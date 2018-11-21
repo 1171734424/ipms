@@ -1,0 +1,248 @@
+
+.check_wrap_margin{
+	background: #fff;
+    height: 100%;
+}
+
+.shop_content{
+	float:left;
+}
+.left_slidebar{
+	float:right;
+}
+.left_slidebar{
+	min-width: 158px;
+    width: 158px;
+    height: 100%;
+    margin: 10px 13px 0 9px;
+    border-left: 1px solid #4a5064;
+}
+ .accordion {	
+	width: 100%;
+    height: 100%;
+    max-width: 158px;
+    background: #f1f6f8;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+ }
+.accordion .link {
+	cursor: pointer;
+	display: block;
+	padding: 8px 4px 10px 41px;
+	color: #FFFFFF;
+	background:#4A5064;
+	font-size: 14px;
+	font-weight: 700;
+	border-bottom: 1px solid #CCC;
+	position: relative;
+	-webkit-transition: all 0.4s ease;
+	-o-transition: all 0.4s ease;
+	transition: all 0.4s ease;
+}
+.accordion li:last-child .link {
+	border-bottom: 0;
+}
+.accordion li i {
+	position: absolute;
+	top: 10px;
+	left: 12px;
+	font-size: 14px;
+	color: #FFFFFF;
+	-webkit-transition: all 0.4s ease;
+	-o-transition: all 0.4s ease;
+	transition: all 0.4s ease;
+}
+.accordion li i.fa-chevron-down {
+	right: 12px;
+	left: auto;
+	font-size: 16px;
+}
+.accordion li.open .link {
+	color: #FFFFFF;
+}
+.accordion li.open i {
+	color: #FFFFFF;
+}
+.accordion li.open i.fa-chevron-down {
+	-webkit-transform: rotate(180deg);
+	-ms-transform: rotate(180deg);
+	-o-transform: rotate(180deg);
+	transform: rotate(180deg);
+}
+/**
+ * Submenu
+ -----------------------------*/
+ .submenu {
+ 	display: none;
+ 	background: #FFFFFF;
+ 	color:#333333;
+ 	font-size: 14px;
+ }
+.submenu li {
+ 	border-bottom: 1px solid #f0f0f0;
+ }
+.submenu a {
+    display: block;
+    text-decoration: none;
+    color: #333;
+    padding: 7px;
+    padding-left: 28px;
+    -webkit-transition: all 0.25s ease;
+    -o-transition: all 0.25s ease;
+    transition: all 0.25s ease;
+ }
+.submenu a:hover {
+ 	background: #EAEAEA;
+ 	color: #333;
+ }
+.submenu li.onColor{
+	border-right:2px solid #E85B48;	
+	font-weight:bold;
+}
+
+.shop_content{
+    position: relative;
+    height: 100%;
+	width: 89%;
+	min-width:70%;
+    margin-bottom: 13px;
+    background:#FFFFFF;
+}
+.shop_content .shop_search{
+	
+}
+.search_select{
+	border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 4px 6px;
+    width: 140px;
+}
+.shop_name{
+	border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding:6px 6px;
+    width: 140px;
+}
+
+.guest_height{
+	height:760px;
+}
+
+
+.member_margin .padding{
+	margin:0;
+}
+.member_margin table.myTable td {
+    vertical-align: middle;
+    padding: 10px;
+    font-size: 0.7rem;	
+    white-space: normal;
+    border: none;
+    text-align: center;
+    word-break: break-word;
+}
+.member_margin section.box_content_widget {
+    border-radius:0;	
+}
+
+.shop_search table.myTable th {
+    font-weight: bold;
+    min-width: 100px;
+    font-size: 0.7rem;
+}
+.shop_search table.myTable th:first-child {
+    padding-left:16px;
+}
+.shop_search table.myTable thead tr .header {
+    cursor: pointer;
+    height: 2.5em;
+}
+.shop_search table.myTable td {
+	vertical-align: middle;
+    padding: 10px;
+    font-size: 0.7rem;
+    border: none;
+    text-align: center;
+    word-break: initial;
+    word-wrap: break-word;
+}
+
+@media screen and (max-width:1700px) {
+    .shop_content{
+		width: 89%;
+	}
+}
+
+
+@media screen and (max-width:1625px) {
+    .shop_content{
+		width: 85%;
+	}
+}
+
+@media screen and (max-width:1443px) {
+    .shop_content{
+		width: 82%;
+	}
+}
+
+@media screen and (max-width:1240px) {
+    .shop_content{
+		width: 81%;
+	}
+}
+
+
+.shop_search{
+	padding-left:10px;
+    padding-top: 10px;
+}
+.form_margin{
+	margin: 0 1.5%;
+	height: 40px;
+}
+.shop_search .btn_style{
+	background: #535474;
+    color: #fff;
+    height: 31px;
+    line-height: 28px;
+    width: 80px;
+    vertical-align: middle;
+}
+.form_margin .rnumber{
+	margin-left:12px;
+}
+
+.shop_search .content{
+	height: 927px;
+}
+
+section.box-content-section {  
+    width: 100%; 
+    height:765px;
+}
+
+section.box_content_widget {
+	 width: 100%; 
+    min-height:765px;
+}
+
+.content{
+	margin-top:10px;
+}
+
+@media screen and (max-width:1000px){
+	::-webkit-scrollbar{
+		display:none;
+	}
+	.guest_height{
+		height:444px;
+		overflow:scroll;
+	}
+	.shop_name{
+		width:123px;
+	}
+	
+}
+

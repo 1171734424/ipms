@@ -1,0 +1,217 @@
+package com.ideassoft.basic.service;
+
+
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.hsqldb.lib.StringUtil;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import com.ideassoft.bean.AuditLog;
+import com.ideassoft.bean.Branch;
+import com.ideassoft.bean.Campaign;
+import com.ideassoft.bean.CampaignRule;
+import com.ideassoft.bean.MemberAccount;
+import com.ideassoft.bean.OperateLog;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.SystemConstants;
+import com.ideassoft.core.dao.GenericDAOImpl;
+import com.ideassoft.crm.service.TransferServcie;
+import com.ideassoft.util.IPUtil;
+import com.ideassoft.util.JSONUtil;
+
+@Service
+public class MarketingBasicService extends GenericDAOImpl {
+	//营销活动的数据的保存上传或下载 	
+	public void dataUpDownForCampaign(String branchId, int priority, String branchIp, String dataTransName, Map<String, Object> mapList,Campaign campaign){
+		String branchIpValue = "";
+		Branch branch = (Branch) findById(Branch.class, branchId);
+		if(branch.getRank().equals("0")){
+			if(!campaign.getBusinessId().equals(CommonConstants.CampaignsType.CampaignSix)){
+				List<?> AllOfBranchList = this.findByProperties(Branch.class, "rank", "1","status","1");
+				for(int i = 0; i < AllOfBranchList.size(); i++){
+					String branchIpNew = ((Branch)(AllOfBranchList.get(i))).getBranchIp();
+					if(branchIpNew != null && !StringUtil.isEmpty(branchIpNew)){
+						branchIpValue = "http://"+branchIpNew+":8080/ipms";
+						TransferServcie.getInstance().transferData(priority, branchIpValue, JSONUtil.fromObject(mapList).toString());
+					} else {
+						continue;
+					}
+				}
+			} else {
+				Branch loginBranch = (Branch)this.findOneByProperties(Branch.class, "branchId", campaign.getBranchId());
+				branchIpValue = "http://"+loginBranch.getBranchIp()+":8080/ipms";
+				TransferServcie.getInstance().transferData(priority, branchIpValue, JSONUtil.fromObject(mapList).toString());
+			}	
+		} /*else {
+			if(branchIp == null || StringUtil.isEmpty(branchIp)){
+				return;
+			}
+			branchIpValue = SystemConstants.MarketCenterIpValue.centerIpValue;
+			TransferServcie.getInstance().transferData(priority, branchIpValue, JSONUtil.fromObject(mapList).toString());
+		}*/
+	}
+	
+//获取序列是在云端还是在本地	
+	public String getCloudOrLocalSequence(String sequenceName){
+		String sequence = "";
+		if(checkSystemExistCloud()){
+			sequence = getSequence(sequenceName, null);
+		} else {
+			sequence = getCloudSequence(sequenceName, null);
+		}
+		return sequence;
+	}
+	
+	public List<?> findCampaignIsControl(String businessId, String startDate, String endDate, String usingPerson, String campaignId) {
+		List<?> result = findBySQL("campaignIsCurrExist", new String[] { businessId, usingPerson, campaignId, startDate, endDate,
+				startDate, endDate, startDate, endDate }, true);
+		return result != null ? result : null;
+	}
+	
+	public boolean isDiscountRoomExist(String branchId, String startDate, String endDate, String roomType, String campaignId) {
+		List<?> result = findBySQL("IsDiscountRoomExist", new String[] { branchId, roomType, campaignId, startDate, endDate,
+				startDate, endDate, startDate, endDate }, true);
+		if (result == null || result.size() == 0) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	//查询当前系统是布置在云端还是本地端啊
+		@Cacheable(value = "longCache", key = "'isC1oud'")
+		public boolean checkSystemExistCloud(){
+			SysParam result = (SysParam)findOneByProperties(SysParam.class, "paramType", "SYSTEMTYPE", "status", "1");
+			if(result != null){
+				if(result.getContent().equals(CommonConstants.SystemLevel.CouldMarketCenter)){
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}	
+		}
+		
+		// 保存,修改,删除营销活动日志
+		public void campaignLog(LoginUser loginUser, Campaign bean, String type,HttpServletRequest request) throws UnknownHostException {
+			try {
+				String sequences = getSequence("SEQ_OPERATELOG_ID");
+				SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
+				String strdate = sdf.format(new Date());
+				//String operid = InetAddress.getLocalHost().toString();// IP地址
+				String operid = IPUtil.getIpAddr(request);
+				operid = (String) operid.subSequence(operid.indexOf("/") + 1, operid.length());
+				String logid = strdate + loginUser.getStaff().getBranchId() + sequences;
+				OperateLog operatelog = new OperateLog();
+				operatelog.setLogId(logid);
+				operatelog.setOperType(type);
+				operatelog.setOperModule(SystemConstants.LogModule.MEMBERINFO);
+				if ("1".equals(type))
+					operatelog.setContent(SystemConstants.LogModule.SAVE + "活动名称：["+ bean.getCampaignName() + "],活动时间：[" + bean.getStartTime() + "~" + bean.getEndTime() +"]" );
+				else if ("2".equals(type))
+					operatelog.setContent(SystemConstants.LogModule.DEL + "活动名称：["+ bean.getCampaignName() + "],活动时间：[" + bean.getStartTime() + "~" + bean.getEndTime() +"]");
+				else if ("3".equals(type))
+					operatelog.setContent(SystemConstants.LogModule.UPDATE + "活动名称：["+ bean.getCampaignName() + "],活动时间：[" + bean.getStartTime() + "~" + bean.getEndTime() +"]");
+				operatelog.setRecordUser(loginUser.getStaff().getStaffId());
+				operatelog.setRecordTime(new Date());
+				operatelog.setOperIp(operid);
+				operatelog.setRemark(bean.getRemark());
+				operatelog.setBranchId(loginUser.getStaff().getBranchId());
+				save(operatelog);
+			} catch (RuntimeException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public boolean isCurrExist(String businessId, String startDate, String endDate, String usingPerson, String campaignId) {
+			List<?> result = findBySQL("campaignIsCurrExist", new String[] { businessId, usingPerson, campaignId, startDate, endDate,
+					startDate, endDate, startDate, endDate }, true);
+			if (result == null || result.size() == 0) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+		
+		public List<?> queryBranchOfBusiness() {
+			String hql = "from SysParam where paramType = 'BUSINESS_TYPE' and orderNo ='2' ";
+			return findByHQL(hql, new String[] {});
+		}
+		
+		public List<?> queryAllOfBusiness() {
+			String hql = "from SysParam where paramType = 'BUSINESS_TYPE'";
+			return findByHQL(hql, new String[] {});
+		}
+		
+		public Branch queryLoginUserBType(String branchId) {
+			Branch result = (Branch)findOneByProperties(Branch.class, "branchId", branchId, "status", "1");
+			return result != null ? result : null;
+		}
+		
+		public List<?> queryAllOfBranch() {
+			String hql = "from Branch";
+			return findByHQL(hql, new String[] {});
+		}
+		
+		// 修改积分
+		public void changeIntegrationLog(LoginUser loginUser, String remark,HttpServletRequest request) throws UnknownHostException {
+			try {
+				String sequences = getSequence("SEQ_OPERATELOG_ID");
+				SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
+				String strdate = sdf.format(new Date());
+				//String operid = InetAddress.getLocalHost().toString();// IP地址
+				String operid = IPUtil.getIpAddr(request);
+				operid = (String) operid.subSequence(operid.indexOf("/") + 1, operid.length());
+				String logid = strdate + loginUser.getStaff().getBranchId() + sequences;
+				OperateLog operatelog = new OperateLog();
+				operatelog.setLogId(logid);
+				operatelog.setOperType("3");
+				operatelog.setOperModule(SystemConstants.LogModule.INTEGRALOPERATION);
+				operatelog.setContent(SystemConstants.LogModule.CHANGEINTEGRAL);
+				operatelog.setRecordUser(loginUser.getStaff().getStaffId());
+				operatelog.setRecordTime(new Date());
+				operatelog.setOperIp(operid);
+				operatelog.setRemark(remark);
+				operatelog.setBranchId(loginUser.getStaff().getBranchId());
+				save(operatelog);
+			} catch (RuntimeException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public Object getAccount(String param) {
+			return findById(MemberAccount.class, param);
+		}
+		
+		public void saveIfo(Object obj) {
+			this.save(obj);
+		}
+		
+		public List<?> queryUsingPersonAndType(String campaignId) {
+			List<?> result = findBySQL("queryPersonAndType", new String[] { campaignId }, true);
+			return result != null && !result.isEmpty() ? result : null;
+		}
+		
+		public void deleteCampaignRules(String campaignId) {
+			List<?> result = this.findByProperties(CampaignRule.class, "campaignId", campaignId);
+			for (int i = 0; i < result.size(); i++) {
+				// this.delete((CampaignRule)(result.get(i)));
+				((CampaignRule) (result.get(i))).setStatus("0");
+				this.update((CampaignRule) (result.get(i)));
+			}
+		}
+		
+		public void updateCampaignStatus(String dataId) {
+			String sql = "update TB_C_CAMPAIGNS set status = '0' where data_id='"+ dataId + "'";
+			executeUpdateSQL(sql);
+		}
+}

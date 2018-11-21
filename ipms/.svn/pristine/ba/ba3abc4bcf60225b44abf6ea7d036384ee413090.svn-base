@@ -1,0 +1,279 @@
+/*左侧预定入住*/
+body{
+ 	overflow: hidden !important;
+}
+
+table.myTable td {
+	padding: 7px;
+}
+.condition_div {
+	
+}
+.div_part_one {
+	height: 601px;
+    overflow: scroll;
+}
+.osearch {
+	font-size: 14px;
+	font-family: "微软雅黑";
+	height: 26px;
+	line-height: 25px;
+	text-align: center;
+	width: 80px;
+	margin-left: 4px;
+	border: 1px solid #CCCCCC;
+	background: #4A5064;
+	color: #fff;
+	cursor: pointer;
+}
+.leftorder_margin {
+    padding: 0 20px;
+}
+/*订单号*/
+.condition_div .ornumber{
+	width:11%;	
+}
+.leftorder_margin h3{
+	height: 53px;
+    line-height: 63px;
+    margin-left: 8px;
+    color: #333;
+	cursor:pointer;
+}
+.close_span{
+	position: absolute;
+    top: 11px;
+    right: 29px;
+	line-height: 32px;
+    height: 36px;
+    width: 40px;
+    padding: 5px 10px;
+    border: 1px solid #638CCC;
+    background: #fff;
+    border-radius: 2px;
+   
+}
+.imooc_order{
+    font-size: 38px;
+    left: 0;
+    top: 0;		
+}
+.leftorder_margin .btn_style{
+	width: 70px;
+    height: 32px;
+    margin: 10px;	
+}
+/*查找维修记录*/
+.repair_margin{
+	position: relative;
+    padding: 0px 20px 20px 20px;
+    color:#333;
+    height: 738px;
+    background: #EFF3F5;  
+}
+.search_repair ul li{
+	line-height: 48px;
+	float:left;
+}
+.repair_margin .content_member{
+	height: 600px !important;
+}
+.repair_margin  .search_repair {
+	width: 100%;	
+    background: #fff;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+.repair_margin .query{
+ 	position:absolute;
+ 	right:127px;
+}
+.repair_margin .add{
+	position:absolute;
+ 	right:43px;
+}
+/*today update content about height*/
+.condition_div .div_part_one{
+    padding: 0 10px;
+	height: 590px;
+    overflow-x: hidden;
+}
+/*添加维修申请*/
+.detail_six{
+	position: absolute;
+    background: #fff;
+    width:700px;
+    height: 403px;
+    border-radius:4px;
+    border: 1px solid #e1e8ec;
+}
+.margintop{
+    margin-top: 12px;
+}
+.add_repair ul li{
+	line-height: 38px;
+	float:left;
+	margin:2px;
+	position:relative;
+	width: 100%;
+}
+.detail_six ul li{
+	line-height: 38px;
+	float:left;
+}
+.search_repair .label_name{
+	float:left;
+	width:70px;
+}
+.add_repair .label_name{
+	float:left;
+	width:118px;
+}
+.add_repair .search_text{
+	padding: 8px 5px;
+    width: 500px;
+    font-size: 14px;
+    margin-left:10px;
+}
+.search_repair .search_text{
+	padding: 7px 5px;
+    width: 100px;
+    font-size: 14px;
+    margin-left:10px;
+}
+.detail_six .label_name{
+	float:none;
+	width:118px;
+}
+.detail_six .text_add{
+	padding: 8px 5px;
+    width: 401px;
+    font-size: 14px;
+    float: right;
+}
+
+.apartmentcheckout{
+	position: absolute;
+    left: 430px;
+    top: 160px;
+    width: 300px;
+    height: 200px;
+    border: 1px solid #ccc;
+    background:#fff;
+}
+.condition_div .apartmentcheckout_input{
+	border:1px solid #ccc;
+	width: 200px;
+    height: 120px;
+	resize:none;
+	margin-top: 24px;
+	padding-left:5px;
+}
+.condition_div .label_name{
+	 line-height: 160px;
+}
+.margintop ul li:nth-child(8){
+	float:right;
+    margin: 4% 10%;
+}
+.equipment_class{
+	display: none;
+    border: 1px solid #ccc;
+    width: 71%;
+    position: absolute;
+    top: 47%;
+    left: 19%;
+    height: 159px;
+}
+.roomtype_class{
+    display: none;
+    border: 1px solid #ccc;
+    width: 71.5%;
+    position: absolute;
+    top: 23%;
+    left: 18.5%;
+    height: 159px;
+}
+.class_main .class_detail{
+	height: 84px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    width: 99%;
+}
+.class_main{
+	height:100%;
+	background: palegoldenrod;
+}
+.class_main ul li{
+	float: left;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+.class_main ul li span{
+	font-weight: bold;
+    line-height: 32px;
+    padding: 0 10px;
+    display: inline-block;
+    vertical-align: middle;
+    white-space: nowrap;
+    color: #0077b3;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.class_main .class_detail table{
+	border:none;
+    width: 95%;
+    margin: 0 2%;
+}
+.class_detail table span{
+	font-size:14px;
+	color:#333;
+    margin: 0 8px;
+    padding: 4px;
+    display: inline-block;
+}
+.add_repair .confirm{
+	border-radius: 4px;
+    width: 85px;
+    height: 34px;
+    line-height: 27px;
+    border: 1px solid #ccc;
+    position: absolute;
+    bottom:-85px;	
+    right:11%;
+}
+.add_repair ul li:nth-child(8){
+	margin:0 !important;
+	float:none !important;
+	position:absolute;
+	bottom:23px;
+}
+.class_detail .confirm{
+	position:absolute;
+	right:2px;
+	bottom:2px;
+}
+/**/
+.rent_deadline table.myTable td{
+	 white-space: inherit;
+}
+
+.add_repair .comfirm_log{
+	bottom:-3px;
+}
+/*处理*/
+.button_margin.button_add{
+	background-color:#FC8A15;
+}
+
+
+
+
+
+
+
+
+
+
+

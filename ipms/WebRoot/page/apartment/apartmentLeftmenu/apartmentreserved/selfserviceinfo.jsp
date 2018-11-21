@@ -1,0 +1,148 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ page import="net.sf.json.JSONObject"%>
+<%@ page import="com.ideassoft.core.page.Pagination"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%
+	JSONObject pagination = JSONObject.fromObject(request.getAttribute("pagination"));	
+%>
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css"/>
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/commom_table.css"/>
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/leftmenu/apartmentreserved.css"/>
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/roomlistfont.css" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/pagenation.css" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/pagination.css" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/jquery-dialog.css"/>
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/roomlist/roomlist.css"/>
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/leftmenu/left_order.css"/>
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	<style type="text/css">
+		.dealandcancle_button {
+			font-size: 12px;
+		    font-family: "微软雅黑";
+		    height: 30px !important;
+		    line-height: 26px !important;
+		    text-align: center;
+		    width: 46px !important;
+		    margin-left: 2px;
+		    border: 1px solid #f1f1f1;
+		    background: #FC8A15 !important;
+		    color: #fff;
+		    cursor: pointer;
+	    }
+	    .applybutton {
+		    font-size: 12px;
+		    font-family: "微软雅黑";
+		    height: 30px !important;
+		    line-height: 26px !important;
+		    text-align: center;
+		    width: 75px !important;
+		    margin-left: 4px;
+		    border: 1px solid #f1f1f1;
+		    background: #898880 !important;
+		    color: #fff;
+		    cursor: pointer;
+		}
+    	.changeroom_btn{
+    		background: #5A5D9C  !important;
+    	}
+    	.RESERVED_ID{
+    		display: none;
+    	}
+	</style>
+  </head>
+  <body>
+   <div class="condition_div">
+  	   <form id="pagerForm" name="pagerForm" action="queryApartSelfservice.do" target="_self">
+	    <div class="div_part_one">
+	    	<table id="myTable" class="myTable" border="0" width="100">
+				<thead id="log">
+					<tr>
+						<th class="header">门店名称</th>
+						<th class="header">房间号</th>
+						<th class="header">预约人</th>
+						<th class="header">手机</th>
+						<th class="header">预约时间</th>
+						<th class="header">开始-结束</th>
+						<th class="header">预约来源</th>
+						<th class="header">操作人</th>
+						<th class="header">操作</th>
+					</tr>
+				</thead>
+				<tbody id="info">
+					<c:forEach items="${list}" var="list">
+						<tr>
+							<td class="RESERVED_ID">${list["RESERVED_ID"]}</td>
+							<td>${list["BRANCH_NAME"]}</td>
+							<td class="room_id">${list["ROOM_ID"]}</td>
+							<td>${list["MEMBER_NAME"]}</td>
+							<td>${list["MOBILE"]}</td>
+							<td class="time">${list["RESERVED_DATE"] }</td>
+							<td>${list["TIME"] }</td>
+							<td>${list["SOURCE"] }</td>
+							<td>${list["STAFF_NAME"] }</td>
+							<c:if test="${list.dispose == null}">
+								<td>
+									<input type="button" id="changeroom_btn" class="dealandcancle_button changeroom_btn" value="换房" onclick="rowdata(this)"/>
+									<input type="button" id="${list['RESERVED_ID']}" class="dealandcancle_button" value="退款" onclick="aptOrderReFund('${list['RESERVED_ID']}')"/>
+								</td>
+							</c:if>
+							<c:if test="${list.dispose != null}">
+								<td>
+									<input type="button" id="${list['RESERVED_ID']}" class="applybutton" value="退款" />
+								</td>
+							</c:if>
+						</tr>
+					</c:forEach>
+				</tbody>
+			</table>
+		</div>
+		<div id="pager"></div>
+		<div>
+			<input type="hidden" id="memberName" name="memberName" value="${memberName }"/>
+			<input type="hidden" id="mobile" name="mobile" value="${mobile }"/>
+			<input type="hidden" id="reservedTime" name="reservedTime" value="${reservedTime }"/>
+		</div>
+	</form>
+  </div>
+	<%@ include file="../../../common/script.jsp"%>
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/pager.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+	<script>
+		Pager.renderPager(<%=pagination%>);
+	</script>
+	<script type="text/javascript">
+		var path = "<%=request.getContextPath()%>";
+		function showMsg(msg, fn) {
+			if (!fn) {
+				TipInfo.Msg.alert(msg);
+			} else {
+				TipInfo.Msg.confirm(msg, fn);
+			}
+		}
+		function aptOrderReFund(aptOrderId){
+			$.ajax({
+		         url: path + "/selfserviceApartReFund.do",
+				 type: "post",
+				 data : {aptOrderId : aptOrderId},
+				 success: function(json) {
+					 showMsg(json.message);
+					 window.setTimeout("window.parent.location.reload(true)",1000);
+				 },
+				 error: function(json) {}
+			});
+		}
+		
+		function rowdata(e){
+			var resver = $(e).parent().parent();
+		    var roomid = resver.find(".room_id").val();
+		    var resverid = resver.find(".RESERVED_ID").text();
+		    var time = resver.find(".time").text();
+		    JDialog.open("房号选择", path + "/page/apartment/apartmentLeftmenu/apartmentreserved/reserveRoomidDialog.jsp?dataid=" + resverid + "&time=" + time, 450, 350);
+		}
+	</script>
+  </body>
+</html>

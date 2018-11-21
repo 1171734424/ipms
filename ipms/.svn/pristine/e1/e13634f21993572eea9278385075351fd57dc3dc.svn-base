@@ -1,0 +1,62 @@
+--查询sql
+select lower(replace(sqlstr, ';', ',')) sqlstr
+  from (select 'select' || substr(sys_connect_by_path(column_name, ', '), 2) ||
+               ' from ' || table_name sqlstr
+          from (select table_name,
+                       decode(data_type, 'DATE', 'to_char(' || column_name || '; ''yyyy/mm/dd'') ' ||
+                              decode(instr(column_name, '_'), 0, column_name,
+                                     decode(data_type, 'DATE', '', column_name || ' ') || replace(column_name, '_', '')),
+                              decode(instr(column_name, '_'), 0,
+                                     column_name, decode(data_type, 'DATE', '', column_name || ' ') ||
+                                     replace(column_name, '_', ''))) column_name,
+                       row_number() over(partition by table_name order by column_id) rn,
+                       count(*) over(partition by table_name) cnt
+                  from dba_tab_columns
+                 where table_name = :TABLE_NAME)
+         where level = cnt
+         start with rn = 1
+        connect by prior table_name = table_name
+               and prior rn = rn - 1);
+或
+select lower(replace(sqlstr, ';', ',')) sqlstr
+  from (select 'select ' || wmsys.wm_concat(column_name) ||
+               ' from ' || table_name sqlstr
+          from (select table_name,
+                       decode(data_type, 'DATE', 'to_char(' || column_name || '; ''yyyy/mm/dd'') ' ||
+                              decode(instr(column_name, '_'), 0, column_name,
+                                     decode(data_type, 'DATE', '', column_name || ' ') || replace(column_name, '_', '')),
+                              decode(instr(column_name, '_'), 0,
+                                     column_name, decode(data_type, 'DATE', '', column_name || ' ') ||
+                                     replace(column_name, '_', ''))) column_name
+                  from dba_tab_columns
+                 where table_name = :TABLE_NAME)
+ group by table_name);
+
+--column配置
+select '<column columnId="' || replace(a.column_name, '_', '') || '" name="'
+       || decode(instr(comments, ' '), 0, comments, substr(comments, 0, instr(comments, ' ')))
+       || '" width="120" editable="true" align="center"'
+       || decode(instr(comments, ' '), 0, '', decode(substr(comments, instr(comments, ' ') + 1), '', '',
+          ' editValue="' || substr(comments, instr(comments, ' ') + 1) || '" editType="select"'))
+       || decode(b.data_type, 'DATE', ' editType="date"', 'NUMBER', ' validateRule="NUMBER"', '')
+       || decode(a.column_name, (select c.column_name from dba_ind_columns c where a.owner = c.index_owner 
+          and a.table_name = c.table_name and a.column_name = c.column_name), ' hidden="true" primaryKey="true"', '')
+       || '/>' columnstr
+  from dba_col_comments a, dba_tab_columns b
+ where a.table_name = :TABLE_NAME
+   and a.table_name = b.table_name
+   and a.column_name = b.column_name
+   and a.owner = b.owner
+   and a.owner = 'RB'
+ order by b.column_id;
+ 
+ 
+--同列合并 (lag顺序,lead逆序)
+select decode(a1, null, t1, '') t1, t2, t3
+  from (select t1, lag(t1) over(partition by t1 order by t2) a1, t2, t3
+          from (select 1 t1, 2 t2, 1 t3 from dual
+                union all
+                select 2, 2, 1 from dual
+                union all
+                select 2, 3, 2 from dual))
+

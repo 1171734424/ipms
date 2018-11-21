@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<filterTime>
+		<nameZH>超时退出时间（单位：分钟）</nameZH>
+		<timeoutDuration>60</timeoutDuration>
+	</filterTime>
+</config>

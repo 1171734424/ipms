@@ -1,0 +1,364 @@
+package com.ideassoft.core.constants;
+
+public class SystemConstants {
+
+	public interface SubSystemName {
+		final public static String CDDS = "cdds";
+
+		final public static String PMS = "ipms";
+	}
+
+	public interface SystemStyle {
+		final public static Integer DEFAULT = 0x00;
+
+		final public static Integer PC = 0x00;
+
+		final public static Integer APP = 0x01;
+	}
+
+	public interface User {
+		final public static String ADMIN_ID = "1";
+
+		final public static String ADMIN_NAME = "admin";
+
+		final public static String BRANCH_ID = "100001";
+
+		final public static String DEPART_ID = "1001";
+		
+		final public static String POST = "1012";
+	}
+
+	public interface Pagination {
+		final public static int FIRST_PAGE = 1;
+
+		final public static int DEFAULT_ROWS = 15; //原记录 20
+	}
+
+	public interface QueryType {
+		final public static String QUERY = "QUERY";
+
+		final public static String EXCEL = "EXCEL";
+
+		final public static String CHART = "CHART";
+	}
+
+	public interface TaskConfig {
+		final public static String AUTO_START = "true";
+
+		final public static String IS_DEAMON = "true";
+
+		final public static String TASK_TYPE = "1";
+	}
+
+	public interface TaskGroup {
+		final public static String SYS_GROUP = "1";
+
+		final public static String USER_GROUP = "2";
+	}
+
+	public interface DatabaseOperation {
+		final public static String SAVE = "SAVE";
+
+		final public static String UPDATE = "UPDATE";
+
+		final public static String DELETE = "DELETE";
+	}
+
+	public interface SQLType {
+		final public static String SQL = "sql";
+
+		final public static String HQL = "hql";
+
+		final public static String PROCEDURE = "procedure";
+	}
+
+	public interface NotifyConstants {
+		final static int SMS_MAX_DEAL_NUM = 1000; // 短信通知服务最大处理数
+
+		final static int MAIL_MAX_DEAL_NUM = 500; // 邮件通知服务最大处理数
+
+		final static int SMS_GET_NUM = 10; // 短信通知服务每次处理数
+
+		final static int MAIL_GET_NUM = 10; // 邮件通知服务每次处理数
+
+		final static int NOTIFY_USER_SMS = 1; // 短信通知用户
+
+		final static int NOT_NOTIFY_USER_SMS = 2; // 不通知短信用户
+
+		final static int NOTIFY_USER_MAIL = 1; // 邮件通知用户
+
+		final static int NOT_NOTIFY_USER_MAIL = 2; // 不通知邮件用户
+
+		final static int IS_SMS_SERVER_OPEN = 1; // 短信通知服务开启
+
+		final static int IS_SMS_SERVER_CLOSED = 0; // 短信通知服务不开启
+
+		final static int IS_MAIL_SERVER_OPEN = 1; // 邮件通知服务开启
+
+		final static int IS_MAIL_SERVER_CLOSED = 0; // 邮件通知服务不开启
+	}
+
+	public interface EventConst {
+		public interface EventType {
+			int INFO = 0; // 信息
+
+			int WARN = 1; // 告警
+
+			int SECONDARYWARN = 2;// 次要告警
+		}
+
+		public interface EventCode {
+			int SERVER_ONLIN = 1;// 服务在线
+
+			int SERVER_OFFLINE = 2;// 服务离线
+
+			int SMS_SERVER_ERROR = 1001;// 短信服务异常
+
+			int SMS_SERVER_START = 1002;// 短信服务启动成功
+
+			int EMAIL_SERVER_ERROE = 1003;// 邮件服务异常
+
+			int EMAIL_SERVER_START = 1004;// 邮件服务启动成功
+		}
+
+		public interface EventSource {
+			String SERVER = "IDEAS";
+		}
+	}
+
+	public interface NotifyMSGType {
+		final public static int EVENTADD = 1;
+	}
+
+	public interface PortStatus {
+		final public static int PORT_NORMAL = 1;
+
+		final public static int PORT_INUSE = 2;
+
+		final public static int PORT_INAVAILABLE = 3;
+
+		final public static int PORT_UNSUPPORTED = 4;
+
+		final public static int PORT_NOTEXISTS = 5;
+	}
+
+	public interface RemoteTransDataResult {
+		final public static String FAILED = "0";
+
+		final public static String DONE = "1";
+	}
+
+	public interface RemoteTransDataType {
+		final public static int FILE = 1;
+
+		final public static int OBJECT = 2;
+
+		final public static int STRING = 3;
+
+		final public static int MIXED = 4;
+	}
+
+	public interface RemoteTransReturnType {
+		final public static String FILE = "file";
+
+		final public static String TXT = "txt";
+
+		final public static String EXCEL = "xlsx";
+
+		final public static String IMAGE = "png";
+
+		final public static String STRING = "string";
+	}
+
+	public interface ImportFileType {
+		final public static String EXCEL = "xlsx";
+
+		final public static String TXT = "txt";
+	}
+
+	public interface SqlStrategy {
+		final public static String DEFAULT = "default";
+		
+		final public static String MULTISQL = "multisql";
+
+		final public static String RIGHT_DEPARTMENT = "department";
+
+		final public static String RIGHT_LEVEL = "level";
+		
+		final public static String RIGHT_BRANCHRANK = "branchRank";
+	}
+
+	/**
+	 * 操作模块
+	 * 
+	 * @author Administrator
+	 * 
+	 */
+	public interface LogModule {
+		final public static String SAVE = "添加会员";
+		final public static String DEL = "删除会员";
+		final public static String UPDATE = "修改会员";
+		final public static String CHANGESCORE = "储值卡充值";
+		final public static String CHANGEINTEGRAL = "积分调整";
+		final public static String MEMBERINFO = "会员资料";
+		final public static String MEMBERQUERY = "会员查询";
+		final public static String INTEGRALOPERATION = "积分操作";
+		final public static String CHANGERANK = "会员升级";
+		final public static String CLEANAPPLY = "处理保洁申请";
+		final public static String ADDCLEANAPPLY = "新增保洁申请";
+		final public static String DELETECLEANAPPLY = "取消保洁申请";
+		final public static String APARTMENTCHECKOUT = "退房申请";
+		final public static String APARTMENTRESERVED = "预约公寓";
+		final public static String APARTMENTRRNT = "公寓续租";
+		final public static String APARTMENTRESERVEDSTATUS[] = { "拒绝", "同意" };
+		final public static String[] CLEANAPPLYSTATUS = { "成功", "失败" };
+		final public static String HOUSEADD = "录入民宿";
+		final public static String HOUSEEDIT = "编辑民宿";
+		final public static String CONTRARTADD = "录入合同";
+		final public static String CONTRARTEDIT = "删除合同";
+		final public static String HOUSEMEMBERACCOUNT = "民宿账户金额设置";
+		final public static String  CLEANREFUND = "进行保洁退款";
+		final public static String SELLHOUSE = "停售房";
+		final public static String REPAIRHOUSE = "维修房";
+	}
+
+	/**
+	 * 操作类型
+	 * 
+	 * @author Administrator
+	 * 
+	 */
+	public interface LogType {
+		final public static String ONE = "1";
+
+	}
+
+	public interface ProjectName {
+		final public static String USER_ID = "00000000";
+	}
+
+	public interface Notify {
+		final public static String appId = "EUCP-EMY-SMS0-JBZOQ"; // 短信接口所需参数：appId
+		final public static String secretKey = "5D4A417695248C7F"; // 密钥
+		final public static String host = "bjmtn.b2m.cn"; // 接口地址
+		final public static String algorithm = "AES/ECB/PKCS5Padding"; // 加密算法
+		final public static String encode = "UTF-8"; // 编码
+		final public static boolean isGizp = false; // 是否压缩
+	}
+
+	public interface note {
+		final public static int APPID = 1400040929; // 短信接口所需参数：appId
+		final public static String APPKEY = "c04d6a97f6c8020d0eb36fc70cbb9ba5"; // key
+		final public static String COUNTRY = "86"; // 每个国家的手机号开头
+	}
+
+	public interface TransferConfig {
+		final public static int MAX_QUEUE_SIZE = 1000;
+	}
+
+	public interface TransferDataType {
+		final public static int ORDER = 1;
+
+		final public static int DATA = 2;
+	}
+
+	public interface PortalResultCode {
+		final public static int NULL = -1;
+
+		final public static int FAILED = -400;
+
+		final public static int DONE = 1;
+
+		final public static int EXIST = 3;
+		
+		final public static String CONNECTIONFAIL = "1111";
+		final public static int HASMULT = 2;//多条记录
+	}
+	
+	public interface WarningType {
+		final public static String CONNECTION = "1";
+
+		final public static String UNUSUAL = "0";
+	}
+	
+	public interface WarningStatus {
+		final public static String DEL = "0";
+
+		final public static String VALID = "1";
+		
+		final public static String READ = "2";
+	}
+
+	public interface ParamType {
+		final public static String KEY_CONFIG = "KEYCONFIG";
+
+		final public static String BRANCH_IP = "BRANCHIP";
+		
+		final public static String ISCHECK = "1";
+
+		final public static String TOKEN = "TOKEN";
+
+		final public static String JSAPITICKET = "JSAPITICKET";
+
+	}
+	
+	public interface  OperType{
+		final public static String roomStatus = "6";
+
+		final public static String billPay = "12";
+
+	}
+	
+	public interface EnginType {
+		
+		final public static int COMMON_DATA = 1;
+
+		final public static int TRANSFER_DATA = 2;
+		
+		final public static int COMMAND_DEAL = 3;
+		
+	} 
+
+	public interface Movement {
+		final public static int CUSTOM_QUERY = 1;
+		
+		final public static int COMMON_QUERY = 2;
+		
+		final public static int CUSTOM_ADD = 3;
+		
+		final public static int COMMON_ADD = 4;
+		
+		final public static int CUSTOM_UPDATE = 5;
+		
+		final public static int COMMON_UPDATE = 6;
+		
+		final public static int CUSTOM_DELETE = 7;
+		
+		final public static int COMMON_DELETE = 8;
+		
+		final public static int COMMON_DELETE_BYID = 9;
+		
+		final public static int TRANSFER_ORDER = 10;
+
+		final public static int UNLOCK = 11;
+	}
+	
+	public interface GateLock {
+		public static final String APP_ID = "9FD256D00BAD11E8B12F69AA4AA78DEB";
+		
+		public static final String USER_NAME = "masterOne";
+
+		//用户密码
+		public static final String PASSWORD = "123456";
+		
+		public static final String KEY = "wb_appID";
+		
+		public static final String WS_URL_Lock = "http://114.215.172.130:7788/wb/lockOrder";
+		
+		public static final String WS_URL_Pair = "http://114.215.172.130:7788/wb/prePairing";
+		
+		//门锁密码
+		public static final String GATELOCK_PASSWORD = "0123456789";
+	}
+	
+}

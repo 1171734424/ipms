@@ -1,0 +1,18 @@
+
+    .orlabel_name{
+        height: 39px;
+    line-height: 39px;
+    
+    }
+    
+    #order-button{
+      position: relative;
+    right: 122px;
+    top: 37px;
+    }
+    #status{
+        width: 195px;
+    }
+    .walk_form{
+    padding-top: 59px;
+    }

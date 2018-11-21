@@ -1,0 +1,263 @@
+package com.ideassoft.bean;
+
+
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+@Entity
+@Table(name = "TB_P_COMMENT", schema = "UCR_PMS")
+public class Comment implements java.io.Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6395215802888008925L;
+	private String commentId;
+	private String branchId;
+	private String orderId;
+	private String memberId;
+	private String commentContent;
+	private String status;
+	private Date recordTime;
+	private String recordUser;
+	private String relativeComment;
+	private String remark;
+	private String contentId;
+	private String picture;
+	private String branchType;
+	private double environmentScore;
+	private double locationScore;
+	private double serviceScore;
+	private double facilityScore;
+	private double securityScore;
+	private String serviceComment;
+	private String facilityComment;
+	private String securityComment;
+	private double totalScore;
+	private String specialLabel;
+	private String priority;
+
+	@Id
+	@Column(name = "COMMENT_ID", unique = true, nullable = false, length = 17)
+	public String getCommentId() {
+		return commentId;
+	}
+
+	public void setCommentId(String commentId) {
+		this.commentId = commentId;
+	}
+
+	@Column(name = "BRANCH_ID", nullable = true, length = 6)
+	public String getBranchId() {
+		return branchId;
+	}
+
+	public void setBranchId(String branchId) {
+		this.branchId = branchId;
+	}
+
+	@Column(name = "ORDER_ID", nullable = true, length = 17)
+	public String getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
+	@Column(name = "MEMBER_ID", nullable = true, length = 8)
+	public String getMemberId() {
+		return memberId;
+	}
+
+	public void setMemberId(String memberId) {
+		this.memberId = memberId;
+	}
+
+
+	@Column(name = "COMMENT_CONTENT", nullable = true, length = 1000)
+	public String getCommentContent() {
+		return commentContent;
+	}
+
+	public void setCommentContent(String commentContent) {
+		this.commentContent = commentContent;
+	}
+
+	@Column(name = "STATUS", length = 2)
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "RECORD_TIME", insertable = false, updatable = true)
+	public Date getRecordTime() {
+		return recordTime;
+	}
+
+	public void setRecordTime(Date recordTime) {
+		this.recordTime = recordTime;
+	}
+
+	@Column(name = "RECORD_USER", length = 8)
+	public String getRecordUser() {
+		return recordUser;
+	}
+
+	public void setRecordUser(String recordUser) {
+		this.recordUser = recordUser;
+	}
+
+	@Column(name = "RELATIVE_COMMENT", nullable = true, length = 17)
+	public String getRelativeComment() {
+		return relativeComment;
+	}
+
+	public void setRelativeComment(String relativeComment) {
+		this.relativeComment = relativeComment;
+	}
+
+	@Column(name = "REMARK", nullable = true, length = 200)
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+	
+	@Column(name = "CONTENT_ID", nullable = true, length = 12)
+	public String getContentId() {
+		return contentId;
+	}
+
+	public void setContentId(String contentId) {
+		this.contentId = contentId;
+	}
+	
+	@Column(name = "PICTURE", nullable = true, length = 1000)
+	public String getPicture() {
+		return picture;
+	}
+
+	public void setPicture(String picture) {
+		this.picture = picture;
+	}
+	
+	@Column(name = "BRANCH_TYPE", nullable = true, length = 1)
+	public String getBranchType() {
+		return branchType;
+	}
+
+	public void setBranchType(String branchType) {
+		this.branchType = branchType;
+	}
+	@Column(name = "SERVICE_SCORE",nullable = false, precision = 9)
+	public double getServiceScore() {
+		return serviceScore;
+	}
+
+	public void setServiceScore(double serviceScore) {
+		this.serviceScore = serviceScore;
+	}
+	
+	@Column(name = "FACILITY_SCORE",nullable = false, precision = 9)
+	public double getFacilityScore() {
+		return facilityScore;
+	}
+
+	public void setFacilityScore(double facilityScore) {
+		this.facilityScore = facilityScore;
+	}
+	
+	@Column(name = "SECURITY_SCORE",nullable = false, precision = 9)
+	public double getSecurityScore() {
+		return securityScore;
+	}
+
+	public void setSecurityScore(double securityScore) {
+		this.securityScore = securityScore;
+	}
+	
+	@Column(name = "SERVICE_COMMENT", nullable = false, length = 200)
+	public String getServiceComment() {
+		return serviceComment;
+	}
+
+	public void setServiceComment(String serviceComment) {
+		this.serviceComment = serviceComment;
+	}
+	
+	@Column(name = "FACILITY_COMMENT", nullable = false, length = 200)
+	public String getFacilityComment() {
+		return facilityComment;
+	}
+
+	public void setFacilityComment(String facilityComment) {
+		this.facilityComment = facilityComment;
+	}
+	
+	@Column(name = "SECURITY_COMMENT", nullable = false, length = 200)
+	public String getSecurityComment() {
+		return securityComment;
+	}
+
+	public void setSecurityComment(String securityComment) {
+		this.securityComment = securityComment;
+	}
+	
+	@Column(name = "TOTAL_SCORE",nullable = false, precision = 9)
+	public double getTotalScore() {
+		return totalScore;
+	}
+
+	public void setTotalScore(double totalScore) {
+		this.totalScore = totalScore;
+	}
+	
+	@Column(name = "SPECIAL_LABEL", nullable = true, length = 64)
+	public String getSpecialLabel() {
+		return specialLabel;
+	}
+	
+	public void setSpecialLabel(String specialLabel) {
+		this.specialLabel = specialLabel;
+	}
+	@Column(name = "ENVIRONMENT_SCORE",nullable = false, precision = 9)
+	public double getEnvironmentScore() {
+		return environmentScore;
+	}
+
+	public void setEnvironmentScore(double environmentScore) {
+		this.environmentScore = environmentScore;
+	}
+	@Column(name = "LOCATION_SCORE",nullable = false, precision = 9)
+	public double getLocationScore() {
+		return locationScore;
+	}
+
+	public void setLocationScore(double locationScore) {
+		this.locationScore = locationScore;
+	}
+
+	@Column(name = "PRIORITY",nullable = false, precision = 1)
+	public String getPriority() {
+		return priority;
+	}
+
+	public void setPriority(String priority) {
+		this.priority = priority;
+	}
+	
+}

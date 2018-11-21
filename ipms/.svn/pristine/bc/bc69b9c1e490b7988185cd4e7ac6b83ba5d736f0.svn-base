@@ -1,0 +1,262 @@
+package com.ideassoft.pms.task;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+
+import com.ideassoft.apartment.service.ApartmentCleanService;
+import com.ideassoft.bean.Branch;
+import com.ideassoft.bean.Clean;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.factory.ServiceFactory;
+import com.ideassoft.core.task.ScheduledTask;
+
+public class CleanTask extends ScheduledTask {
+	
+	private final Logger logger = Logger.getLogger(CleanTask.class);
+	
+	private static ApartmentCleanService apartmentCleanService = null;
+
+	public CleanTask(String name) {
+		super(name);
+	}
+	
+	public void initScheduledData() {
+		apartmentCleanService = (ApartmentCleanService) ServiceFactory.getService("apartmentCleanService");
+		logger.debug("schedule task [test1111] init...............");
+	}
+	
+	public void run() {
+		
+			try {
+				String sql = "select * from TB_P_CLEAN";
+				List<?> judge = apartmentCleanService.findBySQL(sql);
+				//int priority = 1;
+				SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
+				SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd");
+				String systype = null;
+				SysParam sys = (SysParam)apartmentCleanService.findOneByProperties(SysParam.class, "paramType", "SYSTEMTYPE");
+				if(sys != null){
+					 systype = sys.getContent();
+					} 
+				if(CommonConstants.SystemType.Branch.equals(systype) ){
+				Clean clean=null;
+				String timeArea = null;
+				String sequences = null;
+				//List<Clean> cleanList = new ArrayList<Clean>();
+				Boolean flag = true;
+				Calendar nextmonth = Calendar.getInstance(); // 假设是8月1号
+				nextmonth.add(Calendar.MONTH, 1);// 增加一个月
+				nextmonth.set(Calendar.DATE, 1);// 把日期设置为当月第一天
+				Date nextdate = nextmonth.getTime();// 得到9月1号    
+
+				nextmonth.roll(Calendar.DATE, -1);// 日期回滚一天，也就是最后一天
+				int maxDate = nextmonth.get(Calendar.DATE);//这是下月的最大天数 
+				List<?> restAmount = apartmentCleanService.getDefaultParam();
+				String branchId = ((Map<?, ?>) restAmount.get(0)).get("BRANCHID").toString();
+				Calendar a = Calendar.getInstance();
+				Calendar b = Calendar.getInstance();
+				b.set(Calendar.DATE, 1);
+
+				Date today = b.getTime();// 设置为当月1号
+				if (judge.size() == 0) {//数据库里没数据，要把本月的数据也插进去
+					b.roll(Calendar.DATE, -1);// 日期回滚一天，也就是最后一天
+					int maxDateOfnowMonth = b.get(Calendar.DATE);//当月最大天数
+					Boolean flag2 = true;
+					for (int m = 0; m < maxDateOfnowMonth; m++) {
+						
+						b.setTime(today);
+						b.add(Calendar.DAY_OF_MONTH, m);
+						Date nextDate2 = b.getTime();
+						String newstrdate = sdf.format(nextDate2);
+						String newstrdate2 = sdf2.format(nextDate2);
+						Date cleandate2 = sdf2.parse(newstrdate2);
+						for (int n = 0; n < 2; n++) {
+							clean = new Clean();
+							//sequences = cleanService.getSequence("SEQ_CLEAN_ID");
+							sequences = apartmentCleanService.getCloudSequence("SEQ_CLEAN_ID");
+							clean.setCleanId(newstrdate + branchId + sequences);
+							clean.setBranchId(branchId);
+							clean.setCleanDate(cleandate2);
+							//clean.setRoomId("");
+							//clean.setCleanPerson("");
+						    //clean.setRecordUser("");
+							clean.setRecordTime(new Date());
+							//clean.setCleanApplyId("");
+							if (flag2) {
+								timeArea = "0";
+								flag2 = false;
+							} else {
+								timeArea = "1";
+								flag2 = true;
+							}
+							clean.setTimeArea(timeArea);
+							clean.setRestAmount(Integer.parseInt(((Map<?, ?>) restAmount.get(0)).get("CONTENT").toString()));
+							//cleanList.add(clean);
+							apartmentCleanService.save(clean);
+						
+
+						}
+					}
+	            //有数据的情况
+				}
+					for (int i = 0; i < maxDate; i++) {
+						
+						a.setTime(nextdate);
+						a.add(Calendar.DAY_OF_MONTH, i);
+						Date fact_date = a.getTime();
+						String strdate = sdf.format(fact_date);
+						String strdate2 = sdf2.format(fact_date);
+						Date cleandate = sdf2.parse(strdate2);// 这是要插入数据库的实际保洁日期
+						for (int j = 0; j < 2; j++) {
+							clean = new Clean();
+							//sequences = cleanService.getSequence("SEQ_CLEAN_ID");
+							sequences = apartmentCleanService.getCloudSequence("SEQ_CLEAN_ID");
+							clean.setCleanId(strdate + branchId + sequences);
+							clean.setBranchId(branchId);
+							clean.setCleanDate(cleandate);
+							//clean.setRoomId("");
+							//clean.setCleanPerson("");
+							//clean.setRecordUser("");
+							clean.setRecordTime(new Date());
+							//clean.setCleanApplyId("");
+							if (flag) {
+								timeArea = "0";
+								flag = false;
+							} else {
+								timeArea = "1";
+								flag = true;
+							}
+							clean.setTimeArea(timeArea);
+							clean.setRestAmount(Integer.parseInt(((Map<?, ?>) restAmount.get(0)).get("CONTENT").toString()));
+						//	cleanList.add(clean);
+							apartmentCleanService.save(clean);
+						}
+					}
+				
+			}else{
+				//是总店（云端）的情况，考虑加盟店是没有ip的情况，数据生成到云端数据库
+				Clean clean=null;
+				String timeArea = null;
+				String sequences = null;
+				//List<Clean> cleanList = new ArrayList<Clean>();
+				Boolean flag = true;
+				Calendar nextmonth = Calendar.getInstance(); // 假设是8月1号
+				nextmonth.add(Calendar.MONTH, 1);// 增加一个月
+				nextmonth.set(Calendar.DATE, 1);// 把日期设置为当月第一天
+				Date nextdate = nextmonth.getTime();// 得到9月1号    
+
+				nextmonth.roll(Calendar.DATE, -1);// 日期回滚一天，也就是最后一天
+				int maxDate = nextmonth.get(Calendar.DATE);//这是下月的最大天数 
+				List<?> restAmount = apartmentCleanService.getDefaultParam();
+				
+				for(int i = 0;i < restAmount.size();i++){
+					if(((Map<?, ?>) restAmount.get(i)).get("BRANCHID") != null ){
+						String branchId = ((Map<?, ?>) restAmount.get(i)).get("BRANCHID").toString();
+						Branch branch = (Branch)apartmentCleanService.findOneByProperties(Branch.class, "branchId", branchId,"status","1");
+						if(branch != null && branch.getBranchIp() == null && !("0".equals(branch.getRank())) ){
+							
+							
+							List<?> judge2 = apartmentCleanService.findByProperties(Clean.class, "branchId", branchId);
+							Calendar a = Calendar.getInstance();
+							Calendar b = Calendar.getInstance();
+							b.set(Calendar.DATE, 1);
+							Date today = b.getTime();// 设置为当月1号
+							if (judge2.size() == 0) {//数据库里没数据，要把本月的数据也插进去
+								b.roll(Calendar.DATE, -1);// 日期回滚一天，也就是最后一天
+								int maxDateOfnowMonth = b.get(Calendar.DATE);//当月最大天数
+								Boolean flag2 = true;
+								for (int m = 0; m < maxDateOfnowMonth; m++) {
+									
+									b.setTime(today);
+									b.add(Calendar.DAY_OF_MONTH, m);
+									Date nextDate2 = b.getTime();
+									String newstrdate = sdf.format(nextDate2);
+									String newstrdate2 = sdf2.format(nextDate2);
+									Date cleandate2 = sdf2.parse(newstrdate2);
+									for (int n = 0; n < 2; n++) {
+										clean = new Clean();
+										//sequences = cleanService.getSequence("SEQ_CLEAN_ID");
+										sequences = apartmentCleanService.getCloudSequence("SEQ_CLEAN_ID");
+										clean.setCleanId(newstrdate + branchId + sequences);
+										clean.setBranchId(branchId);
+										clean.setCleanDate(cleandate2);
+										//clean.setRoomId("");
+										//clean.setCleanPerson("");
+									    //clean.setRecordUser("");
+										clean.setRecordTime(new Date());
+										//clean.setCleanApplyId("");
+										if (flag2) {
+											timeArea = "0";
+											flag2 = false;
+										} else {
+											timeArea = "1";
+											flag2 = true;
+										}
+										clean.setTimeArea(timeArea);
+										clean.setRestAmount(Integer.parseInt(((Map<?, ?>) restAmount.get(0)).get("CONTENT").toString()));
+										//cleanList.add(clean);
+										apartmentCleanService.save(clean);
+									
+
+									}
+								}
+				            //有数据的情况
+							}
+								for (int i2 = 0; i2 < maxDate; i2++) {
+									
+									a.setTime(nextdate);
+									a.add(Calendar.DAY_OF_MONTH, i2);
+									Date fact_date = a.getTime();
+									String strdate = sdf.format(fact_date);
+									String strdate2 = sdf2.format(fact_date);
+									Date cleandate = sdf2.parse(strdate2);// 这是要插入数据库的实际保洁日期
+									for (int j = 0; j < 2; j++) {
+										clean = new Clean();
+										//sequences = cleanService.getSequence("SEQ_CLEAN_ID");
+										sequences = apartmentCleanService.getCloudSequence("SEQ_CLEAN_ID");
+										clean.setCleanId(strdate + branchId + sequences);
+										clean.setBranchId(branchId);
+										clean.setCleanDate(cleandate);
+										//clean.setRoomId("");
+										//clean.setCleanPerson("");
+										//clean.setRecordUser("");
+										clean.setRecordTime(new Date());
+										//clean.setCleanApplyId("");
+										if (flag) {
+											timeArea = "0";
+											flag = false;
+										} else {
+											timeArea = "1";
+											flag = true;
+										}
+										clean.setTimeArea(timeArea);
+										clean.setRestAmount(Integer.parseInt(((Map<?, ?>) restAmount.get(0)).get("CONTENT").toString()));
+									//	cleanList.add(clean);
+										apartmentCleanService.save(clean);
+									}
+								}
+							
+							
+							
+						}
+					}//if(((Map<?, ?>) restAmount.get(i)).get("BRANCHID") != null )
+				}//for
+
+			}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+	
+		
+	}
+
+
+}

@@ -1,0 +1,38 @@
+.box_pagenation{
+	position:relative;
+}
+#pagerForm .pageRegion{
+	height: 42px;
+    line-height: 36px;
+    width: 100%;
+    margin-top: 15px;
+    position: absolute;
+    bottom: 0;
+}
+.box_pagenation ul{
+	float:right;
+	padding-right:2px;
+	position:relative;
+}
+.box_pagenation ul li{
+    border: 1px solid #208ed3;
+    padding: 5px 15px;
+    background: #FFFFFF;
+    color: #666;
+    float: left;
+    margin: 9px;
+    border-radius: 2px;
+    cursor: pointer;
+}
+.box_pagenation ul li:first-child{
+	padding-left: 20px;
+}
+.box_pagenation ul li:last-child{
+	padding-right:20px;
+}
+.box_pagenation ul li.active{
+	color:#FFFFFF;
+	background:#0272BD;
+	background: linear-gradient(to bottom, #0272BD background:0%,#0272bd 100%);
+}
+

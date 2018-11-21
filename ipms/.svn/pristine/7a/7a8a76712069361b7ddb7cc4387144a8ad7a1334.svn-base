@@ -1,0 +1,109 @@
+package com.ideassoft.util;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.ideassoft.core.constants.CommonConstants;
+
+public class CardUtil {
+	
+	//添加身份证授权
+
+	public static Integer doorAddCardData(HttpServletRequest request, HttpServletResponse response, String gatewayCode, String lockCode, String name, String cardNumb, String startTime, String endTime) {
+
+		try {
+			Integer re = Integer.parseInt(CommonConstants.doorInterfaceResult.FAILED);
+
+			JsonObject jsonObject = new JsonObject();
+			jsonObject.addProperty("sign", 18);
+			jsonObject.addProperty("ownerId",CommonConstants.doorInterfaceParam.OWNERID);
+			jsonObject.addProperty("operatorId", CommonConstants.doorInterfaceParam.OPERATORID);
+			jsonObject.addProperty("gatewayCode", gatewayCode);
+			jsonObject.addProperty("lockCode", lockCode);
+			jsonObject.addProperty("serviceNumb", "");
+			jsonObject.addProperty("name", name);
+			jsonObject.addProperty("cardNumb", cardNumb);
+			jsonObject.addProperty("dnCode", "");
+			jsonObject.addProperty("startTime", startTime);
+			jsonObject.addProperty("endTime", endTime);
+			jsonObject.addProperty("timetag", "");
+					
+			String res = HttpUtil.postData(jsonObject.toString(), CommonConstants.ZyDoorIp.IP);
+			Map<String,String> map = new HashMap<String,String>();
+			JSONUtil.buildParamFromJSON(map,res);
+			String result = map.get("result").toString();
+			if(result != null && !result.equals("")){
+				re = Integer.parseInt(result);
+			}
+			return re;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return CommonConstants.PortalResultCode.FAILED;
+		}
+	}
+	
+	
+	//取消身份证授权
+	public static Integer doorDelCardData(HttpServletRequest request, HttpServletResponse response, String lockCode, String cardNumb) {
+		try {
+			Integer re = Integer.parseInt(CommonConstants.doorInterfaceResult.FAILED);
+			
+			JsonObject jsonObject = new JsonObject();
+			jsonObject.addProperty("sign", 19);
+			jsonObject.addProperty("ownerId",CommonConstants.doorInterfaceParam.OWNERID);
+			jsonObject.addProperty("operatorId", CommonConstants.doorInterfaceParam.OPERATORID);
+			jsonObject.addProperty("lockCode", lockCode);
+			jsonObject.addProperty("serviceNumb", "");
+			jsonObject.addProperty("cardNumb", cardNumb);
+			jsonObject.addProperty("timetag", "");
+			
+			String res = HttpUtil.postData(jsonObject.toString(), CommonConstants.ZyDoorIp.IP);
+			Map<String,String> map = new HashMap<String,String>();
+			JSONUtil.buildParamFromJSON(map,res);
+			String result = map.get("result").toString();
+			if(result != null && !result.equals("")){
+				re = Integer.parseInt(result);
+			}
+			return re;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return CommonConstants.PortalResultCode.FAILED;
+		}
+	}
+	
+	//取消门锁内所有身份证信息
+	public static Integer doorDelAllCardData(HttpServletRequest request, HttpServletResponse response, String lockCode, String gatewayCode) {
+		try {
+			Integer re = Integer.parseInt(CommonConstants.doorInterfaceResult.FAILED);
+			
+			JsonArray jsonArrayList = new JsonArray();
+	    	JsonObject lockInfo = new JsonObject();
+	    	lockInfo.addProperty("lockCode", lockCode);
+	    	lockInfo.addProperty("gatewayCode", gatewayCode);
+	    	jsonArrayList.add(lockInfo);
+	    	
+	    	JsonObject jsonObjects = new JsonObject();
+	    	jsonObjects.addProperty("sign", 40);
+	    	jsonObjects.addProperty("ownerId",CommonConstants.doorInterfaceParam.OWNERID);
+	    	jsonObjects.addProperty("operatorId", CommonConstants.doorInterfaceParam.OPERATORID);
+	    	jsonObjects.add("lockList", jsonArrayList);
+		
+			String res = HttpUtil.postData(jsonObjects.toString(), CommonConstants.ZyDoorIp.IP);
+			Map<String,String> map = new HashMap<String,String>();
+			JSONUtil.buildParamFromJSON(map,res);
+			String result = map.get("result").toString();
+			if(result != null && !result.equals("")){
+				re = Integer.parseInt(result);
+			}
+			return re;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return CommonConstants.PortalResultCode.FAILED;
+		}
+	}
+}

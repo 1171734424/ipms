@@ -1,0 +1,29 @@
+package com.ideassoft.core.constants;
+
+import java.util.HashMap;
+
+import com.ideassoft.bean.RightDefine;
+
+
+public class RightConstants {
+
+	public static HashMap<String, RightDefine> rightDefineMap = new HashMap<String, RightDefine>();
+
+	public interface RightModel {
+		public final static String PAGE_CONTROL = "page";
+		
+		public final static String ROOM_CONTROL = "room";
+		
+		public final static String SELL_CONTROL = "sell";
+		
+		public final static String HOUSE_CONTROL = "house";
+	}
+	
+	public interface RightType {
+		public final static String AD_ROOMPRC = "调整房价";
+		
+		public final static String CON_BILL = "冲减";
+		
+		public final static String  MEM_MANAGE = "会员管理";
+	}
+}

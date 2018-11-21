@@ -1,0 +1,39 @@
+@CHARSET "UTF-8";
+
+.register_margin ul li{
+	float:left;
+	margin:2px;
+	line-height: 38px;
+}
+.register_one{
+	padding: 10px 2px;
+}
+.register_one .label_name{
+    float: left;
+    width: 82px;
+    text-align: right;
+    font-weight: normal;	
+    font-size: 0.85rem;
+}	
+.register_one  .input_ms{
+    padding: 8px 5px;
+    margin-left:10px;
+}
+.editdata_ms .ms_re{
+    float: right;
+    margin: 33px 45px;
+    color: #fff;
+    background: #FC8A15;
+    border:none;
+}
+.register_margin .ms_re{
+   background: #FC8A15;
+   color:#fff;	
+}
+select.text_select{
+	width:100px;	
+}
+/*保洁*/
+.keep_clean  .register_one .label_name{
+	 width: 90px;
+}

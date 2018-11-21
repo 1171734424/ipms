@@ -1,0 +1,234 @@
+package com.ideassoft.util;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+/**
+ * Created by Administrator on 2016/7/11.
+ */
+public class HttpUtil {
+
+    public static void printTime(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+        String time=simpleDateFormat.format(new Date());
+        System.out.println(time);
+    }
+    
+    /**
+     * 示例
+     * @param args
+     */
+    public static void main(String[] args) {
+    	String data = "{ \"sign\": 16,\"ownerId\" : 18952016312,\"operatorId\" : jsdr}";//获取设备
+    	String ip = "lock.qixutech.com";
+    	String a = postData(data, ip);
+    	System.out.println(a);
+	}
+
+    /**
+     * https访问
+     * @param data { \"sign\": 16,\"ownerId\" : 18952016312,\"operatorId\" : jsdr} json数据
+     * @param ip 地址
+     * @return
+     */
+    public static String postData(String data,String ip){
+        URL url;
+        HttpsURLConnection httpsURLConnection=null;
+        OutputStream outputStream=null;
+        DataOutputStream dataOutputStream=null;
+        InputStream inputStream=null;
+        InputStreamReader inputStreamReader;
+        BufferedReader bufferedReader=null;
+        String result="";
+        String line;
+        try {
+            X509TrustManager xtm = new X509TrustManager() {
+                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+            };
+            HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+                public boolean verify(String arg0, SSLSession arg1) {
+                    return true;
+                }
+            };
+            SSLContext ctx = SSLContext.getInstance("TLS");
+            ctx.init(null, new TrustManager[] { xtm }, null);
+            SSLSocketFactory socketFactory =ctx.getSocketFactory();
+
+            url=new URL("https://"+ip+":2016/");
+            httpsURLConnection=(HttpsURLConnection)url.openConnection();
+
+            httpsURLConnection.setSSLSocketFactory(socketFactory);
+            httpsURLConnection.setHostnameVerifier(hostnameVerifier);
+            httpsURLConnection.setRequestMethod("POST");
+            httpsURLConnection.setConnectTimeout(30000);
+            httpsURLConnection.setDoOutput(true);
+            httpsURLConnection.setDoInput(true);
+            httpsURLConnection.setRequestProperty("Content-Type","text/plain");
+            httpsURLConnection.connect();
+            outputStream=httpsURLConnection.getOutputStream();
+            dataOutputStream=new DataOutputStream(outputStream);
+            data=SecurityUtils.encrypt(data);
+            dataOutputStream.write(data.getBytes());
+            inputStream=httpsURLConnection.getInputStream();
+            inputStreamReader=new InputStreamReader(inputStream,"UTF-8");
+            bufferedReader=new BufferedReader(inputStreamReader);
+            while((line=bufferedReader.readLine())!=null){
+                result+=line+"\n";
+            }
+            result=SecurityUtils.decrypt(result);
+            return result;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } finally {
+            if(outputStream!=null){
+                try {
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(inputStream!=null){
+                try{
+                    inputStream.close();
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+            if(bufferedReader!=null){
+                try {
+                    bufferedReader.close();
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+            if(dataOutputStream!=null){
+                try{
+                    dataOutputStream.close();
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+            if(httpsURLConnection!=null){
+                httpsURLConnection.disconnect();
+            }
+        }
+        return null;
+    }
+
+    
+    public static String sendData(String data){
+        URL url;
+        HttpURLConnection httpURLConnection=null;
+        OutputStream outputStream=null;
+        DataOutputStream dataOutputStream=null;
+        InputStream inputStream=null;
+        InputStreamReader inputStreamReader;
+        BufferedReader bufferedReader=null;
+        String result="";
+        String line;
+        try {
+			url = new URL("http://101.201.34.248:8080/import/api/unlock?json="+data);
+			httpURLConnection = (HttpURLConnection)url.openConnection();
+			httpURLConnection.setRequestMethod("POST");
+			httpURLConnection.setConnectTimeout(30000);
+			httpURLConnection.setDoInput(true);
+			httpURLConnection.setDoOutput(true);
+			httpURLConnection.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+			httpURLConnection.connect();
+
+			/**
+			DataOutputStream out = new DataOutputStream(httpURLConnection  
+	                .getOutputStream());  
+	        String content = "json="+URLEncoder.encode(data,"GBK");  
+	        out.writeBytes(content);  
+	        out.flush();  
+	        out.close();  
+	        **/
+	        BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));  
+	        while ((line = reader.readLine()) != null){  
+	        	result+=line+"\n";
+	        }
+            System.out.println(result);  
+            return result;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(outputStream!=null){
+                try {
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(inputStream!=null){
+                try{
+                    inputStream.close();
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+            if(bufferedReader!=null){
+                try {
+                    bufferedReader.close();
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+            if(dataOutputStream!=null){
+                try{
+                    dataOutputStream.close();
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+            if(httpURLConnection!=null){
+                httpURLConnection.disconnect();
+            }
+        }
+        return null;
+    }
+  
+}

@@ -1,0 +1,202 @@
+ <%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+ <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+ <%@ page import="net.sf.json.JSONObject"%>
+
+<!DOCTYPE HTML>
+<html class="whitebg">
+  <head>
+    <title>水电支付页面</title>
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/fonticon.css"/>
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/leftmenu/leftmenu.css"/>
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/shopsell/shopsell.css"/>
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	<script>
+      var base_path = "<%=request.getContextPath()%>";
+	</script>
+  </head>
+  <body style="background:transparent !important;">
+     <div id="multiplesale" class="multiplesale" style="padding-top: 20px;">
+     	<div class="multiplesale_div">
+	        <table id="myTable" class="myTable" border="0" width="100">
+				<thead id="log">
+					<tr>
+						<th class="header">支付月份</th>
+						<th class="header">电费用量</th>
+						<th class="header">电费金额</th>
+						<th class="header">水费用量</th>
+						<th class="header">水费金额</th>
+						<th class="header">费用合计</th>
+					</tr>	
+				</thead>
+				<tbody id="info">
+					<c:forEach items= "${list}" var="list" varStatus="status">
+					<tr>
+						<td align="center">${list.month }</td>
+						<td align="center">${list.electric }</td>
+						<td align="center">${list.ammeterCost }</td>
+						<td align="center">${list.water }</td>
+						<td align="center">${list.waterMemterCost }</td>
+						<td align="center" id="amount">${list.amount }</td>
+					</tr>
+					</c:forEach>
+				</tbody>
+			</table>
+		</div>
+		<table class="totaltable">
+            <tr> 
+	            <td></td>
+	            <td></td>
+			    <td align="right"><span>总计金额：</span><input class="totalinput" id="totalprice" value="0" disable="true"/></td>			
+		   </tr>
+           </table>
+           <div class="paymethod_gdspage">
+              <div id="paycheckbox" class="footertwo_gdspage"> 
+	                <span>付款方式：</span>
+	               <label class="mo-checkbox" id="cashid">
+		               <input id="cashpay" type="checkbox" name="mo-checkbox">
+		               <i class="icon"></i>
+		               <span class="spanmar_gdspage">现金</span>
+	               </label>
+	               <label class="mo-checkbox" id="cardid">
+		               <input id="cardpay" type="checkbox" name="mo-checkbox">
+		               <i class="icon"></i>
+		               <span class="spanmar_gdspage">银行卡</span>
+	               </label>
+              </div>
+           </div>
+        <div id="" class="footerthree_gdspage_mul"> 
+             <input id="cashpayvalue" type="text" class="check payinput_gdspage_cash" disabled="disabled" onkeyup="this.value=this.value.replace(/^\D./g,'')" maxlength="8">
+             <input id="cardpayvalue" type="text" class="check payinput_gdspage_card_mul" placeholder="凭证号" onKeyUp="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="6">
+        </div>
+         
+          <div id="payproject">
+          	<div class="footerzero_gdspage">
+	            <span>工作账：</span>
+	            <select id="payworkbill" name="" class="check projectselect_gdspage">  
+	           	<c:forEach var="th" items="${workbill}">  
+	             <option  value="${th.workbillid}"> ${th.name} </option>  
+	           	</c:forEach>  
+	            </select> 
+            </div>
+          </div> 
+          <div class="sbotton_gdspage">
+             <input id="workbillbutton" name="" type="button" class="submitbotton_gdspage workbutton" style="float: right;" value="新建工作账" onclick="payworkbill()"/>
+             <input id="" name="" type="button" class="submitbotton_gdspage clean" style="float:right;" value="重置" onclick="location.reload(true)"/>
+             <input id="" name="" type="button" class="submitbotton_gdspage clean enter" style="float:right;" value="入账" onclick="payhysubmit()"/>
+           </div>
+        </div>
+        <%@ include file="../../../common/script.jsp"%>
+		<script>
+		var path = "<%=request.getContextPath()%>";
+		var jsonList={};
+		// 初始化显示总金额
+		$(function(){
+		$("#totalprice").val("${sumAmount}");
+		// 蒋jsonList转为json格式	
+		jsonList="${list}";
+		});
+		/*showMsg*/
+		function showMsg(msg, fn) {
+			if (!fn) {
+				TipInfo.Msg.alert(msg);
+			} else {
+				TipInfo.Msg.confirm(msg, fn);
+			}
+		}
+		// 选中CheckBox事件(支付方式级联)
+		$("#paycheckbox").children("label").find("input[type='checkbox']").click(function(){
+			if ($(this).is(":checked")) {
+				// 如果选中checkbox时还有其他的有被选中，那么将其他的去除选中状态
+				$(this).attr("checked",true).parent().siblings().children("input[type='checkbox']").attr("checked",false);
+				// 显示当前id内容，如果结果为"现金"那么就调用现金该出现的内容，反之如此
+				if ($(this).attr("id") == "cashpay") {
+					$("#cashpayvalue").val("${sumAmount}");
+					$("#cardpayvalue").hide();
+					$("#cardpayvalue").val("");
+					$("#payproject").show();
+					$("#cashpayvalue").show();
+				}else if($(this).attr("id") == "cardpay"){
+					$("#cardpayvalue").show();
+					$("#payproject").show();
+					$("#cashpayvalue").hide();
+					$("#cashpayvalue").val("");
+				}
+			}else {
+				// 如果没有被选中 那么就将所有的输入框隐藏，并将所有的输入项设为空
+				$("#cardpayvalue").hide();
+				$("#payproject").hide();
+				$("#cashpayvalue").hide();
+				$("#cashpayvalue").val("");
+				$("#cardpayvalue").val("");
+			}
+		});
+		
+	 // 跳创建工作账页面
+	 function payworkbill() {
+	    var pagetype = "gdssale";
+	    window.parent.parent.JDialog.open("创建工作账", path + "/page/apartment/apartmentLeftmenu/apartmentgoods/creatework_account.jsp?pagetype="+pagetype ,620,289);
+	}
+	
+	 // 提交支付事件
+	 function payhysubmit() {
+		var list = "${list }"; 
+		var workbillId = $("#payworkbill").val();
+		var cardpayvalue = $("#cardpayvalue").val();
+		var payment = null;
+		if ($("#cashpay").is(":checked")) {
+			if (!workbillId) {
+				showMsg("请选择工作账（无工作账请先创建工作账）");
+				return false;
+			}
+			payment = 1;
+		}else if($("#cardpay").is(":checked")){
+			if (!workbillId) {
+				showMsg("请选择工作账（无工作账请先创建工作账）");
+			}
+			if (!cardpayvalue) {
+				showMsg("请先输入凭证号!");
+				return false;
+			}
+			if (cardpayvalue.length < 6) {
+				showMsg("凭证号长度小于6位!");
+				return false;
+			}
+			payment = 2;
+		}else {
+			showMsg("请选择支付方式！");
+			return false;
+		}
+		// 异步提交获取的值至controller后台，并待后台处理后接收返回值
+		$.ajax({
+			url:path + "/apartmentbatchPayMonthHy.do",
+			type:"POST",
+			data:{
+				'jsonList' : jsonList,
+				'workbillId' : workbillId,
+				'payment' : payment
+			},
+			dataType:"json",
+			success:function(json){
+				if (json.result == 1) {
+					showMsg("支付成功！");
+					window.setTimeout("location.reload(true)", 800);
+					window.setTimeout("window.parent.JDialog.close();",800);
+					$(window.parent.document.children[0].children[1].children[2].children[2].children[1].children[0].contentDocument).find(".header_roomlist_li")[3].click();
+
+				}else if(json.result == -1){
+					showMsg("支付失败！");
+					window.setTimeout("location.reload(true)", 800);
+					window.setTimeout("window.parent.JDialog.close();",800);
+					$(window.parent.document.children[0].children[1].children[2].children[2].children[1].children[0].contentDocument).find(".header_roomlist_li")[3].click();
+
+				}
+			}
+		}); 
+	 }
+        
+	</script>
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+  </body>
+</html>

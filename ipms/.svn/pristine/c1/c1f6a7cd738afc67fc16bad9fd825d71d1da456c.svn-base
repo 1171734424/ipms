@@ -1,0 +1,180 @@
+/* Main Dark Style Sheet for jQuery UI Datepicker */
+ #datetimepicker_div,  .datetimepicker_inline {
+	font-family: Arial, Helvetica, sans-serif;
+	padding: 0;
+	margin: 0;
+	background: #DDD;
+	width: 245px;
+}
+ #datetimepicker_div {
+	display: none;
+	border: 1px solid #5ca8f8;
+	z-index: 1000;
+	font-size: 1em;
+}
+ .datetimepicker_inline {
+	float: left;
+	display: block;
+	border: 0;
+}
+ .datetimepicker_dialog {
+	padding: 5px !important;
+	border: 4px ridge #DDD !important;
+}
+ button.datetimepicker_trigger {
+	width: 10px;
+}
+ img.datetimepicker_trigger {
+	margin: 2px;
+	vertical-align: middle;
+	width: 25px;
+}
+ .datetimepicker_prompt {
+	float: left;
+	padding: 2px;
+	background: #DDD;
+	color: #000;
+}
+*html  .datetimepicker_prompt {
+	width: 245px;
+}
+ .datetimepicker_control,  .datetimepicker_links,  .datetimepicker_header,  .datetimepicker {
+	clear: both;
+	float: left;
+	width: 100%;
+	color: #FFF;
+}
+ .datetimepicker_control {
+	background: #5ca8f8;
+	padding: 2px 0px;
+}
+ .datetimepicker_links {
+	background: #e0ecff;
+	padding: 2px 0px;
+	font-size: 1em;
+}
+ .datetimepicker_control,  .datetimepicker_links {
+	font-weight: bold;
+	letter-spacing: 1px;
+}
+ .datetimepicker_links label {
+	padding: 2px 5px;
+	color: #888;
+}
+ .datetimepicker_clear,  .datetimepicker_prev {
+	float: left;
+	width: 36%;
+}
+ .datetimepicker_current {
+	float: left;
+	width: 30%;
+	text-align: center;
+}
+ .datetimepicker_close,  .datetimepicker_next {
+	float: right;
+	width: 34%;
+	text-align: right;
+}
+ .datetimepicker_header {
+	padding: 1px 0 3px;
+	background: #ffffff;
+	text-align: center;
+	font-weight: bold;
+}
+ .datetimepicker_header select {
+	color: #000;
+	border: 1px solid #5ca8f8;
+	font-weight: bold;
+	font-size: 1em;
+	width: 49%;
+}
+ .datetimepicker {
+	background: #CCC;
+	text-align: center;
+}
+ .datetimepicker a {
+	display: block;
+	width: 100%;
+}
+ .datetimepicker .datetimepicker_titleRow {
+	background: #5ca8f8;
+	color: #000;
+	font-weight: bold;
+}
+ .datetimepicker .datetimepicker_daysRow {
+	background: #FFF;
+	color: #666;
+}
+ .datetimepicker_weekCol {
+	background: #B1DB87;
+	color: #000;
+}
+ .datetimepicker .datetimepicker_daysCell {
+	color: #000;
+	border: 1px solid #DDD;
+}
+ #datetimepicker .datetimepicker_daysCell a {
+	display: block;
+}
+ .datetimepicker .datetimepicker_weekEndCell {
+	background: #5ca8f8;
+}
+ .datetimepicker .datetimepicker_daysCellOver {
+	background: #FFF;
+	border: 1px solid #777;
+}
+ .datetimepicker .datetimepicker_unselectable {
+	color: #888;
+}
+ .datetimepicker_today {
+	background: #84ffd8 !important;
+}
+ .datetimepicker_currentDay {
+	background: #84ffd8 !important;
+}
+ #datetimepicker_div a,  .datetimepicker_inline a {
+	cursor: pointer;
+	margin: 0;
+	padding: 0;
+	background: none;
+	color: #000;
+}
+ .datetimepicker_inline .datetimepicker_links a {
+	padding: 0 5px !important;
+}
+ .datetimepicker_control a,  .datetimepicker_links a {
+	padding: 2px 5px !important;
+	color: #000 !important;
+}
+ .datetimepicker_titleRow a {
+	color: #000 !important;
+}
+ .datetimepicker_control a: hover {
+	background: #FDD !important;
+	color: #333 !important;
+}
+ .datetimepicker_links a: hover,  .datetimepicker_titleRow a: hover {
+	background: #FFF !important;
+	color: #333 !important;
+}
+ .datetimepicker_multi .datetimepicker {
+	border: 1px solid #83C948;
+}
+ .datetimepicker_oneMonth {
+	float: left;
+	width: 245px;
+}
+ .datetimepicker_newRow {
+	clear: left;
+}
+ .datetimepicker_cover {
+	display: none;
+	display/**/: block;
+	position: absolute;
+	z-index: -1;
+	filter: mask();
+	top: -4px;
+	left: -4px;
+	width: 193px;
+	height: 200px;
+}

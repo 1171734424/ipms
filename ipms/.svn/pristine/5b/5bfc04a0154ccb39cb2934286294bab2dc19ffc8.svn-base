@@ -1,0 +1,379 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ include file="../../common/taglib.jsp"%>
+<%@ include file="../../common/css.jsp"%>
+<%@ include file="../../common/script.jsp"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>添加房型图片</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<script src="<%=request.getContextPath()%>/script/crm/manage/jquery.min.js"></script>
+	<script src="<%=request.getContextPath()%>/script/crm/manage/jquery-migrate-1.2.1.min.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="<%=request.getContextPath()%>/css/common/picadd/webuploader.min.css" rel="stylesheet" type="text/css" media="all" />
+	<script src="<%=request.getContextPath()%>/script/common/picAdd/webuploader.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/picAdd/uploadImgPreviewRoomType.js"></script>
+	
+	<style>
+		
+		._filelist li{/*这个选择器一定要有宽高，否则图片显示不出来，因为它里面的内容是绝对定位的*/
+                width: 180px;
+                height: 160px;
+            }
+            .choose-file-btn{
+                width: 180px;
+                height: 80px;
+                background-color: #f60;
+                overflow: hidden;
+            }
+            .basicInfo{
+            	overflow: auto;
+    			height: 100%;
+            }
+            
+            
+            .img_update{
+            	overflow:hidden;
+            }
+            .img_slide{
+            	list-style:none;
+            	padding:0;
+            	margin:0;
+            	float:left;
+            }
+            .img_slide li{
+            background:#e9e9e9;
+            border-top:1px solid #d3d3d3;
+            }
+             .img_slide li:first-child{
+             	border:none;
+             }
+            .img_slide li a{
+            text-decoration:none;
+            	display:block;
+            	width:60px;
+            	height:40px;
+            	line-height:40px;
+            	font-size:14px;
+            	text-align:center;
+            	color:black;
+            }
+            .img_slide li.active {
+            	background:#525474;
+            }
+             .img_slide li.active a{
+             	color:white;
+             }
+            
+            .img_content{
+            	overflow:hidden;
+            	list-style:none;
+            	padding:0;
+            	margin:0;
+            }
+            .img_content>li{
+            	display:none;
+            
+            }
+             .img_content li.active{
+             	display:block
+             }
+             
+             .choose-file-btn{
+            	 display:inline-block;
+             	width:100px;
+             	height:30px;
+             	border-radius:5px;
+             	background-color:#525474;
+             	vertical-align: middle;
+             	padding-left: 10px;
+             	color:white;
+             	font-size:12px;
+             	line-height:30px;
+             	text-align:center;
+             	margin-top: -4px;
+             
+             }
+             .webuploader-pick{
+             	background-color:#525474 !important;
+
+             }
+              .webuploader-pick:before{
+              	content:'';
+             
+              	display:block;
+              	position:absolute;
+             	 height: 20px;
+  				 top: 5px;
+   				 left: 6px;
+              	background:url();
+              	background-size:100% 100%;
+              
+              }
+           
+             .upload_now2{
+             	width:100px;
+             	height:30px;
+             	padding:0px;
+             	margin:0px;
+             	border:none;
+             	border-radius:5px;
+             	background-color:#525474;
+             	padding-left:10px;
+             	color:white;
+             }
+             .upload_now2:before{
+             	content:'';
+              	display:block;
+              	position:absolute;
+             	 height: 20px;
+  				 top: 5px;
+   				 left: 6px;
+              	background:url(ipms/images/cloud.png) no-repeat;
+              	background-size:100% 100%;
+             }
+             .table_basicInfo{
+             	margin-top:10px;
+             	margin-left:20px;
+             }
+             
+             .stylea{
+                width: 150px;
+			    text-align: center;
+			    height: 30px;
+			    border-radius: 3px;
+			    margin-left: 23px;
+             }
+             
+             .door{
+                 font-weight: bold;
+				    /* margin-left: 35px; */
+				    padding: 10px;
+				    }
+				    
+				  button{
+				  	outline:transparent;
+				  	cursor:pointer;
+				  }  
+	</style>
+  </head>
+  
+  <body>
+  	<form id="basicInfo" name="basicInfo" class="basicInfo" >
+  	  <input type="hidden" name="roomType" value="${roomType}" id="roomType"/>
+	  <input type="hidden" name="branchIdTwo" value="${branchId}" id="branchIdTwo"/>
+	  <input type="hidden" name="theme" value="${theme}" id="theme" />
+	  <input type="hidden" name="scence" value="${scence}" id="scence" />
+  	  <div class="table_basicInfo">
+		<table class=""> 
+		       	<tr>
+		       		<td  class="tdone door">门店</td>
+		       		<td class="tdtwo">
+		       			<select id="branchId" name="branchId" disabled class="stylea">
+		       				<c:if test="${theme eq '酒店' || theme eq '公寓'}">	
+								<c:forEach items="${branchList}" var="branch">
+									<option value="${branch.branchId}" <c:if test="${branchId eq branch.branchId}">selected = "selected"</c:if>>${branch.branchName}</option>
+								</c:forEach>
+							</c:if>
+							<c:if test="${theme eq '民宿'}">
+								<c:forEach items="${branchList}" var="house">
+									<option value="${house.houseId}" <c:if test="${branchId eq branch.branchId}">selected = "selected"</c:if>>${house.houseNo}</option>
+								</c:forEach>
+							</c:if>
+		    			</select>
+		    		</td>
+		    	</tr>
+		</table>
+		<div class='img_update'>
+			<ul class='img_slide'>
+				<li class='active'><a href="javascript:;">头图</a></li>
+				<li><a href="javascript:;">房型内景</a></li>
+			</ul>
+		
+		<ul class="img_content">
+			<li class='active'>	
+				<div class="table_basicInfo">
+		  			<div id="uploader0" class='uploader2'></div>
+	       			<div class="choose-file-btn choose_file2" id="choose_file0">选择图片</div>
+	        		<button type="button" id="upload_now0" class='upload_now2'>上传图片</button>
+				</div>
+		
+			  	<div class="filled">
+				  <ul class="_filelist">
+				
+				  	<c:forEach items="${picture}" var="p">
+					    <li id="${p.pictureId}" class="state-complete dataDel">
+					      <img src="${p.pictureUrl}" style="position: absolute; top: 50%; left: 50%; height:120px; width:240px; margin-top: -60px; margin-left: -120px;">    
+					      <div class="file-panel filedata" style="overflow: hidden; height: 0px;"><span class="cancel" onclick="deletePic(this,'${p.pictureId}')">删除</span></div> 
+					    </li>
+				    </c:forEach>
+				    
+				  </ul>
+			    </div>
+		    </li>
+		    
+			<li>	
+				<div class="table_basicInfo">
+		       		<div id="uploader1" class='uploader2'></div>
+		       		<div class="choose-file-btn choose_file2" id="choose_file1">选择图片</div>
+		        	<button type="button" id="upload_now1" class='upload_now2'>上传图片</button>
+				</div>
+	
+			  	<div class="filled">
+				  <ul class="_filelist">
+				
+				  	<c:forEach items="${pictures}" var="ps">
+					    <li id="${ps.pictureId}" class="state-complete dataDel">
+					      <img src="${ps.pictureUrl}" style="position: absolute; top: 50%; left: 50%; height:120px; width:240px; margin-top: -60px; margin-left: -120px;">    
+					      <div class="file-panel filedata" style="overflow: hidden; height: 0px;"><span class="cancel" onclick="deletePic(this,'${ps.pictureId}')">删除</span></div> 
+					    </li>
+				    </c:forEach>
+				   
+				  </ul>
+			    </div>
+		    </li>
+
+		</div>
+		</div>
+		
+	</form>
+  </body>
+  <script type="text/javascript">
+  var base_path = '<%=request.getContextPath()%>';
+	
+	function showMsg(msg, fn) {
+		if (!fn) {
+			TipInfo.Msg.alert(msg);
+		} else {
+			TipInfo.Msg.confirm(msg, fn);
+		}
+	}
+
+	
+$(function (){
+	  var index = '${scence}';
+
+	  $("#scence").val(index);
+	  $(".img_slide").children('li:eq('+index+')').addClass('active').siblings('li').removeClass('active');
+	  $(".img_slide").next('ul').children('li:eq('+index+')').show().siblings('li').hide();
+		
+	  $(".dataDel").mouseover(function(e){
+		 $(this).find(".filedata").css("height","30px");
+	  });
+	  $(".dataDel").mouseout(function(e){
+			 $(this).find(".filedata").css("height","0px");
+	  });
+
+	  
+    var uploader2 = uploadImage({
+         wrap: "#uploader" +index, //包裹整个上传控件的元素，必须。可以传递dom元素、选择器、jQuery对象
+         /*预览图片的宽度，可以不传，如果宽高都不传则为包裹预览图的元素宽度，高度自动计算*/
+         //width: "160px", 
+         height: 120,//预览图片的高度
+         fileVal: "file", // [默认值：'file'] 设置文件上传域的name。
+         btns: {//必须
+             uploadBtn: $("#upload_now"+index), //开始上传按钮，必须。可以传递dom元素、选择器、jQuery对象
+             retryBtn: null, //用户自定义"重新上传"按钮
+             chooseBtn: '#choose_file'+index,//"选折图片"按钮，必须。可以传递dom元素、选择器、jQuery对象
+             chooseBtnText: "选择图片" //选择文件按钮显示的文字
+         },
+         pictureOnly: true,//只能上传图片
+         resize: false,//是否可以重复上传，即上传一张图片后还可以再次上传。默认是不可以的，false为不可以，true为可以
+         duplicate: true,
+         multiple: index != '0' ? true : false, //是否支持多选能力
+         swf: "http://127.0.0.1:8080/ipms/Uploader.swf", //swf文件路径，必须
+         url: base_path+"/addRoomTypePicNew.do?branchId="+$("#branchIdTwo").val()+"&scence="+index+"&roomType="+$("#roomType").val()+"&theme="+$("#theme").val(), //图片上传的路径，必须
+         maxFileTotalSize: null, //最大上传文件大小，默认10M
+         maxFileSize: 50485760, //单个文件最大大小，默认2M
+         showToolBtn: true, //当鼠标放在图片上时是否显示工具按钮,
+         onFileAdd: null, //当有图片进来后所处理函数
+         onDelete: null, //当预览图销毁时所处理函数
+         /*当单个文件上传失败时执行的函数，会传入当前显示图片的包裹元素，以便用户操作这个元素*/
+         uploadFailTip: null, 
+         onError:null, //上传出错时执行的函数
+         notSupport: null, //当浏览器不支持该插件时所执行的函数
+         /*当上传成功（此处的上传成功指的是上传图片请求成功，并非图片真正上传到服务器）后所执行的函数，会传入当前状态及上一个状态*/
+         onSuccess: null
+     });
+ });
+
+	function deletePic(e, pictureId){
+		$(e).parent().parent().remove();
+		$.ajax({
+	         url: base_path + "/delPicsInRoomType.do",
+	         data: {
+	        	 pictureId : pictureId,
+	        	 branchId : $("#branchId").val(),
+	        	 scence : $("#branchId").val()
+	         },
+			 dataType : "json",
+			 type : "post",
+			 success: function(json) {
+				 window.location.href = base_path + "/addRoomTypePictureTwo.do?roomType="+$("#roomType").val()+"&theme="+$("#theme").val()+"&branchId="+$("#branchIdTwo").val()+"&scence="+$("#scence").val();
+			 },
+			 error: function(json) {}
+		});
+	}
+	
+	$(function(){
+		$('.img_slide').on('click','li',function(){
+			$(this).addClass('active').siblings('li').removeClass('active');
+			 index = $(this).index();
+			 $("#scence").val(index);
+			$(this).parent().next('ul').children('li:eq('+index+')').show().siblings('li').hide();
+			
+			
+			 uploader2 = uploadImage({
+		           wrap: "#uploader" +index, //包裹整个上传控件的元素，必须。可以传递dom元素、选择器、jQuery对象
+		           /*预览图片的宽度，可以不传，如果宽高都不传则为包裹预览图的元素宽度，高度自动计算*/
+		           //width: "160px", 
+		           height: 120,//预览图片的高度
+		           fileVal: "file", // [默认值：'file'] 设置文件上传域的name。
+		           btns: {//必须
+		               uploadBtn: $("#upload_now"+index), //开始上传按钮，必须。可以传递dom元素、选择器、jQuery对象
+		               retryBtn: null, //用户自定义"重新上传"按钮
+		               chooseBtn: '#choose_file'+index,//"选折图片"按钮，必须。可以传递dom元素、选择器、jQuery对象
+		               chooseBtnText: "选择图片" //选择文件按钮显示的文字
+		           },
+		           pictureOnly: true,//只能上传图片
+		           resize: false,
+		           //是否可以重复上传，即上传一张图片后还可以再次上传。默认是不可以的，false为不可以，true为可以
+		           duplicate: true,
+		           multiple: index != '0'? true : false, //是否支持多选能力
+		           swf: "http://127.0.0.1:8080/ipms/Uploader.swf", //swf文件路径，必须
+		           url: base_path+"/addRoomTypePicNew.do?branchId="+$("#branchId").val()+"&scence="+index+"&roomType="+$("#roomType").val(), //图片上传的路径，必须
+		           maxFileTotalSize: null, //最大上传文件大小，默认10M
+		           maxFileSize: 5242880, //单个文件最大大小，默认5M
+		           showToolBtn: true, //当鼠标放在图片上时是否显示工具按钮,
+		           onFileAdd: null, //当有图片进来后所处理函数
+		           onDelete: null, //当预览图销毁时所处理函数
+		           /*当单个文件上传失败时执行的函数，会传入当前显示图片的包裹元素，以便用户操作这个元素*/
+		           uploadFailTip: null, 
+		           onError:null, //上传出错时执行的函数
+		           notSupport: null, //当浏览器不支持该插件时所执行的函数
+		           /*当上传成功（此处的上传成功指的是上传图片请求成功，并非图片真正上传到服务器）后所执行的函数，会传入当前状态及上一个状态*/
+		           onSuccess: null
+		       });
+			
+		})
+		
+		
+		
+		
+		
+	})
+  </script>
+</html>

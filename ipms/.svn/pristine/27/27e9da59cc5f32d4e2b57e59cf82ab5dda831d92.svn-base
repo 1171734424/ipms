@@ -1,0 +1,449 @@
+package com.ideassoft.pms.controller;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.bean.Bill;
+import com.ideassoft.bean.Check;
+import com.ideassoft.bean.Contrart;
+import com.ideassoft.bean.OffsetLog;
+import com.ideassoft.bean.OperateLog;
+import com.ideassoft.bean.Order;
+import com.ideassoft.bean.Recording;
+import com.ideassoft.bean.RoomMapping;
+import com.ideassoft.bean.Staff;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.bean.wrapper.CheckAllAmount;
+import com.ideassoft.bean.wrapper.CheckoutRoom;
+import com.ideassoft.bean.wrapper.MultiQueryCheck;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.pms.service.ApartmentRefundService;
+import com.ideassoft.pms.service.RoomService;
+import com.ideassoft.util.DateUtil;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.PriceUtil;
+import com.ideassoft.util.ReflectUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Transactional
+@Controller
+public class ApartmentRefundController {
+	
+	@Autowired
+	private ApartmentRefundService apartmentRefundService;
+	
+	@Autowired
+	private RoomService roomService;
+	
+	@RequestMapping("/apartmentRefund.do")
+	public ModelAndView apartmentRent(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/ipmspage/leftmenu/apartmentrefund/apartmentrefund");
+		return mv;
+	}
+	
+	@RequestMapping("/apartmentRefundAll.do")
+	public ModelAndView apartmentRefundAll(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		//SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Pagination pagination = (Pagination) ReflectUtil.setBeanFromRequest(request, Pagination.class);
+		if (pagination != null && pagination.getPageNum() == null) {
+			pagination.setPageNum(1);
+			pagination.setRows(17);
+		}
+		String memberName = request.getParameter("memberName");
+		String mobile = request.getParameter("mobile");
+		String reservedTime = request.getParameter("reservedTime");
+//		String date = "";
+//		if (!StringUtil.isEmpty(reservedTime)) {
+//			Calendar dayTime = Calendar.getInstance();
+//			dayTime.setTime(sdf.parse(reservedTime));
+//			dayTime.add(Calendar.DAY_OF_MONTH, -2);
+//			date = sdf.format(dayTime.getTime());
+//		}
+		List<?> list = apartmentRefundService.findBySQLWithPagination("apartmentRefundAll", new String[] { loginUser.getStaff().getBranchId(), memberName, mobile, reservedTime }, pagination, true);
+		mv.addObject("list", list);
+		mv.addObject("orderuser", memberName);
+		mv.addObject("mobile", mobile);
+		mv.addObject("ordertime", reservedTime);
+		mv.addObject("pagination", pagination);
+		mv.setViewName("page/ipmspage/leftmenu/apartmentrefund/apartmentrefundinfo");
+		return mv;
+	}
+	
+	@RequestMapping("/apartmentRefundMoney.do")
+	public ModelAndView apartmentRefundMoney(HttpServletRequest request,
+			HttpServletResponse response, String checkid) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("checkid", checkid);
+		mv.setViewName("page/ipmspage/leftmenu/apartmentrefund/apartmentrefuntbill");
+		return mv;
+	}
+	
+	@RequestMapping("/showApartmentAddBill.do")
+	public ModelAndView showApartmentAddBill(HttpServletRequest request) {
+		String checkid = request.getParameter("checkid");
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("checkid", checkid);
+		mv.setViewName("/page/ipmspage/leftmenu/apartmentrefund/add_bill");
+		return mv;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping("/loadApartmentPayandCost.do")
+	public void loadApartmentPayandCost(HttpServletRequest request, HttpServletResponse response, String checkid) {
+		Contrart Contract = (Contrart) apartmentRefundService.findOneByProperties(Contrart.class, "contrartId", checkid);
+		CheckAllAmount checkallamount = new CheckAllAmount();
+		Double cost = 0D;
+		Double pay = 0D;
+		//if (Contract.getStatus().equals(CommonConstants.ApartmentStatus.CheckOffAndUnout)) {
+			List<Bill> bills = apartmentRefundService.findByProperties(Bill.class, "checkId", checkid);
+			for (Bill bill : bills) {
+				cost += bill.getCost();
+				pay += bill.getPay();
+			}
+			checkallamount.setCost(cost);
+			checkallamount.setPay(pay);
+		//}
+		JSONUtil.responseJSON(response, checkallamount);
+	}
+	
+	@RequestMapping("/loadApartmentCheckData.do")
+	public void loadCheckData(HttpServletRequest request, HttpServletResponse response, MultiQueryCheck multiQuerycheck) {
+		Contrart Contract = (Contrart) apartmentRefundService.findOneByProperties(Contrart.class, "contrartId", multiQuerycheck.getCheckid());
+		JSONUtil.responseJSON(response, Contract);
+	}
+	
+	@RequestMapping("/apartmentCheckOutBill.do")
+	public void apartmentCheckOutBill(HttpServletRequest request, HttpServletResponse response, CheckoutRoom checkoutroom) throws UnknownHostException {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Contrart contract = (Contrart) apartmentRefundService.findOneByProperties(Contrart.class, "contrartId", checkoutroom.getCheckId());
+		String branchId = contract.getBranchId();
+		String checkId = contract.getContrartId();
+		String money = "";
+		if(checkoutroom.getAmount() == null || "".equals(checkoutroom.getAmount())){
+			checkoutroom.setAmount("0");
+		}
+		SysParam sysparam = (SysParam) apartmentRefundService.findOneByProperties(SysParam.class, "paramType", "PROJECT", "content", checkoutroom.getProjectid());
+		if(sysparam != null){
+			String project = sysparam.getParamName();
+			checkoutroom.setProject(project);
+		}
+		if (!("0".equals(checkoutroom.getAmount())
+				|| checkoutroom.getProjectid() == null || "".equals(checkoutroom.getProjectid()))) {
+			Bill bill = new Bill();
+			String billId = DateUtil.currentDate("yyMMdd") + branchId + apartmentRefundService.getSequence("SEQ_NEW_BILL");
+			bill.setBillId(billId);
+			bill.setBranchId(branchId);
+			bill.setCheckId(checkId);
+			bill.setProjectId(checkoutroom.getProjectid());
+			bill.setProjectName(checkoutroom.getProject());
+			bill.setDescribe("结账");
+			bill.setCost(0.00);
+			if ("2001".equals(checkoutroom.getProjectid())) {
+				bill.setPay(-Double.valueOf(checkoutroom.getAmount()));
+				money = "-" + checkoutroom.getAmount();
+				bill.setPayment("1");
+			} else if ("2002".equals(checkoutroom.getProjectid())) {
+				bill.setPay(Double.valueOf(checkoutroom.getAmount()));
+				money = checkoutroom.getAmount();
+				bill.setPayment("1");
+			} else if ("2003".equals(checkoutroom.getProjectid())) {
+				bill.setPay(Double.valueOf(checkoutroom.getAmount()));
+				money = checkoutroom.getAmount();
+				bill.setPayment("2");
+			} else {
+				bill.setPay(Double.valueOf(checkoutroom.getAmount()));
+				money = checkoutroom.getAmount();
+				bill.setPayment("3");
+			}
+			bill.setStatus("1");
+			bill.setRecordUser(loginuser.getStaff().getStaffId());
+			apartmentRefundService.save(bill);
+		}
+		
+		OperateLog operlog = new OperateLog();
+		operlog.setBranchId(contract.getBranchId());
+		operlog.setLogId(DateUtil.currentDate("yyMMdd") + contract.getBranchId() + apartmentRefundService.getSequence("SEQ_OPERATELOG_ID"));
+		String operid = InetAddress.getLocalHost().toString();// IP地址
+		operid = (String) operid.subSequence(operid.indexOf("/") + 1, operid.length());
+		operlog.setOperIp(operid);
+		operlog.setOperType("11");
+		operlog.setOperModule("退房操作");
+		operlog.setContent("合同号" + contract.getContrartId() + "结账,退款金额:" + money);
+		operlog.setRecordUser(loginuser.getStaff().getStaffId());
+		operlog.setRecordTime(new Date());
+		apartmentRefundService.save(operlog);
+		
+		if (contract != null) {
+			contract.setStatus(CommonConstants.ApartmentStatus.CheckOff);
+			contract.setRecordTime(new Date());
+			apartmentRefundService.update(contract);
+		}
+		
+		JSONUtil.responseJSON(response, new AjaxResult(1, "结算成功!"));
+	}
+	
+	
+	@RequestMapping("/apartmentOrderoff.do")
+	public void apartmentOrderoff(HttpServletRequest request, HttpServletResponse response, String checkid) {
+		Contrart Contract = (Contrart) apartmentRefundService.findOneByProperties(Contrart.class, "contrartId", checkid);
+		String status = Contract.getStatus();
+		if ("2".equalsIgnoreCase(status)) {
+			JSONUtil.responseJSON(response, new AjaxResult(0, "当前已结算!"));
+		} else {
+			JSONUtil.responseJSON(response, new AjaxResult(1, "可以结算!"));
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping("/apartmentloadroommapping.do")
+	public void apartmentloadroommapping(HttpServletRequest request, HttpServletResponse response, String checkid) {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchId = staff.getBranchId();
+		Check check = (Check) apartmentRefundService.findOneByProperties(Check.class, "checkId", checkid);
+		Order order = (Order) apartmentRefundService.findById(Order.class, checkid);
+		String roomid = check == null ? order.getRoomId() : check.getRoomId();
+		RoomMapping roommapping = (RoomMapping) apartmentRefundService.findOneByProperties(RoomMapping.class, "relaRoomid", roomid);
+		List<Map<String, String>> result = new ArrayList<Map<String, String>>();
+		if(roommapping != null){
+			result = apartmentRefundService.findBySQL("loadroommapping", new String[] { branchId, roommapping.getRoomId() }, true);
+		}
+		JSONUtil.responseJSON(response, result);
+	}
+	
+	@RequestMapping("/apartmentloadRoomBillData.do")
+	public void apartmentloadRoomBillData(HttpServletRequest request, HttpServletResponse  response, String checkid, String status) {
+		Contrart Contract = (Contrart) apartmentRefundService.findOneByProperties(Contrart.class, "contrartId", checkid);
+		String sql = "loadroomlistbill";
+		List<?> alllist = apartmentRefundService.findBySQL(sql, new String[] { checkid, Contract.getBranchId(), null}, true);
+		List<?> normallist = apartmentRefundService.findBySQL(sql, new String[] { checkid, Contract.getBranchId(), "1" }, true);
+		//List<?> list = apartmentRefundService.findBySQL(sql, new String[] { checkid, Contract.getBranchId(), status }, true);
+		List<?> list = roomService.findBillBySql(checkid, Contract.getBranchId(), status);
+		if (alllist.size() <= normallist.size()) {
+			JSONUtil.responseJSON(response, new AjaxResult(0, "账单无冲减/转账记录!", list));
+		} else {
+			JSONUtil.responseJSON(response, new AjaxResult(1, "", list));
+		}
+	}
+	
+	@RequestMapping("/apartmentAddbill.do")
+	public void apartmentAddbill(HttpServletRequest request, HttpServletResponse response, String checkId, String project,
+			String projectid, String amount, String remark) {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = "";
+		Bill bill = new Bill();
+		Contrart Contract = (Contrart) apartmentRefundService.findOneByProperties(Contrart.class, "contrartId", checkId);
+		branchid = Contract.getBranchId();
+		String billId = DateUtil.currentDate("yyMMdd") + branchid + apartmentRefundService.getSequence("SEQ_NEW_BILL");
+		bill.setBillId(billId);
+		bill.setBranchId(branchid);
+		bill.setCheckId(checkId);
+		bill.setProjectId(projectid);// gai
+		bill.setProjectName(project);
+		bill.setDescribe("入账");
+		if (projectid.startsWith("2")) {
+			if ("2001".equals(projectid)) {
+				bill.setPay(-Double.valueOf(amount));
+			} else {
+				bill.setPay(Double.valueOf(amount));
+			}
+			bill.setCost(0.00);
+		} else {
+			bill.setCost(Double.valueOf(amount));
+			bill.setPay(0.00);
+		}
+		if ("2001".equals(projectid)) {
+			bill.setPayment("1");
+		} else if ("2002".equals(projectid)) {
+			bill.setPayment("1");
+		} else if ("2003".equals(projectid)) {
+			bill.setPayment("2");
+		} else {
+			bill.setPayment("0");
+		}
+		bill.setStatus("1");
+		bill.setRemark(remark);
+		bill.setRecordUser(staff.getStaffId());
+
+		Recording recording = new Recording();
+		String recordId = DateUtil.currentDate("yyMMdd") + branchid + apartmentRefundService.getSequence("SEQ_NEW_RECORDING");
+		recording.setRecordId(recordId);
+		recording.setBranchId(branchid);
+		recording.setCheckId(checkId);
+		recording.setRecordType("1");
+		recording.setProjectId(projectid);
+		recording.setFee(Double.valueOf(amount));
+		recording.setRecordUser(staff.getStaffId());
+
+		try {
+			apartmentRefundService.save(bill);
+			apartmentRefundService.save(recording);
+			JSONUtil.responseJSON(response, new AjaxResult(1, "入账成功!"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			JSONUtil.responseJSON(response, new AjaxResult(0, "入账失败!"));
+		}
+	}
+	
+	@RequestMapping("/apartmentConsumption.do")
+	public void apartmentConsumption(HttpServletRequest request, HttpServletResponse response, String strbillid, String offset, String checkid) {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Contrart Contract = (Contrart) apartmentRefundService.findOneByProperties(Contrart.class, "contrartId", checkid);
+		Staff staff = loginuser.getStaff();
+		String[] arrbill = strbillid.split(",");
+		boolean errorbillflag = true;
+		for (String billid : arrbill) {
+			Bill bill = (Bill) apartmentRefundService.findOneByProperties(Bill.class, "billId", billid);
+			String projectid = bill.getProjectId();
+			if (projectid.startsWith("2")) {
+				double price = bill.getPay();
+				if (price == 0) {
+					errorbillflag = false;
+				}
+			} else {
+				double price = bill.getCost();
+				if (price == 0) {
+					errorbillflag = false;
+				}
+			}
+		}
+
+		if (!errorbillflag) {
+			JSONUtil.responseJSON(response, new AjaxResult(0, "选中了错误的冲减金额!"));
+			return;
+		}
+
+		for (String billid : arrbill) {
+			Bill consumebill = new Bill();
+			Bill bill = (Bill) apartmentRefundService.findOneByProperties(Bill.class, "billId", billid);
+			String billId = DateUtil.currentDate("yyMMdd") + Contract.getBranchId() + apartmentRefundService.getSequence("SEQ_NEW_BILL");
+			consumebill.setBillId(billId);
+			consumebill.setBranchId(Contract.getBranchId());
+			consumebill.setCheckId(bill.getCheckId());
+			consumebill.setDescribe(bill.getDescribe());
+			consumebill.setOffset(offset);
+			consumebill.setPayment(bill.getPayment());
+			consumebill.setProjectId(bill.getProjectId());
+			consumebill.setProjectName(bill.getProjectName());
+			consumebill.setRecordUser(staff.getStaffId());
+			consumebill.setRemark(bill.getBillId());
+			consumebill.setStatus("2");
+
+			String projectid = bill.getProjectId();
+			// 记日志
+			OffsetLog otlog = new OffsetLog();
+			String logid = DateUtil.currentDate("yyMMdd") + Contract.getBranchId()
+					+ apartmentRefundService.getSequence("SEQ_OFFSETLOG_ID");
+			otlog.setLogId(logid);
+			otlog.setBranchId(Contract.getBranchId());
+			otlog.setCheckId(bill.getCheckId());
+			otlog.setLastBillId(bill.getBillId());
+			otlog.setCurrBillId(consumebill.getBillId());
+			otlog.setRecordUser(staff.getStaffId());
+			otlog.setRecordTime(new Date());
+			otlog.setOffsetType("1");
+
+			if (projectid.startsWith("2")) {
+				double price = bill.getPay();
+				if (price == 0) {
+					JSONUtil.responseJSON(response, new AjaxResult(0, "选中了错误的冲减金额!"));
+					return;
+				}
+				consumebill.setPay(-price);
+				consumebill.setCost(0.00);
+				otlog.setOffsetFee(bill.getPay());// 记冲减金额
+			} else {
+				double price = bill.getCost();
+				if (price == 0) {
+					JSONUtil.responseJSON(response, new AjaxResult(0, "选中了错误的冲减金额!"));
+					return;
+				}
+				consumebill.setCost(-price);
+				consumebill.setPay(0.00);
+				otlog.setOffsetFee(bill.getCost()); // 记冲减金额
+			}
+			bill.setStatus("2");
+
+			try {
+				apartmentRefundService.save(consumebill);
+				apartmentRefundService.save(bill);
+				apartmentRefundService.save(otlog);// 记冲减日志
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		JSONUtil.responseJSON(response, new AjaxResult(1, "冲减金额成功!"));
+	}
+	
+	@RequestMapping("/countMoney.do")
+	public void countMoney(HttpServletRequest request, HttpServletResponse  response, String contractId) throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		Contrart Contract = (Contrart) apartmentRefundService.findOneByProperties(Contrart.class, "contrartId", contractId);
+		Date nextTime = Contract.getContrartEndTime();
+		Date date = sdf.parse(sdf.format(new Date()));
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(Contract.getContrartEndTime());
+		Double money = 0.0;
+		
+		Double roomPrice = PriceUtil.doubleToPriceDouble(Double.parseDouble(Contract.getUnitPrice()) / Double.parseDouble("30"));
+		if (Contract.getStatus().equals("4")){
+			String startTime = sdf.format(new Date());
+			String endTime = sdf.format(Contract.getContrartEndTime());
+			Calendar sTime = Calendar.getInstance();
+	        Calendar eTime = Calendar.getInstance();
+	        sTime.setTime(sdf.parse(startTime));
+	        eTime.setTime(sdf.parse(endTime));
+	        int result = sTime.get(Calendar.MONTH) - eTime.get(Calendar.MONTH);
+	        int month = (sTime.get(Calendar.YEAR) - eTime.get(Calendar.YEAR)) * 12;
+	        int num = Math.abs(month + result);
+			for(int i = 0; i < num; i++){
+				calendar.add(Calendar.MONTH, -1);
+				if (nextTime.getTime() >= date.getTime() && date.getTime() >= calendar.getTime().getTime()) {
+					System.out.println(sdf.format(date));
+					System.out.println(sdf.format(calendar.getTime()));
+					int days = (int) ((date.getTime() - calendar.getTime().getTime()) / (1000*3600*24));
+					money = (money + (Double.parseDouble(Contract.getUnitPrice()) - (roomPrice * Double.parseDouble(Integer.toString(days)))));
+				} else {
+					money = money + Double.parseDouble(Contract.getUnitPrice());
+				}
+				nextTime = calendar.getTime();
+			}
+		} else if (Contract.getStatus().equals("1")) {
+			String startTime = sdf.format(Contract.getStartTime());
+			String endTime = sdf.format(Contract.getContrartEndTime());
+			Calendar sTime = Calendar.getInstance();
+	        Calendar eTime = Calendar.getInstance();
+	        sTime.setTime(sdf.parse(startTime));
+	        eTime.setTime(sdf.parse(endTime));
+	        int result = sTime.get(Calendar.MONTH) - eTime.get(Calendar.MONTH);
+	        int month = (sTime.get(Calendar.YEAR) - eTime.get(Calendar.YEAR)) * 12;
+	        int num = Math.abs(month + result);
+			money = Double.parseDouble(Contract.getUnitPrice()) * num;
+		}
+		JSONUtil.responseJSON(response, new AjaxResult(1, PriceUtil.doubleToPrice(money)));
+	}
+}

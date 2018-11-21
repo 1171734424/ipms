@@ -1,0 +1,157 @@
+
+//初始化页面（加载数据）
+$(document).ready(function() {
+	var themeid = $("#oldtheme").val();
+	var rptheme = themeid;
+	if (rptheme == "1") {
+		$("#rpstatus1").show();
+		$("#rpstatus2").hide();
+		$("#rpstatus2").val("0");
+		$("#rpstatus3").hide();
+		$("#rpstatus3").val("0");
+
+	} else if (rptheme == "2") {
+		$("#rpstatus1").hide();
+		$("#rpstatus1").val("0");
+		$("#rpstatus2").show();
+		$("#rpstatus3").hide();
+		$("#rpstatus3").val("0");
+	} else if (rptheme == "3") {
+		$("#rpstatus1").hide();
+		$("#rpstatus1").val("0");
+		$("#rpstatus2").hide();
+		$("#rpstatus2").val("0");
+		$("#rpstatus3").show();
+	}
+	
+	if($("#branchRank").val() == '0'){
+		$("#branch_select").bind("click",function(){
+		 	JDialog.open("门店", base_path + "/select4Branch2.do?branchTheme="+ $("#rptheme").val(),450,350);
+		 	 
+		});
+	}
+});
+
+
+//showMsg
+function showMsg(msg, fn) {
+	if (!fn) {
+		TipInfo.Msg.alert(msg);
+	} else {
+		TipInfo.Msg.confirm(msg, fn);
+	}
+}
+
+//房间状态联动
+function thChange() {
+	var rptheme = $("#rptheme").val();
+	if (rptheme == "1") {
+		$("#rpstatus1").show();
+		$("#rpstatus2").hide();
+		$("#rpstatus2").val("0");
+		$("#rpstatus3").hide();
+		$("#rpstatus3").val("0");
+
+	} else if (rptheme == "2") {
+		$("#rpstatus1").hide();
+		$("#rpstatus1").val("0");
+		$("#rpstatus2").show();
+		$("#rpstatus3").hide();
+		$("#rpstatus3").val("0");
+	} else if (rptheme == "3") {
+		$("#rpstatus1").hide();
+		$("#rpstatus1").val("0");
+		$("#rpstatus2").hide();
+		$("#rpstatus2").val("0");
+		$("#rpstatus3").show();
+	}
+}
+
+//新增方法
+function roomadd() {
+	var theme = $("#rptheme").val();
+	var branch_select_CUSTOM_VALUE = $("#branch_select_CUSTOM_VALUE").val();
+	var rpstatus;
+	var rpstatus1 = $("#rpstatus1").val();
+	var rpstatus2 = $("#rpstatus2").val();
+	var rpstatus3 = $("#rpstatus3").val();
+	var rproomtype = $("#rproomtype").val();
+	if (theme=="1") {
+		rpstatus = rpstatus1;
+	} else if (theme=="2") {
+		rpstatus = rpstatus2;
+	} else if (theme=="3") {
+		rpstatus = rpstatus3;
+	}
+	var floor = $("#rpfloor").val();
+	var roomid = $("#rproomid").val();
+	var area = $("#rparea").val();
+	var status = rpstatus;
+	var remark = $("#rpremark").val();
+	if (!theme) {
+		showMsg("场景不能为空");
+	} else if (!branch_select_CUSTOM_VALUE) {
+		showMsg("门店不能为空");
+	} else if (!rproomtype) {
+		showMsg("房型不能为空");
+	} else if (!floor) {
+		showMsg("楼层不能为空");
+	} else if (!roomid) {
+		showMsg("房号不能为空");
+	} else if (!status) {
+		showMsg("状态不能为空");
+	} else if (!/^\d+$/.test(floor)) {
+		showMsg("楼层必须为数字，请重新输入");
+	} else if (!/^\d+$/.test(roomid)) {
+		showMsg("房号必须为数字，请重新输入");
+	} else if (remark.length >= 100) {
+		showMsg("备注内容不能超过100个字符，请重新输入");
+	}else {
+		if (area) {
+			if (!/^\d+$/.test(area)) {
+				showMsg("面积必须为数字，请重新输入");
+				$("#opostcode").val("");
+				return;
+			}
+		}
+		$.ajax({
+			url : base_path + "/adddataRoom.do",
+			type : "post",
+			dataType : "json",
+			data : {
+				'theme' : theme,
+				'branchid' : branch_select_CUSTOM_VALUE,
+				'rproomtype' : rproomtype,
+				'floor' : floor,
+				'roomid' : roomid,
+				'area' : area,
+				'status' : status,
+				'remark' : remark
+			},
+			success : function(json) {
+				if (1 == json.result) {
+					if (json.message) {
+						showMsg(json.message);
+					} else {
+						showMsg("新增成功！");
+						window.setTimeout(
+								"window.parent.location.reload(true)", 2000);
+						window.setTimeout("window.parent.JDialog.close();",
+								2000);
+					}
+
+				} else {
+					showMsg("新增失败！");
+					window.setTimeout("window.parent.location.reload(true)",
+							2000);
+					window.setTimeout("window.parent.JDialog.close();", 2000);
+				}
+			},
+			error : function() {
+				showMsg("操作失败，请重新操作！");
+				window.setTimeout("window.parent.location.reload(true)", 2000);
+				window.setTimeout("window.parent.JDialog.close();", 2000);
+			}
+		});
+	}
+}

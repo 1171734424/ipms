@@ -1,0 +1,488 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ include file="../../common/taglib.jsp"%>
+<%@ include file="../../common/css.jsp"%>
+<%@ include file="../../common/script.jsp"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>门店修改</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<script charset="utf-8" src="http://map.qq.com/api/js?v=2.exp"></script> 
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+	<link href="<%=request.getContextPath()%>/css/reset.css" rel="stylesheet" media="all" />
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" media="all" />
+	
+<style type="text/css">
+
+.inputStyle{
+	width: 280px;
+}
+#preLocation{
+width:280px;
+}
+/* #aftLocation{
+width:40px;
+} */
+#remarkInput{
+height:120px;
+width: 97%;
+}
+td.must{
+color:red;
+}
+</style>
+  </head>
+  
+  <body onload="init()">
+    <table class="branch_table crm-table">
+    	<tr><td class="must">门店名称</td><td><input class="inputStyle" id="branchName" maxlength="15" readonly value="${branch.branchName}" /></td><td class="must">门店类型</td><td><select class="inputStyle" id="branchType" disabled="disabled">
+    																				<c:forEach items="${branchThemList}" var="branchThemList">				
+    																				<option value="${branchThemList.content }"<c:if test="${branchThemList.content eq branch.branchType}">selected="selected"</c:if>>${branchThemList.paramName}</option>
+    																				</c:forEach>
+    																				</select></td></tr>
+    	
+    	<tr><td class="must">等级</td><td><select class="inputStyle" id="branchRank" disabled="disabled">
+    						<c:forEach items="${branchRankList}" var="branchRankList">
+    						<option value="${branchRankList.paramName}" <c:if test="${branchRankList.paramName eq branch.rank}">selected="selected"</c:if>>${branchRankList.content}</option>
+    						</c:forEach>
+    						</select></td><td class="must">座机</td><td><input class="inputStyle" id="homePhone" value="${branch.phone}" placeholder="如 0252554235"/></td></tr>
+    	<tr><td class="must">邮编</td><td><input class="inputStyle" id="postCode" value="${branch.postcode}" placeholder="如 210000"/></td><td class="must">联系人</td><td><input class="inputStyle" id="connectPerson" value="${branch.contacts}" maxlength="5"/></td></tr>
+    	<tr><td class="must">手机</td><td><input class="inputStyle" id="phone" value="${branch.mobile}"/></td><td class="must">详细地址</td><td><input class="inputStyle" id="preLocation" value="${addresshead}"/><%--&nbsp—&nbsp
+    	<input class="inputStyle" id="aftLocation" value="${addresslastInput}" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}",
+   onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"/>&nbsp号--%></td></tr>
+    	<tr><td class="must">城市</td><td><select class="inputStyle" onclick="chooseCity()" id="cityCode">
+    						<c:forEach items="${cityList }" var="cityList">
+    						<option value="${cityList.adminiCode}" id="cityopt" <c:if test="${cityList.adminiCode eq city.adminiCode}">selected="selected"</c:if> >${cityList.adminiName}</option>
+    						</c:forEach>
+    						
+    					</select class="must"></td><td class="must">区</td><td><select class="inputStyle" id="district" onclick="chooseDistrict()">
+    												 <c:if test="${fn:length(districtList) eq 0}">
+    												<option value="">暂无区域记录</option>
+    												</c:if> 
+    												<c:forEach items="${districtList }" var="districtList">
+						    						<option value='${districtList["ADMINI_CODE"]}' id="districtopt" <c:if test="${districtList['ADMINI_CODE'] eq district.adminiCode}">selected="selected"</c:if> >${districtList["ADMINI_NAME"]}</option>
+						    						</c:forEach>
+    												</select></td></tr>
+    	<tr><td >街道</td><td><select class="inputStyle" id="street" onclick="chooseStreet()">
+    						 <c:if test='${(fn:length(streetList) eq 0) or street.adminiCode eq ""}'>
+    												<option value="">暂无街道记录</option>
+    												</c:if> 
+    												<c:forEach items="${streetList }" var="streetList">
+						    						<option value='${streetList["ADMINI_CODE"]}' id="streetopt" <c:if test="${streetList['ADMINI_CODE'] eq street.adminiCode}">selected="selected"</c:if>>${streetList["ADMINI_NAME"]}</option>
+						    						</c:forEach>
+    						</select></td><td>商业圈</td><td><select class="inputStyle" id="circle" onchick="chooseCircle()">
+    														 <c:if test="${fn:length(circletList) eq 0}">
+			    												<option value="">暂无商圈记录</option>
+			    												</c:if> 
+			    												<c:forEach items="${circletList }" var="circletList">
+									    						<option value='${circletList["ADMINI_CODE"]}' id="circleopt" <c:if test="${circletList['ADMINI_CODE'] eq circle.adminiCode}">selected="selected"</c:if>>${circletList["ADMINI_NAME"]}</option>
+									    						</c:forEach>
+    														</select></td></tr>
+    														<tr><td class="must">经度</td><td><input class="inputStyle" id="longitude" value="${location.longitude}"/>
+    														</td>
+    														<td class="must">纬度</td><td><input class="inputStyle" id="latitude" value="${location.latitude}"/>
+    														</td>
+    														</tr>
+    														<tr>
+<!--     														<td class="">门店ip地址</td> -->
+<!--     														<td><input class="inputStyle" id="ip" value="${branch.branchIp}"/> -->
+<!--     														</td> -->
+    														<td class="must">推荐</td>
+    														<td><select class="inputStyle"  id = "recommend">
+    															 <option value = "0" <c:if test="${branch.isRecommend eq 0}">selected="selected"</c:if>>否</option>
+    															 <option value = "1" <c:if test="${branch.isRecommend eq 1}">selected="selected"</c:if>>是</option>
+    															</select>
+    														</td>
+    														<td>房价审核</td><td><select class="inputStyle" id="flag" >
+    																				<option value="0" <c:if test="${branch.flag eq 0}">selected="selected"</c:if>>关</option>
+    																				<option value="1" <c:if test="${branch.flag eq 1}">selected="selected"</c:if>>开</option>
+    																				</select>
+    														</td>
+    														</tr>
+    	<tr><td>备注</td><td colspan="3"><input class="inputStyle" id="remarkInput" value="${branch.remark}"/></td></tr>
+    </table>
+    <div class="contractbutton parents-content">
+	 <div class="pdepartsubmit crm-confirmbt" onclick="submitBranch()">提交</div>
+	 <div class="pdepartcancle crm-cancelbt" onclick="window.parent.JDialog.close()">取消</div>
+	 </div>
+                <input type="hidden" name="latlng" value="" class="mid_tet" readonly /> 
+                <input type="hidden" name="branchId" value="${branch.branchId}" class="mid_tet" readonly /> 
+  </body>
+  <script><!--
+  var base_path = '<%=request.getContextPath()%>';
+  $(function(){
+	
+  });
+  
+ /*  $("#sp_butt").click(function(){ 
+     
+        	  var optionsCity=$("#cityCode option:selected");
+        	  var optionsCityText=optionsCity.text();
+        	  var optionsDistrict=$("#district option:selected");
+        	  var optionsDistrictText=optionsDistrict.text();
+        	  var optionsStreet=$("#street option:selected");
+        	  var optionsStreetText=optionsStreet.text();
+        	  var optionsCircle=$("#circle option:selected");
+        	  var optionsCircleText=optionsCircle.text();
+        	  var homeId=$("#aftLocation").val();
+        	  if(optionsDistrictText=='暂无区域记录'){
+        		  optionsDistrictText='';
+        	  }
+        	  if(optionsStreetText=='暂无街道记录'){
+        		  optionsStreetText='';
+        	  }
+        	  if(optionsCircleText=='暂无商圈记录'){
+        		  optionsCircleText='';
+        	  }
+        	  var location=optionsCityText+optionsDistrictText+optionsStreetText+optionsCircleText+homeId;
+        	 geocoder.getLocation(location); 
+
+      });  */
+//QQ map. 
+
+var init = function() { 
+var callbacks={ 
+  //若服务请求成功，则运行以下函数，并将结果传入 
+  complete:function(result){ 
+      var latlng = result.detail.location; 
+      
+          $("input[name='latlng']").val(latlng); 
+          
+    	  /* /^0\d{2,3}-[1-9]\d{6,7}$/ */
+    	 /*  var homePhoneEx="/^[0-9]{5}$/";
+          var result=  homePhoneEx.test(homePhone); */
+    	  
+    	  /* $.ajax({
+  			url: base_path+"/saveBranch.do",
+  			type: "post",
+  			dataType: "json",
+  			data: {
+  				branchName : branchName,
+  				branchType : branchType,
+  				branchRank : branchRank,
+  				homePhone : homePhone,
+  				postCode : postCode,
+  				connectPerson : connectPerson,
+  				phone : phone,
+  				preLocation : preLocation,
+  				aftLocation : aftLocation,
+  				cityCode : cityCode,
+  				district : district,
+  				street : street,
+  				circle : circle,
+  				remarkInput : remarkInput,
+  				latlng : latlng,
+  			},
+  			success: function(data) {
+  				
+  			},
+  			error : function(data){
+  				}
+  			}); */
+      
+  }, 
+  //若服务请求失败，则运行以下函数 
+  error:function(){ 
+	  showMsg("出错了。请先填写地址！"); 
+  } 
+} 
+//创建类实例 
+geocoder = new qq.maps.Geocoder(callbacks); 
+/* getLatlng(); */
+} 
+  
+      function getLatlng(){
+    	  var optionsCity=$("#cityCode option:selected");
+    	  var optionsCityText=optionsCity.text();
+    	  var optionsDistrict=$("#district option:selected");
+    	  var optionsDistrictText=optionsDistrict.text();
+    	  var optionsStreet=$("#street option:selected");
+    	  var optionsStreetText=optionsStreet.text();
+    	  var optionsCircle=$("#circle option:selected");
+    	  var optionsCircleText=optionsCircle.text();
+    	  /* var homeId=$("#aftLocation").val(); */
+    	  if(optionsDistrictText=='暂无区域记录'){
+    		  optionsDistrictText='';
+    	  }
+    	  if(optionsStreetText=='暂无街道记录'){
+    		  optionsStreetText='';
+    	  }
+    	  if(optionsCircleText=='暂无商圈记录'){
+    		  optionsCircleText='';
+    	  }
+    	  var location=optionsCityText+optionsDistrictText+optionsStreetText+optionsCircleText;
+    	 geocoder.getLocation(location); 
+      }
+  function submitBranch(){
+	  var latlng=$("input[name='latlng']").val();
+	  var branchId=$("input[name='branchId']").val();
+	  var branchName =$("#branchName").val();
+	  var branchType =$("#branchType").val();
+	  var branchRank =$("#branchRank").val();
+	  var homePhone =$("#homePhone").val();
+	  var postCode =$("#postCode").val();
+	  var connectPerson =$("#connectPerson").val();
+	  var phone =$("#phone").val();
+	  var preLocation =$("#preLocation").val();
+	  /* var aftLocation =$("#aftLocation").val(); */
+	  var cityCode =$("#cityCode").val();
+	  var district =$("#district").val();
+	  var street =$("#street").val();
+	  var circle =$("#circle").val();
+	  var remarkInput =$("#remarkInput").val();
+	  var flag =$("#flag").val();
+	  var longitude =$("#longitude").val();
+	  var latitude =$("#latitude").val();
+	  var ip = $("#ip").val();
+	  var recommend = $("#recommend").val();
+	  
+	   if(cityCode==""){
+		  showMsg("请选择城市！");  
+		  return false;
+	  }
+	  
+	    if(district==""){
+		  showMsg("请选择区域！");  
+		  return false;
+	  }
+	  if(longitude==""){
+		  showMsg("经度不能为空！");
+		  return false;
+	  }else{
+		  var longitudeRex = /^[\-\+]?(0?\d{1,2}\.\d{1,10}|1[0-7]?\d{1}\.\d{1,10}|180\.0{1,10})$/;
+		  if(!longitudeRex.test(longitude)){
+			  showMsg("经度-180.0～+180.0，必须输入1到10位小数！");
+			  return false;
+		  }
+	  }
+	  if(latitude == ""){
+		  showMsg("纬度不能为空！");
+		  return false;
+	  }else{
+		  var latitudeRex = /^[\-\+]?([0-8]?\d{1}\.\d{1,10}|90\.0{1,10})$/;
+		  if(!latitudeRex.test(latitude)){
+			  showMsg("纬度-90.0～+90.0，必须输入1到10位小数！");
+			  return false;
+		  }
+	  }
+//	  if(ip==""){
+	//	  showMsg("ip地址不可为空！");
+	//	  return false;
+	  //}
+	  
+	  
+//	  var ipRex = /^(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$/;
+//	  if(!(ipRex.test(ip))){
+	//	  showMsg("ip格式不正确！");  
+ //   	  return false;
+//	  }
+	  
+	  if(branchName==""){
+		  showMsg("门店名称不可为空！");  
+		  return false;
+	  }
+	  if(homePhone==""){
+		  showMsg("座机不可为空！");  
+		  return false;
+	  }
+	  if(postCode==""){
+		  showMsg("邮编不可为空！");  
+		  return false;
+	  }
+	  if(connectPerson==""){
+		  showMsg("联系人不可为空！");  
+		  return false;
+	  }
+	  if(phone==""){
+		  showMsg("手机号不可为空！");  
+		  return false;
+	  }
+	  if(preLocation==""){
+		  showMsg("地址不可为空！");  
+		  return false;
+	  }
+	  var postCodeRegexp=/^[0-9]{6}$/;
+	  if(!(postCodeRegexp.test(postCode))){
+		  showMsg("邮编格式不正确！");  
+    	  return false;
+	  }
+	  //(/^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/)
+	  var homePhoneRex=/^((0\d{2,3}\d{7,8})|(1[3584]\d{9}))$/;
+	  if(!(homePhoneRex.test(homePhone))){
+		  showMsg("座机格式不正确！");  
+    	  return false;
+	  }
+	  
+	  
+      if(!(/^1[34578]\d{9}$/.test(phone))){   
+    	  showMsg("手机号格式不正确！");  
+    	  return false;  
+      } 
+	  
+	  $.ajax({
+			url: base_path+"/updateBranch.do",
+			type: "post",
+			dataType: "json",
+			data: {
+				branchName : branchName,
+				branchType : branchType,
+				branchRank : branchRank,
+				homePhone : homePhone,
+				postCode : postCode,
+				connectPerson : connectPerson,
+				phone : phone,
+				preLocation : preLocation,
+				/* aftLocation : aftLocation, */
+				cityCode : cityCode,
+				district : district,
+				street : street,
+				circle : circle,
+				remarkInput : remarkInput,
+				latlng : latlng,
+				flag : flag,
+				branchId : branchId,
+				longitude : longitude,
+				latitude : latitude,
+				ip : ip,
+				recommend : recommend
+			},
+			success: function(data) {
+				if(data.result==1){
+					showMsg("保存成功！");
+					window.setTimeout("window.parent.location.reload(true)", 1000);
+					window.setTimeout("window.parent.JDialog.close();",1000);
+				}
+			},
+			error : function(data){
+				}
+			}); 
+  }
+  //区域选择联动
+  function chooseDistrict(){
+	  var districtAdminiCode=$("#district").val();
+	   $.ajax({
+			url: base_path+"/queryPlaceByDistrict.do",
+			type: "post",
+			dataType: "json",
+			data: {
+				districtAdminiCode:districtAdminiCode
+			},
+			success: function(data) {
+				var streetList=data.data.streetList;
+				var circletList=data.data.circletList;
+				var streetHtmlString="";
+				var circleHtmlString="";
+				
+				 
+				 if(streetList.length==0){
+					 streetHtmlString+="<option value=''>暂无街道记录</option>";
+				 }else{
+				 jQuery.each(streetList, function(i,item){
+					 var code=item["ADMINI_CODE"];
+					 var name=item["ADMINI_NAME"];
+					 streetHtmlString+="<option value='"+code+"'>"+name+"</option>"
+				      }); 
+				 }
+				 $("#street").html('').append(streetHtmlString); 
+				 
+				 if(circletList.length==0){
+					 circleHtmlString+="<option value=''>暂无商圈记录</option>";
+				 }else{
+				 jQuery.each(circletList, function(i,item){
+					 var code=item["ADMINI_CODE"];
+					 var name=item["ADMINI_NAME"];
+					 circleHtmlString+="<option value='"+code+"'>"+name+"</option>"
+				      }); 
+				 }
+				 $("#circle").html('').append(circleHtmlString); 
+				/*  getLatlng(); */
+			},
+			error: function() {
+			}
+		});
+  }
+  //城市选择联动
+  function chooseCity(){
+	  var cityAdminiCode=$("#cityCode").val();
+	   $.ajax({
+			url: base_path+"/queryPlaceByCity.do",
+			type: "post",
+			dataType: "json",
+			data: {
+				cityAdminiCode:cityAdminiCode
+			},
+			success: function(data) {
+				var districtList=data.data.districtList;
+				var streetList=data.data.streetList;
+				var circletList=data.data.circletList;
+				var districtHtmlString="";
+				var streetHtmlString="";
+				var circleHtmlString="";
+				
+				if(districtList.length==0){
+					districtHtmlString+="<option value=''>暂无区域记录</option>";
+				 }else{
+				 jQuery.each(districtList, function(i,item){
+					 var code=item["ADMINI_CODE"];
+					 var name=item["ADMINI_NAME"];
+					 districtHtmlString+="<option value='"+code+"'>"+name+"</option>"
+				      }); 
+				 }
+				 $("#district").html('').append(districtHtmlString); 
+				 
+				 if(streetList.length==0){
+					 streetHtmlString+="<option value=''>暂无街道记录</option>";
+				 }else{
+				 jQuery.each(streetList, function(i,item){
+					 var code=item["ADMINI_CODE"];
+					 var name=item["ADMINI_NAME"];
+					 streetHtmlString+="<option value='"+code+"'>"+name+"</option>"
+				      }); 
+				 }
+				 $("#street").html('').append(streetHtmlString); 
+				 
+				 if(circletList.length==0){
+					 circleHtmlString+="<option value=''>暂无商圈记录</option>";
+				 }else{
+				 jQuery.each(circletList, function(i,item){
+					 var code=item["ADMINI_CODE"];
+					 var name=item["ADMINI_NAME"];
+					 circleHtmlString+="<option value='"+code+"'>"+name+"</option>"
+				      }); 
+				 }
+				 $("#circle").html('').append(circleHtmlString); 
+				 
+				 /* getLatlng(); */
+			},
+			error: function() {
+			}
+		});
+  }
+  function chooseStreet(){
+	  /* getLatlng(); */
+  }
+  function chooseCircle(){
+	  /* getLatlng(); */
+  }
+  function showMsg(msg, fn) {
+		if (!fn) {
+			TipInfo.Msg.alert(msg);
+		} else {
+			TipInfo.Msg.confirm(msg, fn);
+		}
+	}
+  --></script>
+</html>

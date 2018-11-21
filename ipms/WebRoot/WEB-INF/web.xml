@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+	
+	<filter>
+		<filter-name>EncodingFilter</filter-name>
+		<filter-class>
+			com.ideassoft.core.filter.EncodingFilter
+		</filter-class>
+		<init-param>
+			<param-name>urlencoding</param-name>
+			<param-value>ISO-8859-1</param-value>
+		</init-param>
+		<init-param>
+			<param-name>appencoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>EncodingFilter</filter-name>
+		<url-pattern>*.do</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>LoginFilter</filter-name>
+		<filter-class>
+			com.ideassoft.core.filter.LoginFilter
+		</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>LoginFilter</filter-name>
+		<url-pattern>*.do</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>LoginFilter</filter-name>
+		<url-pattern>*.jsp</url-pattern>
+	</filter-mapping>
+	
+	<!--<filter>
+		<filter-name>Spring OpenSessionInViewFilter</filter-name>
+		<filter-class>org.springframework.orm.hibernate3.support.OpenSessionInViewFilter</filter-class>
+		<init-param>
+			<param-name>sessionFactoryBean</param-name>
+			<param-value>sessionFactory</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>Spring OpenSessionInViewFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>-->
+	
+	<listener>
+		<listener-class>
+			org.springframework.web.context.ContextLoaderListener
+		</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>
+			com.ideassoft.core.session.LoginSessionListener
+		</listener-class>
+	</listener>
+	
+	<servlet>
+		<servlet-name>action</servlet-name>
+		<servlet-class>
+			org.springframework.web.servlet.DispatcherServlet
+		</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>
+				/WEB-INF/applicationContext-core.xml,
+				/WEB-INF/applicationContext-db.xml
+			</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>action</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ServerInitServlet</servlet-name>
+		<servlet-class>
+			com.ideassoft.core.server.ServerInitServlet
+		</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+
+	<welcome-file-list>
+		<welcome-file>/page/ipmspage/login/login.jsp</welcome-file>
+	</welcome-file-list>
+	<error-page>
+	    <error-code>404</error-code>
+	    <location>/page/system/error.jsp?errorCode=404</location>
+	 </error-page>
+	<error-page>
+	    <error-code>500</error-code>
+	    <location>/page/system/error.jsp?errorCode=500</location>
+	 </error-page>
+</web-app>
+

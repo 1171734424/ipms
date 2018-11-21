@@ -1,0 +1,756 @@
+package com.ideassoft.hotel.controller;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.jdbc.SqlBuilder;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.hotel.service.HotelReportFormService;
+import com.ideassoft.price.MultiPrice;
+import com.ideassoft.util.DateUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Transactional
+@Controller
+public class HotelReportFormController {
+	@Autowired
+	private HotelReportFormService reportFormService;
+
+	/*
+	 * //在住客人明细表
+	 * 
+	 * @RequestMapping("/queryRoomingGuest.do") public ModelAndView
+	 * queryRoomingGuest(HttpServletRequest request, HttpServletResponse
+	 * response, String roomType, String roomType_CUSTOM_VALUE, String roomId,
+	 * String checkUser) throws Exception { ModelAndView mv = new
+	 * ModelAndView(); Pagination pagination =
+	 * SqlBuilder.buildPagination(request); LoginUser loginUser = (LoginUser)
+	 * request
+	 * .getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+	 * String branchId = loginUser.getStaff().getBranchId(); // 查找在住客人明细 List<?>
+	 * roomingGuestsList =
+	 * this.reportFormService.queryRoomingGuestByCon(pagination, branchId,
+	 * roomType_CUSTOM_VALUE, roomId, checkUser );
+	 * mv.addObject("roomingGuestsList", roomingGuestsList);
+	 * mv.addObject("pagination", pagination); // 查找所有的门店传递到页面上去 List<?>
+	 * branchList = this.manageService.queryAllOfBranch();
+	 * mv.addObject("branchList", branchList); mv.addObject("roomType",
+	 * roomType); mv.addObject("roomType_CUSTOM_VALUE", roomType_CUSTOM_VALUE);
+	 * mv.addObject("roomId", roomId); mv.addObject("checkUser", checkUser);
+	 * mv.setViewName("page/ipmspage/reportform/roomingGuests"); return mv; }
+	 */
+
+	@RequestMapping("/hotelqueryRoomingGuest.do")
+	public ModelAndView queryRoomingGuest(HttpServletRequest request, HttpServletResponse response, String roomType,
+			String roomType_CUSTOM_VALUE, String roomId, String checkUser) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		// 查找所有的门店传递到页面上去
+		List<?> branchList = this.reportFormService.queryAllOfBranch();
+		mv.addObject("branchList", branchList);
+		List<?> roomTypeList = this.reportFormService.queryAllOfRoomType(branchId);
+		mv.addObject("roomTypeList", roomTypeList);
+		// 查找房型
+		mv.addObject("roomType", roomType);
+		mv.addObject("roomType_CUSTOM_VALUE", roomType_CUSTOM_VALUE);
+		mv.addObject("roomId", roomId);
+		mv.addObject("checkUser", checkUser);
+		mv.setViewName("page/ipmshotel/reportform/roomingGuests");
+		return mv;
+	}
+
+	@RequestMapping("/hotelqueryRoomingGuestData.do")
+	public ModelAndView queryRoomingGuestData(HttpServletRequest request, HttpServletResponse response,
+			String roomType, String roomType_CUSTOM_VALUE, String roomId, String checkUser) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		// 查找在住客人明细
+		List<?> roomingGuestsList = this.reportFormService.queryRoomingGuestByCon(pagination, branchId, roomType,
+				roomId, checkUser);
+		mv.addObject("roomingGuestsList", roomingGuestsList);
+		mv.addObject("pagination", pagination);
+		mv.addObject("roomType", roomType);
+		mv.addObject("roomType_CUSTOM_VALUE", roomType_CUSTOM_VALUE);
+		mv.addObject("roomId", roomId);
+		mv.addObject("checkUser", checkUser);
+		mv.setViewName("page/ipmshotel/reportform/roomingGuestsData");
+		return mv;
+	}
+
+	// 在住客人的明细根据查询条件来返回结果
+	/*
+	 * @RequestMapping("/queryRoomingByCon.do") public void
+	 * queryRoomingGuestByCondition(HttpServletRequest request,
+	 * HttpServletResponse response, String roomType, String roomId, String
+	 * checkUser)throws Exception{ Pagination pagination =
+	 * SqlBuilder.buildPagination(request); LoginUser loginUser = (LoginUser)
+	 * request
+	 * .getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+	 * String branchId = loginUser.getStaff().getBranchId(); List<?>
+	 * roomingGuestsList =
+	 * this.reportFormService.queryRoomingGuestByCon(pagination, branchId,
+	 * roomType, roomId, checkUser ); Map<String, Object> rm = new
+	 * HashMap<String, Object>(); rm.put("result", roomingGuestsList);
+	 * rm.put("pagination", pagination); JSONUtil.responseJSON(response, rm); }
+	 */
+
+	// 查询每张单子的具体入住人
+	@RequestMapping("/hotelqueryRoomGuestDetail.do")
+	public ModelAndView queryRoomGuestDetail(HttpServletRequest request, HttpServletResponse response, String checkId)
+			throws Exception {
+		ModelAndView mv = new ModelAndView();
+		List<?> roomGuestDetailLists = this.reportFormService.queryRoomGuestDetail(checkId);
+		mv.addObject("roomGuestDetailLists", roomGuestDetailLists);
+		mv.setViewName("page/ipmshotel/reportform/roomGuestDetails");
+		return mv;
+	}
+
+	// 换房明细表
+	@RequestMapping("/hotelchangeRoomTable.do")
+	public ModelAndView changeRoomTable(HttpServletRequest request, HttpServletResponse response, String checkId,
+			String status, String checkUser, String startTime, String endTime, String recordUser) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// 查找所有的门店传递到页面上去
+		List<?> branchList = this.reportFormService.queryAllOfBranch();
+		mv.addObject("branchList", branchList);
+		mv.addObject("checkId", checkId);
+		mv.addObject("status", status);
+		mv.addObject("checkUser", checkUser);
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("recordUser", recordUser);
+		mv.setViewName("page/ipmshotel/reportform/changRoomTable");
+		return mv;
+	}
+
+	// 换房明细表
+	@RequestMapping("/hotelchangeRoomTableData.do")
+	public ModelAndView changeRoomTableData(HttpServletRequest request, HttpServletResponse response, String checkId,
+			String status, String checkUser, String startTime, String endTime, String recordUser) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		// 查找换房明细
+		List<?> changeRoomList = this.reportFormService.queryChangeRoomByCon(pagination, branchId, checkId, status,
+				checkUser, startTime, endTime, recordUser);
+		mv.addObject("changeRoomList", changeRoomList);
+		mv.addObject("pagination", pagination);
+		// 查找所有的门店传递到页面上去
+		List<?> branchList = reportFormService.queryAllOfBranch();
+		mv.addObject("branchList", branchList);
+		mv.addObject("checkId", checkId);
+		mv.addObject("status", status);
+		mv.addObject("checkUser", checkUser);
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("recordUser", recordUser);
+		mv.setViewName("page/ipmshotel/reportform/changRoomTableData");
+		return mv;
+	}
+
+	/*
+	 * //换房明细，根据查询条件
+	 * 
+	 * @RequestMapping("/changeRoomTableByCon.do") public void
+	 * changeRoomTableByCon(HttpServletRequest request, HttpServletResponse
+	 * response, String checkId, String status, String checkUser, String
+	 * startTime, String endTime)throws Exception{ Pagination pagination =
+	 * SqlBuilder.buildPagination(request); LoginUser loginUser = (LoginUser)
+	 * request
+	 * .getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+	 * String branchId = loginUser.getStaff().getBranchId(); List<?>
+	 * changeRoomList = this.reportFormService.queryChangeRoomByCon(pagination,
+	 * branchId, checkId, status, checkUser ,startTime, endTime); Map<String,
+	 * Object> rm = new HashMap<String, Object>(); rm.put("result",
+	 * changeRoomList); rm.put("pagination", pagination);
+	 * JSONUtil.responseJSON(response, rm); }
+	 */
+
+	// 入账明细表
+	@RequestMapping("/hotelaccountRecordDetail.do")
+	public ModelAndView accountRecordDetail(HttpServletRequest request, HttpServletResponse response, String startTime,
+			String endTime, String checkId, String recordType, String accountStatus, String payMent, String recordUser,
+			String projectType) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// 查找账单状态list和支付方式list
+		List<?> billStatusList = this.reportFormService.queryBillStatusList();
+		List<?> payMentList = this.reportFormService.querypayMentList();
+		mv.setViewName("page/ipmshotel/reportform/accountRecordDetail");
+		mv.addObject("payMentList", payMentList);
+		mv.addObject("billStatusList", billStatusList);
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("checkId", checkId);
+		mv.addObject("recordType", recordType);
+		mv.addObject("accountStatus", accountStatus);
+		mv.addObject("payMent", payMent);
+		mv.addObject("recordUser", recordUser);
+		mv.addObject("projectType", projectType);
+		return mv;
+	}
+
+	// 入账明细表
+	@RequestMapping("/hotelaccountRecordDetailData.do")
+	public ModelAndView accountRecordDetailData(HttpServletRequest request, HttpServletResponse response,
+			String startTime, String endTime, String checkId, String recordType, String accountStatus, String payMent,
+			String recordUser, String projectType) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		// 查找入账明细
+		List<?> accountRecordList = this.reportFormService.accountRecordDetailByCon(pagination, startTime, endTime,
+				branchId, checkId, recordType, accountStatus, payMent, recordUser, projectType);
+		mv.addObject("accountRecordList", accountRecordList);
+		mv.addObject("pagination", pagination);
+		/*
+		 * // 查找所有的门店传递到页面上去 List<?> branchList =
+		 * this.manageService.queryAllOfBranch(); mv.addObject("branchList",
+		 * branchList);
+		 */
+		// 查找入账sum
+		List<?> accountRecordSum = this.reportFormService.accountRecordDetailSumByCon(startTime, endTime, branchId,
+				checkId, recordType, accountStatus, payMent, recordUser, projectType);
+		mv.addObject("accountRecordSum", accountRecordSum);
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("checkId", checkId);
+		mv.addObject("recordType", recordType);
+		mv.addObject("accountStatus", accountStatus);
+		mv.addObject("payMent", payMent);
+		mv.addObject("recordUser", recordUser);
+		mv.addObject("projectType", projectType);
+		if(pagination.getPageNum().equals(pagination.getTotal()) || pagination.getTotal() == 0)
+			mv.addObject("lastPage", "lastPage");
+		mv.setViewName("page/ipmshotel/reportform/accountRecordDetailData");
+		return mv;
+	}
+
+	// 入账汇总
+	@RequestMapping("/hotelaccountInTotal.do")
+	public ModelAndView accountInTotal(HttpServletRequest request, HttpServletResponse response, String startTime,
+			String endTime) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/ipmshotel/reportform/accountRecordTotal");
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		return mv;
+	}
+
+	// 入账汇总
+	@RequestMapping("/hotelaccountInTotalData.do")
+	public ModelAndView accountInTotalData(HttpServletRequest request, HttpServletResponse response, String startTime,
+			String endTime) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		// 查找入账明细
+		List<?> accountRecordList = this.reportFormService.accountRecordTotal(pagination, startTime.trim(), endTime
+				.trim(), branchId.trim());
+		accountRecordList.remove(accountRecordList.size() - 1);
+		mv.addObject("accountRecordList", accountRecordList);
+		mv.addObject("pagination", pagination);
+		// 查找入账sum
+		List<?> accountRecordSum = this.reportFormService.accountRecordTotalSum(startTime, endTime, branchId);
+		mv.addObject("accountRecordSum", accountRecordSum);
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		if(pagination.getPageNum().equals(pagination.getTotal()) || pagination.getTotal() == 0)
+			mv.addObject("lastPage", "lastPage");
+		mv.setViewName("page/ipmshotel/reportform/accountRecordTotalData");
+		return mv;
+	}
+
+	// 冲减明细
+	@RequestMapping("/hotelcancelOutDetail.do")
+	public ModelAndView cancelOutDetail(HttpServletRequest request, HttpServletResponse response, String startTime,
+			String endTime, String recordUser) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/ipmshotel/reportform/cancelOutDetail");
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("recordUser", recordUser);
+		return mv;
+	}
+
+	// 冲减明细
+	@RequestMapping("/hotelcancelOutDetailData.do")
+	public ModelAndView cancelOutDetailData(HttpServletRequest request, HttpServletResponse response, String startTime,
+			String endTime, String recordUser) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		// 查找冲减明细
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		List<?> cancelOutDetailList = this.reportFormService.cancelOutDetail(pagination, startTime, endTime,
+				recordUser, branchId);
+		mv.addObject("cancelOutDetailList", cancelOutDetailList);
+		/*
+		 * List<?> cancelOutSum =
+		 * this.reportFormService.cancelOutSum(pagination,startTime, endTime,
+		 * recordUser, branchId); mv.addObject("cancelOutSum", cancelOutSum);
+		 */
+		mv.addObject("pagination", pagination);
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("recordUser", recordUser);
+		mv.setViewName("page/ipmshotel/reportform/cancelOutDetailData");
+		return mv;
+	}
+
+	// 商品售卖明细
+	@RequestMapping("/hotelgoodsSaleDetail.do")
+	public ModelAndView goodsSaleDetail(HttpServletRequest request, HttpServletResponse response, String startTime,
+			String endTime, String recordUser, String goodsName, String goodsKind) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// 查找商品类型加载到condition
+		List<?> goodsType = this.reportFormService.queryAllOfGoodsType();
+		mv.addObject("goodsType", goodsType);
+		mv.setViewName("page/ipmshotel/reportform/goodsSaleDetail");
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("recordUser", recordUser);
+		mv.addObject("goodsName", goodsName);
+		mv.addObject("goodsKind", goodsKind);
+		return mv;
+	}
+
+	// 商品售卖明细
+	@RequestMapping("/hotelgoodsSaleDetailData.do")
+	public ModelAndView goodsSaleDetailData(HttpServletRequest request, HttpServletResponse response, String startTime,
+			String endTime, String recordUser, String goodsName, String goodsKind) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		// 查找商品售卖明细
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		List<?> goodsSaleDetailList = this.reportFormService.goodsSaleDetail(pagination, startTime, endTime,
+				recordUser, branchId, goodsName, goodsKind);
+		mv.addObject("goodsSaleDetailList", goodsSaleDetailList);
+		List<?> goodsSaleSum = this.reportFormService.goodsSaleSum(pagination, startTime, endTime, recordUser,
+				branchId, goodsName, goodsKind);
+		mv.addObject("goodsSaleSum", goodsSaleSum);
+		mv.addObject("pagination", pagination);
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("recordUser", recordUser);
+		mv.addObject("goodsName", goodsName);
+		mv.addObject("goodsKind", goodsKind);
+		if(pagination.getPageNum().equals(pagination.getTotal()) || pagination.getTotal() == 0)
+			mv.addObject("lastPage", "lastPage");
+		mv.setViewName("page/ipmshotel/reportform/goodsSaleDetailData");
+		return mv;
+	}
+
+	// ttv明细
+	@RequestMapping("/hotelttvDetail.do")
+	public ModelAndView ttvDetail(HttpServletRequest request, HttpServletResponse response, String startTime,
+			String endTime, String recordUser, String status) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("recordUser", recordUser);
+		mv.addObject("status", status);
+		mv.setViewName("page/ipmshotel/reportform/ttvDetail");
+		return mv;
+	}
+
+	// ttv明细
+	@RequestMapping("/hotelttvDetailData.do")
+	public ModelAndView ttvDetailData(HttpServletRequest request, HttpServletResponse response, String startTime,
+			String endTime, String recordUser, String status) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		List<?> ttvDetailList = this.reportFormService.ttvDetail(pagination, branchId, startTime, endTime, recordUser,
+				status);
+		mv.addObject("ttvDetailList", ttvDetailList);
+		List<?> ttvDetailSum = this.reportFormService.ttvDetailSum(pagination, branchId, startTime, endTime,
+				recordUser, status);
+		mv.addObject("ttvDetailSum", ttvDetailSum);
+		mv.addObject("pagination", pagination);
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("recordUser", recordUser);
+		mv.addObject("status", status);
+		if(pagination.getPageNum().equals(pagination.getTotal()) || pagination.getTotal() == 0)
+			mv.addObject("lastPage", "lastPage");
+		mv.setViewName("page/ipmshotel/reportform/ttvDetailData");
+		return mv;
+	}
+
+	// 水电表缴费单
+	@RequestMapping("/hotelWaterMeterPayment.do")
+	public ModelAndView WaterMeterPayment(HttpServletRequest request, HttpServletResponse response, String startTime,
+			String endTime, String recordUser, String status) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// Pagination pagination = SqlBuilder.buildPagination(request);
+		// 查水电表缴费表
+		// LoginUser loginUser = (LoginUser)
+		// request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		// String branchId = loginUser.getStaff().getBranchId();
+		// TODO
+		// TODO
+		// List<?> ttvDetailList =
+		// this.reportFormService.ttvDetail(pagination,branchId, startTime,
+		// endTime, recordUser, status);
+		// mv.addObject("ttvDetailList", ttvDetailList);
+		// mv.addObject("pagination", pagination);
+		mv.setViewName("page/ipmshotel/reportform/ttvDetail");
+		return mv;
+	}
+	
+//	/**
+//	 * 跳转渠道分析报表页面
+//	 * 
+//	 * @param request
+//	 * @param response
+//	 * @return
+//	 */
+//	@RequestMapping("/queryChannelAnalyse.do")
+//	public ModelAndView queryChannelAnalyse(HttpServletRequest request, HttpServletResponse response) {
+//		ModelAndView mv = new ModelAndView();
+//		mv.setViewName("page/ipmshotel/reportform/channelAnalyse");
+//		return mv;
+//	}
+	
+	/**
+	 * 查询渠道分析报表
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping("/hotelqueryChannelAnalyseData.do")
+	public ModelAndView queryChannelAnalyseData(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// 获取参数
+		String startTime = request.getParameter("startTime");
+		String endTime = request.getParameter("endTime");
+		String adminUser = request.getParameter("adminUser");
+		// 获取当前分页信息
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		// 查询数据
+		List<?> list = reportFormService.findBySQLWithPagination("queryChannelAnaly", new  String[]{adminUser,startTime,endTime},pagination,true);
+		// 将数据返回前台页面
+		mv.addObject("pagination", pagination);
+		mv.setViewName("page/ipmshotel/reportform/channelAnalyseData");
+		mv.addObject("list", list);
+		return mv;
+	}
+	
+	/**
+	 * 双击跳转当前月所有民宿订单详情
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/hotelallMonthOrderDetails.do")
+	public ModelAndView allMonthOrderDetails(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// 获取参数
+		String month = request.getParameter("month");
+		// 查询当前分页信息
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		// 设置显示条目
+		pagination.setRows(5);
+		// 查询数据
+		List<?> list = reportFormService.findBySQLWithPagination("qMonthOrderDetails", new  String[]{month},pagination,true);
+		// 返回前台页面数据
+		mv.addObject("list", list);
+		mv.addObject("month",month);
+		mv.addObject("pagination", pagination);
+		mv.setViewName("page/ipmshotel/reportform/allMonthOrderDetails");
+		return mv;
+	}
+	
+//	/**
+//	 * 跳转财务报表冲减明细表报表页面
+//	 * 
+//	 * @param request
+//	 * @param response
+//	 * @return
+//	 */
+//	@RequestMapping("/queryWriteDownDetile.do")
+//	public ModelAndView queryWriteDownDetile(HttpServletRequest request, HttpServletResponse response) {
+//		ModelAndView mv = new ModelAndView();
+//		// 获取参数
+//		String branchName = request.getParameter("branchName");
+//		String recordUser = request.getParameter("recordUser");
+//		String times = request.getParameter("times");
+//		String adminUser = request.getParameter("adminUser");
+//		// 将数据返回前台页面
+//		mv.addObject("adminUser", adminUser);
+//		mv.addObject("branchName", branchName);
+//		mv.addObject("recordUser", recordUser);
+//		mv.addObject("times", times);
+//		mv.setViewName("page/ipmshotel/reportform/writeDownDetail");
+//		return mv;
+//	}
+	
+	/**
+	 * 展示财务报表冲减明细表报表页面
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping("/hotelwriteDownDetailData.do")
+	public ModelAndView writeDownDetailData(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// 获取参数
+		String branchName = request.getParameter("branchName");
+		String recordUser = request.getParameter("recordUser");
+		String startTime = request.getParameter("startTime");
+		String endTime = request.getParameter("endTime");
+		String times = request.getParameter("times");
+		String adminUser = request.getParameter("adminUser");
+		// 获取当前分页信息
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		// 设置显示条目
+		pagination.setRows(20);
+		// 查询数据
+		List<?> list = reportFormService.findBySQLWithPagination("qWriteDownDetail", new  String[]{branchName,recordUser,startTime,endTime},pagination,true);
+		// 将数据返回前台页面
+		mv.addObject("pagination", pagination);
+		mv.addObject("adminUser", adminUser);
+		mv.addObject("branchName", branchName);
+		mv.addObject("recordUser", recordUser);
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("times", times);
+		mv.setViewName("page/ipmshotel/reportform/writeDownDetailData");
+		mv.addObject("list", list);
+		return mv;
+	}
+	
+//	/**
+//	 * 跳转财务报表入账项目明细报表页面
+//	 * 
+//	 * @param request
+//	 * @param response
+//	 * @return
+//	 */
+//	@RequestMapping("/queryIntoAccountDetil.do")
+//	public ModelAndView queryIntoAccountDetil(HttpServletRequest request, HttpServletResponse response) {
+//		ModelAndView mv = new ModelAndView();
+//		// 获取参数
+//		String branchName = request.getParameter("branchName");
+//		String checkId = request.getParameter("checkId");
+//		String recordUser = request.getParameter("recordUser");
+//		String times = request.getParameter("times");
+//		// 将数据返回前台页面
+//		mv.addObject("checkId", checkId);
+//		mv.addObject("branchName", branchName);
+//		mv.addObject("recordUser", recordUser);
+//		mv.addObject("times", times);
+//		mv.setViewName("page/ipmshotel/reportform/intoAccountDetail");
+//		return mv;
+//	}
+	
+	/**
+	 * 展示财务报表入账项目明细报表页面
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping("/hotelqueryIntoAccountDetilData.do")
+	public ModelAndView queryIntoAccountDetilData(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// 获取参数
+		String checkId = request.getParameter("checkId");
+		String branchName = request.getParameter("branchName");
+		String recordUser = request.getParameter("recordUser");
+		String startTime = request.getParameter("startTime");
+		String endTime = request.getParameter("endTime");
+		String times = request.getParameter("times");
+		// 获取当前分页信息
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		// 查询数据
+		List<?> list = reportFormService.findBySQLWithPagination("qIntoAccountDetil", new  String[]{checkId,branchName,startTime,endTime,recordUser,},pagination,true);
+		// 将数据返回前台页面
+		mv.addObject("pagination", pagination);
+		mv.addObject("checkId", checkId);
+		mv.addObject("branchName", branchName);
+		mv.addObject("recordUser", recordUser);
+		mv.addObject("times", times);
+		mv.addObject("list", list);
+		mv.setViewName("page/ipmshotel/reportform/intoAccountDetailData");
+		return mv;
+	}
+	
+//	/**
+//	 * 跳经营报表页面
+//	 * 
+//	 * @param request
+//	 * @param response
+//	 * @return
+//	 */
+//	@RequestMapping("/queryOperationStatement.do")
+//	public ModelAndView queryOperationStatement(HttpServletRequest request, HttpServletResponse response) {
+//		ModelAndView mv = new ModelAndView();
+//		// 获取参数
+//		String branchName = request.getParameter("branchName");
+//		String rpId = request.getParameter("rpId");
+//		String queryDate = request.getParameter("queryDate");
+//		// 将数据返回前台页面
+//		mv.addObject("rpId", rpId);
+//		mv.addObject("branchName", branchName);
+//		mv.addObject("queryDate", queryDate);
+//		mv.setViewName("page/ipmshotel/reportform/operationStatmentDetail");
+//		return mv;
+//	}
+	
+	/**
+	 * 展示营报表页面
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping("/hotelqueryOperationStatementData.do")
+	public ModelAndView queryOperationStatementData(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// 获取参数
+		String branchName = request.getParameter("branchName");
+		String rpId = request.getParameter("rpId");
+		String queryDate = request.getParameter("queryDate");
+		// 定义变量
+		double sumPrice = 0D; // 房价总计
+		double avg = 0D; // 平均每天每间民宿价格
+		MultiPrice mp = null;
+		Date nowTime = new Date();
+		String startTime = DateUtil.d2s(nowTime, "yyyy/MM/dd HH:mm:ss");;
+		String endTime = DateUtil.getNowEndTime(DateUtil.d2s(nowTime), "yyyy/MM/dd HH:mm:ss");
+		// 判断时间段是否有值 如果没有获取当天时间
+		if (!"".equals(queryDate) && queryDate != null) {
+			String[] nowTimes = queryDate.split(" - ");
+			startTime = DateUtil.d2s(DateUtil.s2d(nowTimes[0],"yyyy-MM-dd HH:mm:ss"), "yyyy/MM/dd HH:mm:ss") ;
+			endTime = DateUtil.d2s(DateUtil.s2d(nowTimes[1],"yyyy-MM-dd HH:mm:ss"), "yyyy/MM/dd HH:mm:ss") ;
+		}
+		// 获取天数
+		Date st = DateUtil.s2d(startTime, "yyyy/MM/dd");
+		Date et = DateUtil.s2d(endTime, "yyyy/MM/dd");
+		int day = DateUtil.daysOfTwo(st, et) + 1;
+		// 获取当前操作人Id
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String staffId = loginUser.getStaff().getStaffId();
+		// 获取当前分页信息
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		// 查询所有民宿个数
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> houseNumber = reportFormService.findBySQL("querAllHouseName", new  String[]{staffId,""},true);
+		// 查询当前管理员管理的所有有效民宿名称及Id
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> houseList = reportFormService.findBySQLWithPagination("querAllHouseName", new  String[]{staffId,branchName},pagination,true);
+		@SuppressWarnings("unchecked")
+		List<Map<?,?>> disList = reportFormService.findBySQL("queryrpdiscount", true);
+		// 循环查询房价 获取所有价格之和
+		for (int i = 0; i < houseNumber.size(); i++) {
+			// 如果房价码rpId不为空，直接查询所有民宿给定的房价码价格
+			if (!StringUtils.isEmpty(rpId)) {
+				mp = new MultiPrice(houseNumber.get(i).get("HOUSE_ID").toString(), "3", "", rpId, "1", startTime, endTime);
+				sumPrice += mp.checkRoomPrice();
+			// 如果房价码rpId为空，循环查询所有民宿的所有房价码价格
+			} else if (StringUtils.isEmpty(rpId)) {
+				// 由于房价码有多个，所以需要需要循环遍历
+				for (int j = 0; j < disList.size(); j++) {
+					mp = new MultiPrice(houseNumber.get(i).get("HOUSE_ID").toString(), "3", "", disList.get(j).get("PARAM_NAME").toString(), "1", startTime, endTime);
+					sumPrice += mp.checkRoomPrice();
+				}
+			}
+		}
+		// 计算平均每个房间均价
+		if (!StringUtils.isEmpty(rpId)) {
+			// 如果存在房价码的公式为:房价合计/输入天数/房间数量
+			avg = sumPrice / day / houseNumber.size();
+		} else if (StringUtils.isEmpty(rpId)) {
+			// 如果不存在房价码的公式为:房价合计/房价码个数/输入天数/房间数量
+			avg = sumPrice / disList.size() / day / houseNumber.size();
+		}
+		// 向上取整2位小数
+		BigDecimal roundAvg = new BigDecimal(avg);
+		double avgPrice = roundAvg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+		// 获取每间民宿赔偿价
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> compensateForHouse = reportFormService.findBySQL("compensateForHouse", new  String[]{staffId,branchName,startTime,endTime},true);
+		// 合计营业额等数据
+		//List<?> sumPayForHouse = reportFormService.findBySQL("sumPayForHouse", new  String[]{staffId,branchName,startTime,endTime},true);
+		// 查询房间入住情况
+		@SuppressWarnings("unchecked")
+		List<Map<String,Object>> countHouse = reportFormService.findBySQL("queryCountHouse", new  String[]{staffId,branchName,startTime,endTime},true);
+		
+		// 拼接数据
+		for (int i = 0; i < houseList.size(); i++) {
+			// 先将所有的民宿添加赔偿及入住率
+			houseList.get(i).put("SUMCOST", "0");
+			houseList.get(i).put("OCCUPANCYRATE", "0%");
+			houseList.get(i).put("REVPAR", "0");
+			// 将有赔偿金额的民宿添加到民宿集合中
+			for (int j = 0; j < compensateForHouse.size(); j++) {
+				if (houseList.get(i).get("HOUSE_ID").equals(compensateForHouse.get(j).get("HOUSE_ID"))) {
+					houseList.get(i).put("SUMCOST", compensateForHouse.get(j).get("SUMCOST"));
+				} 
+			}
+			// 计算统计入住率 
+			for (int k = 0; k < countHouse.size(); k++) {
+				if (houseList.get(i).get("HOUSE_ID").equals(countHouse.get(k).get("HOUSE_ID"))) {
+					// 入住率为 = 实际输入数量 / 天数
+					double rate = Double.parseDouble(countHouse.get(k).get("COUNTHOUSE").toString()) / day;
+					// 可能出现除不尽 需要向上取整两位数
+					BigDecimal rateAvg = new BigDecimal(rate);
+					double rateHouse = rateAvg.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+					// 拼接入住率 例：50%
+					houseList.get(i).put("OCCUPANCYRATE", (rateHouse * 100) + "%");
+				} 
+			}
+			// 计算RevPAR = 实际平均房价×出租率来计算（指每间可供租出客房产生的平均实际营业收入） 
+			String rate = houseList.get(i).get("OCCUPANCYRATE").toString();
+			rate = rate.substring(0,rate.length()-1);
+			if (!"0".equals(rate)) {
+				// 可能出现除不尽 需要向上取整两位数
+				BigDecimal perparHouse = new BigDecimal(avgPrice * (Double.parseDouble(rate) / 100));
+				double perpar = perparHouse.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+				houseList.get(i).put("REVPAR", perpar);; 
+			}
+		}
+		
+		// 将数据返回前台页面
+		mv.addObject("pagination", pagination);
+		mv.addObject("avgPrice", avgPrice);
+		mv.addObject("rpId", rpId);
+		mv.addObject("branchName", branchName);
+		mv.addObject("queryDate", queryDate);
+		mv.addObject("avg", avg);
+		mv.addObject("houseList", houseList);
+		mv.setViewName("page/ipmshotel/reportform/operationStatmentDetailData");
+		return mv;
+	}
+}

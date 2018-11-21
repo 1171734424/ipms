@@ -1,0 +1,1100 @@
+package com.ideassoft.apartment.controller;
+
+import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.apartment.service.ApartmentRepairService;
+import com.ideassoft.bean.Branch;
+import com.ideassoft.bean.Check;
+import com.ideassoft.bean.Contrart;
+import com.ideassoft.bean.Equipment;
+import com.ideassoft.bean.HaltPlan;
+import com.ideassoft.bean.House;
+import com.ideassoft.bean.MaintenanceLog;
+import com.ideassoft.bean.Member;
+import com.ideassoft.bean.OperateLog;
+import com.ideassoft.bean.Order;
+import com.ideassoft.bean.Post;
+import com.ideassoft.bean.RepairApply;
+import com.ideassoft.bean.Room;
+import com.ideassoft.bean.Staff;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.SystemConstants;
+import com.ideassoft.core.jdbc.SqlBuilder;
+import com.ideassoft.core.notifier.SmsSingleSender;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.util.DateUtil;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.RegExUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Transactional
+@Controller
+public class ApartmentRepairController {
+	
+	@Autowired
+	private ApartmentRepairService apartmentRepairService;
+	
+	private static Logger log = Logger.getLogger(ApartmentRepairController.class);
+	
+	/**
+	 * 维修申请(公寓)-左侧跳转维修页面
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/apartmentRepair.do")
+	public ModelAndView apartmentRepair(HttpServletRequest request) {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		//Branch bigBranch = apartmentRepairService.queryLoginUserBType(loginuser.getStaff().getBranchId());
+		List<?> optionone = apartmentRepairService.findBySQL("queryOptionsOne", true);
+		List<?> optiontwo = apartmentRepairService.findBySQL("queryOptionsTwo", true);
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrepair/repair");
+		mv.addObject("optionone", optionone);
+		mv.addObject("optiontwo", optiontwo);
+		// 当是营销中心的职员登录时
+		mv.addObject("loginBranch", loginuser.getStaff());
+		return mv;
+	}
+	
+	/**
+	 * 维修申请(公寓)-跳转新增维修申请表页面
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/addApartRepairApplication.do")
+	public ModelAndView addApartRepairApplication(HttpServletRequest request) {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		ModelAndView mv = new ModelAndView();
+		//List<?> house = repairService.findByProperties(House.class, "staffId", staff.getStaffId());
+		List<?> house = apartmentRepairService.findBySQL("fHouseonlyStaffid",new String[]{loginuser.getStaff().getStaffId()}, true);
+
+		if(house.size() == 0){
+			house = apartmentRepairService.findByProperties(House.class, "recordUser", staff.getStaffId());
+		}
+		
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrepair/addRepairApplication");
+		
+		return mv;
+	}
+	
+	/**
+	 * 维修申请(公寓)-页面条件查询维修详情
+	 * 
+	 * @param request
+	 * @param response
+	 * @param startdate
+	 * @param enddate
+	 * @param roomid
+	 * @param equipment
+	 * @param checkstatus
+	 * @param mobile
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/queryApartRepairDetail.do")
+	public ModelAndView queryApartRepairDetail(HttpServletRequest request,
+			HttpServletResponse response, String startdate,String enddate,
+			String roomid, String equipment, String checkstatus, String mobile)
+			throws Exception {
+		if ("开始日期".equals(startdate)) {
+			startdate = "";
+		}
+		if ("结束日期".equals(enddate)) {
+			enddate = "";
+		}
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		pagination.setRows(12);
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId();
+		//List<?> house = repairService.findByProperties(House.class, "staffId", staff.getStaffId());
+		List<?> house = apartmentRepairService.findBySQL("fHouseonlyStaffid",new String[]{loginuser.getStaff().getStaffId()}, true);
+
+		if(house.size() == 0){
+			house = apartmentRepairService.findByProperties(House.class, "recordUser", staff.getStaffId());
+		}
+		if(house.size() <= 0){
+			String sql = "queryRepairDetail";
+			List<?> result = apartmentRepairService.findBySQLWithPagination(sql, new String[] { branchid, roomid, mobile, startdate,
+					enddate, equipment, checkstatus }, pagination, true);
+			mv.addObject("result", result);
+		} else {
+			String sql = "queryRepairDetailH";
+			List<?> result = apartmentRepairService.findBySQLWithPagination(sql, new String[] { staff.getStaffId(), roomid, mobile, startdate,
+					enddate, equipment, checkstatus }, pagination, true);
+			mv.addObject("result", result);
+			mv.addObject("flag", 1);//minsu kaiguan
+		}
+		mv.addObject("pagination", pagination);
+		mv.addObject("startdate", startdate);
+		mv.addObject("enddate", enddate);
+		mv.addObject("roomid", roomid);
+		mv.addObject("equipment", equipment);
+		mv.addObject("checkstatus", checkstatus);
+		mv.addObject("mobile", mobile);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrepair/queryRepairDetail");
+		return mv;
+	}
+	
+	/**
+	 * 维修申请(公寓)-公寓加载维修类别
+	 * 
+	 * @param response
+	 */
+	@RequestMapping("/loadApartEquipmentData.do")
+	public void loadApartEquipmentData(HttpServletResponse response){
+		List<?> result = apartmentRepairService.findBySQL("queryRepairParts", true);
+		JSONUtil.responseJSON(response, result);
+	}
+
+	/**
+	 * 维修申请(公寓)-自动获取新增申请记录数据
+	 * 
+	 * @param request
+	 * @param response
+	 * @param roomid
+	 * @param roomtype
+	 */
+	@RequestMapping("/getApartApplicationDate.do")
+	public void getApartApplicationDate(HttpServletRequest request,
+			HttpServletResponse response, String roomid, String roomtype) {
+
+		LoginUser loginuser = (LoginUser) request.getSession(true)
+				.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId();
+		Map<String, Object> map = new HashMap<String, Object>();
+		List<?> list = apartmentRepairService.findBySQL("queryContractData", new String[] {
+				branchid, roomid, roomtype }, true);
+		if (list.size() != 0) {
+			String contractId = (String) ((Map) (list.get(0)))
+					.get("CONTRART_ID");
+			String memberId = (String) ((Map) (list.get(0))).get("MEMBER_ID");
+			Member mr = (Member) apartmentRepairService.findOneByProperties(
+					Member.class, "memberId", memberId);
+			String memberName = mr.getMemberName();
+			String mobile = (String) ((Map) (list.get(0))).get("MOBILE");
+			map.put("contrartid", contractId);
+			map.put("membername", memberName);
+			map.put("mobile", mobile);
+			map.put("memberId", memberId);
+		}
+		JSONUtil.responseJSON(response, map);
+	}
+	
+	/**
+	 * 维修申请(公寓)-公寓新增维修申请记录
+	 * 
+	 * @param request
+	 * @param response
+	 * @param contrartid
+	 * @param roomId
+	 * @param person
+	 * @param mobile
+	 * @param equipment
+	 * @param emergent
+	 * @param repairtime
+	 * @param remark
+	 * @param equipmentName
+	 */
+	@RequestMapping("/addRepairApartApplicationRecord.do")
+	public void addRepairApartApplicationRecord(HttpServletRequest request,
+			HttpServletResponse response, String contrartid, String roomId,
+			String person, String mobile, String equipment, String emergent,
+			String repairtime, String remark,String equipmentName) {
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+			Date date = new Date();
+			Date repairdate = null;
+			if (sdf.parse(sdf.format(date)).getTime() > sdf.parse(repairtime)
+					.getTime()) {
+				JSONUtil.responseJSON(response, new AjaxResult(0,
+						",添加失败,请确认维修申请日期是否正确!"));
+				return;
+			} else {
+				repairdate = sdf.parse(repairtime);
+			}
+			LoginUser loginuser = (LoginUser) request.getSession(true)
+					.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+			Staff staff = loginuser.getStaff();
+			String branchid = staff.getBranchId();
+			Contrart ct = (Contrart) apartmentRepairService.findOneByProperties(
+					Contrart.class, "contrartId", contrartid);
+			String roomtype = ct.getRoomType();
+			Member mr = (Member) apartmentRepairService.findOneByProperties(
+					Member.class, "memberName", person);
+			String memberid = mr.getMemberId();
+			String[] eqsarr = equipment.split(",");
+			for (String eq : eqsarr) {
+				// 新增维修申请记录
+				String branchidchange = null;
+				Branch branch = ((Branch) (apartmentRepairService
+						.findOneByProperties(Branch.class, "branchId",branchid,"status","1")));
+				String rank = branch.getRank().toString();
+				if(rank.equals("0")){//总店
+					branchidchange = "*";
+				}else{
+					branchidchange = branchid;
+				}
+				SysParam sysParam = ((SysParam) (apartmentRepairService
+						.findOneByProperties(SysParam.class, "paramType","AUDITRepair","parameter1",branchidchange)));
+				String postone = sysParam.getParamName().toString();
+				RepairApply ra = new RepairApply();
+				String id = DateUtil.currentDate("yyMMdd") + branchid + "3"
+						+ apartmentRepairService.getSequence("SEQ_REPAIRAPPLY_ID");
+				ra.setRepairApplyId(id);
+				ra.setBranchId(branchid);
+				ra.setContractId(contrartid);
+				ra.setRoomId(roomId);
+				ra.setApplicationDate(new Date());
+				ra.setReservedPerson(memberid);
+				ra.setMobile(mobile);
+				ra.setStatus("1");
+				ra.setAuditDescription("");
+				ra.setRecordTime(new Date());
+				ra.setRecordUser(staff.getStaffId());
+				ra.setRemark(remark);
+				ra.setRepairTime(repairdate);
+				ra.setEquipment(eq);
+				ra.setEmergent(emergent);
+				ra.setRoomType(roomtype);
+				ra.setPost(postone);
+				ra.setAuditRemark("待审核");
+				if(equipment.equals("7") || equipment.equals("8") || equipment.equals("9")){
+					SysParam sp = (SysParam) apartmentRepairService.findOneByProperties(SysParam.class, "paramType", "EQUIPSUPERKIND", "parameter1",equipment);
+					Equipment eqt = (Equipment) apartmentRepairService.findOneByProperties(Equipment.class, "branchId", branchid,"roomId",roomId,"superKind",sp.getContent());
+					if(eqt == null){
+						JSONUtil.responseJSON(response, new AjaxResult(0, "该房间暂无此设备 "));
+						return;
+					}
+					ra.setSerialNo(eqt.getSerialNo());
+				}
+				OperateLog ol = new OperateLog();
+				// 记操作日志表operateLog
+				String olId = DateUtil.currentDate("yyMMdd") + branchid
+						+ apartmentRepairService.getSequence("SEQ_OPERATELOG_ID");
+				String operid = InetAddress.getLocalHost().toString();// IP地址
+				operid = (String) operid.subSequence(operid.indexOf("/") + 1,
+						operid.length());
+				ol.setLogId(olId);
+				ol.setOperType("10");
+				ol.setOperModule("新增公寓维修申请");
+				ol.setContent(staff.getStaffName() + "新增维修申请");
+				ol.setRecordUser(staff.getStaffId());
+				ol.setRecordTime(new Date());
+				ol.setOperIp(operid);
+				ol.setBranchId(branchid);
+				apartmentRepairService.save(ra);// 更新申请记录表
+				apartmentRepairService.save(ol);// 更新操作日志表
+				// 新增紧急维修发送短信消息给管家
+				List<?> phone = apartmentRepairService.findBySQL("queryAptmanagePhone",
+						new String[] { branchid }, true);
+				if (phone != null && phone.size() > 0) {// &
+					String phoneNumber = (String) ((Map<?, ?>) phone.get(0))
+							.get("MOBILE");
+					List<?> equ = apartmentRepairService.findBySQL("queryEquipment",
+							new String[] { equipment }, true);
+					String equipmentname = (String) ((Map<?, ?>) equ.get(0))
+							.get("EQUIPMENT");
+					if ("1".equals(emergent)) {// 紧急维修
+						// 发短信给公寓管家
+						if (phoneNumber.matches(RegExUtil.MOBILE)) {// 手机号格式正确发送信息
+							SmsSingleSender singleSender = new SmsSingleSender(
+									SystemConstants.note.APPID,
+									SystemConstants.note.APPKEY);
+							ArrayList<String> message = new ArrayList<String>();
+							message.add(roomId);
+							message.add(person);
+							message.add(equipmentname);
+							singleSender.sendWithParam(SystemConstants.note.COUNTRY,phoneNumber, 48840, message, "", "", "");
+						}
+
+						List<?> poststaffphone = apartmentRepairService.getPoststaffphone(postone, branchid);
+						String audittypename = CommonConstants.MessageTextDefinition.Repair;
+						if (null != poststaffphone && !poststaffphone.isEmpty()) {
+							for (int j = 0; j < poststaffphone.size(); j++) {
+								String mobileaudit = ((Map<?, ?>) poststaffphone
+										.get(j)).get("MOBILE").toString();
+								String staffname = ((Map<?, ?>) poststaffphone
+										.get(j)).get("STAFFNAME").toString();
+								String auditremark = "待审核";
+								if (mobile.matches(RegExUtil.MOBILE)) {
+									SmsSingleSender singleSender = new SmsSingleSender(
+											SystemConstants.note.APPID,
+											SystemConstants.note.APPKEY);
+									ArrayList<String> params = new ArrayList<String>();
+									params.add(staffname);
+									params.add(roomId);
+									params.add(person);
+									params.add(audittypename);
+									params.add(auditremark);
+									singleSender.sendWithParam(SystemConstants.note.COUNTRY,mobileaudit, 47260, params, "", "","");
+								}
+
+							}
+						}
+					}
+				}
+			}
+			JSONUtil.responseJSON(response, new AjaxResult(4, "添加成功 "));
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			JSONUtil.responseJSON(response, new AjaxResult(2, "添加失败,请稍后再试 "));
+		}
+	}
+	
+	/**
+	 * 维修申请(公寓)-获取公寓所有房型
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping("/queryApartmentRoomType.do")
+	public void queryApartmentRoomType(HttpServletRequest request,
+			HttpServletResponse response) {
+
+		LoginUser loginuser = (LoginUser) request.getSession(true)
+				.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId();
+		//List<?> house = repairService.findByProperties(House.class, "staffId", staff.getStaffId());
+		List<?> house = apartmentRepairService.findBySQL("fHouseonlyStaffid",new String[]{loginuser.getStaff().getStaffId()}, true);
+
+		if(house.size() == 0){
+			house = apartmentRepairService.findByProperties(House.class, "recordUser", staff.getStaffId());
+		}
+		List<?> list = apartmentRepairService.findBySQL("ApartmentRoomtype",
+				new String[] { branchid }, true);
+		List<?> hlist = apartmentRepairService.findBySQL("HouseNameAndId",new String[]{staff.getStaffId()}, true);
+		if(house.size() <= 0){
+			JSONUtil.responseJSON(response, list);
+		}else{
+			JSONUtil.responseJSON(response, hlist);
+		}
+	}
+	
+	/**
+	 * 维修申请(公寓)-查日志条数
+	 * 
+	 * @param request
+	 * @param response
+	 * @param applyId
+	 */
+	@RequestMapping("/checkApartMainLogNum.do")
+	public void checkApartMainLogNum(HttpServletRequest request,
+			HttpServletResponse response, String applyId) {
+		String[] applyIds = applyId.split(",");
+		Map<String, String> map = new HashMap<String, String>();
+		for (int i = 0; i < applyIds.length; i++) {
+			@SuppressWarnings("unchecked")
+			List<MaintenanceLog> mlog = apartmentRepairService.findByProperties(
+					MaintenanceLog.class, "repairApplyId", applyIds[i]);
+			if (mlog.size() == 0) {
+				map.put(applyIds[i], "1");// wujilu
+			} else {
+				map.put(applyIds[i], "2");// youilu
+			}
+		}
+		JSONUtil.responseJSON(response, map);
+	}
+	
+	/**
+	 * 维修申请(公寓)-单击跳转维修日志详情页面
+	 * 
+	 * @param request
+	 * @param applyId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping("/loadApartmentRepairLog.do")
+	public ModelAndView loadApartmentRepairLog(HttpServletRequest request, String applyId)
+			throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true)
+		.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId();
+		//List<?> house = repairService.findByProperties(House.class, "staffId", staff.getStaffId());
+		List<?> house = apartmentRepairService.findBySQL("fHouseonlyStaffid",new String[]{loginuser.getStaff().getStaffId()}, true);
+
+		if(house.size() == 0){
+			house = apartmentRepairService.findByProperties(House.class, "recordUser", staff.getStaffId());
+		}
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		pagination.setRows(4);
+		List<MaintenanceLog> mlog = apartmentRepairService.findBySQLWithPagination(
+				"queryLog", new String[] { applyId }, pagination, true);
+		ModelAndView mv = new ModelAndView();
+		if(house.size() <= 0){
+			mv.addObject("flag",2);			
+		}else{
+			mv.addObject("flag",1);			
+		}
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrepair/repairLog");
+		mv.addObject("pagination", pagination);
+		mv.addObject("mlog", mlog);
+		return mv;
+	}
+	
+	/**
+	 * 维修申请(公寓)-撤销维修申请
+	 * 
+	 * @param response
+	 * @param request
+	 * @param applyId
+	 * @param mainstatus
+	 */
+	@RequestMapping("/cancelApartmentRepair.do")
+	public void cancelApartmentRepair(HttpServletResponse response,
+			HttpServletRequest request, String applyId, String mainstatus) {
+
+		RepairApply ra = (RepairApply) apartmentRepairService.findOneByProperties(
+				RepairApply.class, "repairApplyId", applyId);
+		LoginUser loginuser = (LoginUser) request.getSession(true)
+				.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId();
+		String recorduser = ((LoginUser) request.getSession(true).getAttribute(
+				RequestUtil.LOGIN_USER_SESSION_KEY)).getStaff().getStaffId();
+		String serialNo = ra.getSerialNo();
+		Equipment eqt = null;
+		if ("0".equals(ra.getStatus())) {
+			// 已取消
+			JSONUtil.responseJSON(response, new AjaxResult(2, "该申请已取消,请勿重复操作!"));
+			return;
+		}
+		if ("4".equals(ra.getStatus())) {// 不是已修复,未审核,已审核,未修复
+			// 是已修复
+			JSONUtil.responseJSON(response, new AjaxResult(5,"该申请已修复,无法取消!"));
+			return;
+		}
+		
+		try {
+			if(serialNo != null){
+				eqt = (Equipment) apartmentRepairService.findOneByProperties(Equipment.class, "serialNo", ra.getSerialNo());
+				eqt.setStatus("1");
+				apartmentRepairService.update(eqt);
+			}
+			ra.setStatus("0");
+			ra.setRecordTime(new Date());
+			ra.setRecordUser(recorduser);					
+			List<House> houseList = apartmentRepairService.findByProperties(House.class, "houseId", ra.getBranchId());
+			//新增取消停售房计划,刷新房态		
+			
+			//维修此时无checkId，不是在住的，可能为停售房，
+			if(StringUtils.isEmpty(ra.getContractId())){
+				List<?> list = apartmentRepairService.findByProperties(HaltPlan.class, "branchId", ra.getBranchId(), "status", "3");
+				House h = (House) apartmentRepairService.findOneByProperties(House.class, "houseId", ra.getBranchId());
+				if(list != null && !list.isEmpty()){
+					h.setStatus("T");
+					/*for (Object object : list) {
+						HaltPlan haltplan = (HaltPlan) object;
+						String hbranchid = haltplan.getBranchId();
+						House h = (House) repairService.findOneByProperties(House.class, "houseId", hbranchid);
+						h.setStatus("T");
+						repairService.save(h);
+					}*/
+				}else{
+					h.setStatus("1");
+				}
+				apartmentRepairService.save(h);
+/*				List<HaltPlan> hp = null;
+				if(ra.getBranchId().startsWith("H")){
+					hp = repairService.findByProperties(HaltPlan.class, "branchId", ra.getBranchId());							
+				}else{
+					hp = repairService.findByProperties(HaltPlan.class, "branchId", ra.getBranchId(), "roomId",ra.getRoomId());
+				}
+				if(hp.size() > 0){//是停售,维修计划
+					for(HaltPlan haltplan : hp){
+						if("3".equals(haltplan.getStatus()) && ra.getApplicationDate().equals(haltplan.getStartTime())){//正在执行--取消
+							haltplan.setStatus("0");
+							repairService.update(haltplan);
+							if(houseList.size()<=0){//公寓
+								Room room = (Room) repairService.findOneByProperties(Room.class, "roomKey.roomId", ra.getRoomId(),"roomKey.branchId",ra.getBranchId());
+								room.setStatus("1");
+								repairService.update(room);
+							}else{//民宿
+								House house = (House) repairService.findOneByProperties(House.class, "houseId", ra.getBranchId(),"houseNo",ra.getRoomId());
+								house.setStatus("1");
+								repairService.update(house);
+							}
+						}
+						if("1".equals(haltplan.getStatus()) && ra.getApplicationDate().equals(haltplan.getStartTime())){//有效计划
+							haltplan.setStatus("0");
+							repairService.update(haltplan);
+						}
+					}
+				}*/
+			}else{
+				//更新房态
+				if(!"1".equals(ra.getStatus())){
+					if(houseList.size()<=0){//公寓
+						List<?> list = apartmentRepairService.findBySQL("queryRoomStatus",new String[]{applyId,ra.getBranchId(),ra.getRoomId()},true);
+						Room room = null;
+						if(list.size()<= 0){//设为在住
+							
+							room = (Room) apartmentRepairService.findOneByProperties(Room.class, "roomKey.roomId", ra.getRoomId(),"roomKey.branchId",ra.getBranchId());
+							room.setStatus("3");
+							room.setRecordTime(new Date());
+							room.setRecordUser(staff.getStaffId());
+							apartmentRepairService.update(room);
+						}
+					}else{//民宿
+						List<?> list = apartmentRepairService.findBySQL("queryRoomStatus",new String[]{applyId,ra.getBranchId(),ra.getRoomId()},true);
+						House house = null;
+						if(list.size()<= 0){//设为在住
+							house = (House) apartmentRepairService.findOneByProperties(House.class, "houseId", ra.getBranchId(),"houseNo",ra.getRoomId());
+							
+							house.setStatus("3");
+							house.setRecordTime(new Date());
+							//house.setRecordUser(staff.getStaffId());
+							apartmentRepairService.update(house);
+						}
+						
+					}
+				}
+				
+			}
+			
+			// 新增操作日志
+			OperateLog ol = new OperateLog();
+			String olId = DateUtil.currentDate("yyMMdd") + branchid
+					+ apartmentRepairService.getSequence("SEQ_OPERATELOG_ID");
+			String operid = InetAddress.getLocalHost().toString();// IP地址
+			operid = (String) operid.subSequence(
+					operid.indexOf("/") + 1, operid.length());
+			ol.setLogId(olId);
+			ol.setOperType("10");
+			ol.setOperModule("取消公寓维修申请");
+			ol.setContent(staff.getStaffName() + "取消维修申请");
+			ol.setRecordUser(staff.getStaffId());
+			ol.setRecordTime(new Date());
+			ol.setOperIp(operid);
+			ol.setBranchId(branchid);
+			apartmentRepairService.save(ol);// 新增操作日志
+			//repairService.update(ra);
+			JSONUtil.responseJSON(response,new AjaxResult(3, "维修申请已取消"));
+			// 发短信给客户
+			List<?> phone = apartmentRepairService.findBySQL("queryAptmanagePhone", new String[] { branchid },true);// 公寓管家号码
+			String phoneNum = "";
+			String postName = "";
+			SmsSingleSender singleSender = new SmsSingleSender(SystemConstants.note.APPID,SystemConstants.note.APPKEY);
+			String phoneNumber = ra.getMobile();
+			String roomId = ra.getRoomId();
+			String repairId = ra.getRepairApplyId();
+			if(phone.size() != 0){
+				for (int i = 0; i < phone.size(); i++) {
+					phoneNum += (String) ((Map<?, ?>) phone.get(i)).get("MOBILE")+",";
+				}
+				postName = "公寓管家";
+				ArrayList<String> message = new ArrayList<String>();
+				message.add(repairId);
+				message.add(roomId);
+				message.add(postName);
+				message.add(phoneNum.substring(0, phoneNum.length()-1));
+				singleSender.sendWithParam(SystemConstants.note.COUNTRY, phoneNumber,55972, message, "", "", "");
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			JSONUtil.responseJSON(response, new AjaxResult(4, "取消失败"));
+		}
+	}
+	
+	/**
+	 * 维修申请(公寓)-处理已修复申请记录
+	 * 
+	 * @param request
+	 * @param applyId
+	 * @return
+	 */
+	@RequestMapping("/doneApartApplication.do")
+	public ModelAndView doneApartApplication(HttpServletRequest request,
+			String applyId) {
+		RepairApply ra = (RepairApply) apartmentRepairService.findOneByProperties(RepairApply.class, "repairApplyId", applyId);
+		String equipment = ra.getSerialNo();
+		List<?> list;
+		if(equipment == null){//meiyou
+			list = apartmentRepairService.findBySQL("queryProblemTag", true);
+		}else{
+			list = apartmentRepairService.findBySQL("queryTagNew",true);
+		}
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("list", JSONUtil.fromObject(list).toString().toLowerCase());
+		mv.addObject("applyId", applyId);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrepair/doneApplication");
+		return mv;
+	}
+	
+	/**
+	 * 维修申请(公寓)-双击显示详情页面
+	 * 
+	 * @param request
+	 * @param applyId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/dblApartRepairDetail.do")
+	public ModelAndView dblApartRepairDetail(HttpServletRequest request,String applyId
+			) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true)
+				.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId();
+		ModelAndView mv = new ModelAndView();
+		//List<?> house = repairService.findByProperties(House.class, "staffId", staff.getStaffId());
+		List<?> house = apartmentRepairService.findBySQL("fHouseonlyStaffid",new String[]{loginuser.getStaff().getStaffId()}, true);
+
+		if(house.size() == 0){
+			house = apartmentRepairService.findByProperties(House.class, "recordUser", staff.getStaffId());
+		}
+		String sql = "";
+		if(house.size() <= 0){
+			sql = "dblshowRepair";
+			mv.addObject("flag", 2);//公寓
+		}else{
+			sql = "dblshowRepairH";
+			mv.addObject("flag", 1);//民宿
+		}
+		List<?> result = apartmentRepairService.findBySQL(sql, new String[] { 
+				applyId }, true);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrepair/dblRepairDetail");
+		mv.addObject("result", result);
+		return mv;
+	}
+	
+	/**
+	 * 维修申请(公寓)-处理修复申请添加新日志记录
+	 * 
+	 * @param request
+	 * @param response
+	 * @param applyId
+	 * @param problemtab
+	 * @param problemdesc
+	 * @param repairTime
+	 * @param repairPerson
+	 * @param timearea
+	 * @param status
+	 * @param repairLogRemark
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping("/addApartRepairLogRecord.do")
+	public void addApartRepairLogRecord(HttpServletRequest request,
+			HttpServletResponse response, String applyId, String problemtab,
+			String problemdesc, String repairTime, String repairPerson,
+			String timearea, String status, String repairLogRemark) {
+		boolean houseflag = false;
+		boolean flag = true;
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+			Date date = new Date();
+			if ("0".equals(status)) {
+				JSONUtil.responseJSON(response, new AjaxResult(0, "请确认是否已修复!"));
+				return;
+			}
+			RepairApply ra = (RepairApply) apartmentRepairService.findOneByProperties(
+					RepairApply.class, "repairApplyId", applyId);
+			if (repairTime == null || "".equals(repairTime)) {
+				JSONUtil.responseJSON(response, new AjaxResult(5, "请输入维修日期!"));
+				return;
+			} else if(sdf.parse(sdf.format(ra.getApplicationDate())).getTime() > sdf
+					.parse(repairTime).getTime()){
+				if(ra.getContractId() == null){
+					JSONUtil.responseJSON(response, new AjaxResult(1,
+					"请前往停售房计划页面操作!"));
+					return;
+				}else{
+					JSONUtil.responseJSON(response, new AjaxResult(1,
+					"请确认维修日期在申请日期之后!"));
+					return;
+				}
+				
+			}else if (date.getTime() < sdf.parse(repairTime).getTime()) {
+				if(ra.getContractId() == null){
+					JSONUtil.responseJSON(response, new AjaxResult(1,
+					"请前往停售房计划页面操作!"));
+					return;
+					
+				}else{
+					JSONUtil.responseJSON(response, new AjaxResult(3,
+					"请确认维修日期在当前系统时间之前!"));
+					return;
+					
+				}
+			}
+			MaintenanceLog mlog = new MaintenanceLog();
+			RepairApply re = (RepairApply) apartmentRepairService.findOneByProperties(
+					RepairApply.class, "repairApplyId", applyId);
+			LoginUser loginuser = (LoginUser) request.getSession(true)
+					.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+			Staff staff = loginuser.getStaff();
+			String branchid = staff.getBranchId();
+			String mlogid = DateUtil.currentDate("yyMMdd") + branchid+"3"
+					+ apartmentRepairService.getSequence("SEQ_MAINTENANCELOG_ID");
+			mlog.setLogId(mlogid);
+			mlog.setBranchId(branchid);
+			mlog.setEquipment(ra.getEquipment());
+			mlog.setProblemTag(problemtab.substring(0,problemtab.length() - 1));
+			mlog.setDescribe(problemdesc);
+			mlog.setRecordUser(staff.getStaffId());
+			mlog.setRecordTime(new Date());
+			mlog.setStatus(status);
+			mlog.setRemark(repairLogRemark);
+			mlog.setRoomId(ra.getRoomId());
+			mlog.setApplicationSource("2");
+			mlog.setRepairPerson(repairPerson);
+			mlog.setApplicationDate(ra.getApplicationDate());
+			mlog.setRepairTimearea(timearea);
+			mlog.setRepairTime(sdf.parse(repairTime));
+			mlog.setRepairApplyId(applyId);
+			mlog.setAcrepairTime(sdf.parse(repairTime));
+			OperateLog ol = new OperateLog();// 新增操作日志记录
+			String olId = DateUtil.currentDate("yyMMdd") + branchid
+					+ apartmentRepairService.getSequence("SEQ_OPERATELOG_ID");
+			String operid = InetAddress.getLocalHost().toString();// IP地址
+			operid = (String) operid.subSequence(operid.indexOf("/") + 1,operid.length());
+			ol.setLogId(olId);
+			ol.setOperType("10");
+			ol.setOperModule("处理公寓维修申请");
+			String newstatus = "";
+			if ("1".equals(status)) {
+				newstatus = "未修复";
+				re.setStatus("3");// 更新申请表状态未修复
+				apartmentRepairService.update(re);
+				//更新房态
+//				if(re.getBranchId().startsWith("H")){//民宿
+//					House house = (House) repairService.findOneByProperties(House.class, "houseId", re.getBranchId());
+//					house.setStatus("W");
+//					house.setRecordTime(new Date());
+//					house.setRecordUser(staff.getStaffId());
+//					repairService.update(house);
+//				}else{
+//					Room room = (Room) repairService.findOneByProperties(Room.class, "roomKey.roomId", re.getRoomId(),"roomKey.branchId",ra.getBranchId());
+//					room.setStatus("W");
+//					room.setRecordTime(new Date());
+//					room.setRecordUser(staff.getStaffId());
+//					repairService.update(room);
+//				}
+					
+			} else {
+				newstatus = "已修复";
+				re.setStatus("4");
+				apartmentRepairService.update(re);
+				apartmentRepairService.getSession().flush();
+				List<House> houseList = apartmentRepairService.findByProperties(House.class, "houseId", re.getBranchId());
+				if(houseList.size()<=0){//公寓
+					houseflag = false;
+					if(ra.getContractId() != null && ra.getContractId() != ""){//非维修计划
+						Room room = null;
+						List<?> list = apartmentRepairService.findBySQL("queryRoomStatus",new String[]{applyId,ra.getBranchId(),ra.getRoomId()},true);
+						if(list.size()<= 0){//设为在住房
+							room = (Room) apartmentRepairService.findOneByProperties(Room.class, "roomKey.roomId", ra.getRoomId(),"roomKey.branchId",ra.getBranchId());
+							room.setStatus("3");
+							room.setRecordTime(new Date());
+							room.setRecordUser(staff.getStaffId());
+							apartmentRepairService.update(room);	
+						}
+					}else{//维修计划和设备新增
+						//新增取消停售房计划,刷新房态
+							List<HaltPlan> hp = apartmentRepairService.findByProperties(HaltPlan.class, "branchId", ra.getBranchId(), "roomId",ra.getRoomId());
+							if(hp.size() > 0){//是停售,维修计划
+								for(HaltPlan haltplan : hp){
+									if("3".equals(haltplan.getStatus()) && ra.getApplicationDate().equals(haltplan.getStartTime())){//正在执行--取消
+										haltplan.setStatus("2");
+										apartmentRepairService.update(haltplan);
+											Room room = (Room) apartmentRepairService.findOneByProperties(Room.class, "roomKey.roomId", ra.getRoomId(),"roomKey.branchId",ra.getBranchId());
+											//此处要判断该房间是否是在住合同状态再刷房态
+											Contrart ct = (Contrart) apartmentRepairService.findOneByProperties(Contrart.class, "branchId", ra.getBranchId(), "roomId",ra.getRoomId(),"status","4");
+											if(ct != null){//
+												room.setStatus("3");//已入住
+											}else{
+												room.setStatus("1");
+												
+											}
+											apartmentRepairService.update(room);
+									}
+									if("1".equals(haltplan.getStatus()) && ra.getApplicationDate().equals(haltplan.getStartTime())){//有效计划
+										haltplan.setStatus("0");
+										apartmentRepairService.update(haltplan);
+									}
+									
+								}
+								
+							}else{
+//								
+//								Room room = null;
+//								List<?> list = repairService.findBySQL("queryRepairPlanAp",new String[]{applyId,ra.getBranchId(),ra.getRoomId()},true);
+//								if(list.size()<= 0){//设为空房
+//									room = (Room) repairService.findOneByProperties(Room.class, "roomKey.roomId", ra.getRoomId(),"roomKey.branchId",ra.getBranchId());
+//									room.setStatus("1");
+//									room.setRecordTime(new Date());
+//									room.setRecordUser(staff.getStaffId());
+//									repairService.update(room);	
+//								}
+							}
+							
+					}
+					String serivalNo = ra.getSerialNo();
+					Equipment eqt = null;
+					if(serivalNo != null){
+						eqt = (Equipment) apartmentRepairService.findOneByProperties(Equipment.class, "serialNo", ra.getSerialNo());
+						eqt.setStatus("1");
+						apartmentRepairService.update(eqt);
+					}
+				}else{//民宿
+					houseflag = true;
+					//if(ra.getContractId() != null && ra.getContractId() != ""){//非维修计划
+						List<?> list = apartmentRepairService.findBySQL("queryRoomStatus",new String[]{applyId,ra.getBranchId(),ra.getRoomId()},true);
+						House house = null;
+						if(list.size()<= 0){//设为在住房
+							house = (House) apartmentRepairService.findOneByProperties(House.class, "houseId", ra.getBranchId(),"houseNo",ra.getRoomId());
+							//此处要判断该房间是否是在住合同状态再刷房态
+							Check ck = (Check) apartmentRepairService.findOneByProperties(Check.class, "branchId", ra.getBranchId(),"status","1");
+							Order or = (Order) apartmentRepairService.findOneByProperties(Order.class, "branchId", ra.getBranchId(),"status","1");
+							if(ck != null){//
+								house.setStatus("3");//已入住
+							}else if(or != null){
+								house.setStatus("2");//已预定
+							}else{
+								house.setStatus("1");
+							}
+							house.setRecordTime(new Date());
+							//house.setRecordUser(staff.getStaffId());
+							apartmentRepairService.update(house);	
+						}
+						
+						/*}else{//维修计划和设备新增
+						//新增取消停售房计划,刷新房态
+						List<HaltPlan> hp = repairService.findByProperties(HaltPlan.class, "branchId", ra.getBranchId());
+						if(hp.size() > 0){//是停售,维修计划
+							for(HaltPlan haltplan : hp){
+								if("3".equals(haltplan.getStatus()) && ra.getApplicationDate().equals(haltplan.getStartTime())){//正在执行--取消
+									haltplan.setStatus("0");
+									repairService.update(haltplan);
+										House house = (House) repairService.findOneByProperties(House.class,"houseId",ra.getBranchId());
+										//此处要判断该房间是否是在住合同状态再刷房态
+										Check ck = (Check) repairService.findOneByProperties(Check.class, "branchId", ra.getBranchId(),"status","1");
+										if(ck != null){//
+											house.setStatus("3");//已入住
+										}else{
+											house.setStatus("1");
+										}
+										repairService.update(house);
+								}
+								if("1".equals(haltplan.getStatus()) && ra.getApplicationDate().equals(haltplan.getStartTime())){//有效计划
+									haltplan.setStatus("0");
+									repairService.update(haltplan);
+								}
+								
+							}
+							
+						}else{
+//							
+//							Room room = null;
+//							List<?> list = repairService.findBySQL("queryRepairPlanAp",new String[]{applyId,ra.getBranchId(),ra.getRoomId()},true);
+//							if(list.size()<= 0){//设为空房
+//								room = (Room) repairService.findOneByProperties(Room.class, "roomKey.roomId", ra.getRoomId(),"roomKey.branchId",ra.getBranchId());
+//								room.setStatus("1");
+//								room.setRecordTime(new Date());
+//								room.setRecordUser(staff.getStaffId());
+//								repairService.update(room);	
+//							}
+						}
+						
+					}*/
+						
+				}
+			}
+			ol.setContent(staff.getStaffName() + "处理维修申请,备注:" + newstatus);
+			ol.setRecordUser(staff.getStaffId());
+			ol.setRecordTime(new Date());
+			ol.setOperIp(operid);
+			ol.setBranchId(branchid);
+			apartmentRepairService.save(ol);// 新增操作日志
+			apartmentRepairService.save(mlog);
+			flag = false;	
+			// 修复处理完发送微信消息通知,已修复才发
+			String ctId = re.getContractId();
+			String roomId = re.getRoomId();
+			String equipment = re.getEquipment();
+			List<?> equ = apartmentRepairService.findBySQL("queryEquipment",
+					new String[] { equipment }, true);
+			String equipmentname = (String) ((Map<?, ?>) equ.get(0))
+					.get("EQUIPMENT");
+			// 获取公寓管家手机号
+			List<?> phone = apartmentRepairService.findBySQL("queryAptmanagePhone",
+					new String[] { branchid }, true);
+			String phoneNum = "";//手机号
+			String postName = "";//职位名称
+			if(phone.size()==0){
+				SysParam sys = (SysParam) apartmentRepairService.findOneByProperties(SysParam.class, "paramType", "AUDIT", "remark",branchid);
+				phoneNum = sys.getParamDesc();
+				Post post = (Post) apartmentRepairService.findOneByProperties(Post.class, "postId", sys.getParameter1());
+				postName = post.getPostName();//默认审核人职位名称
+			}
+			if(phone.size() != 0){
+				phoneNum = (String) ((Map<?, ?>) phone.get(0)).get("MOBILE");
+				postName = "公寓管家";
+			}
+			if ("2".equals(status)) {// 修复
+				// 处理成功发送微信消息和短信消息
+				// 获取会员手机号
+				String phoneNumber = ra.getMobile();
+				String regex = RegExUtil.MOBILE; // 手机校验
+				if (phoneNumber.matches(regex)) {// 手机号格式正确发送短息
+					String repairId = ra.getRepairApplyId();
+					SmsSingleSender singleSender = new SmsSingleSender(SystemConstants.note.APPID,SystemConstants.note.APPKEY);
+					ArrayList<String> message = new ArrayList<String>();
+					message.add(repairId);
+					message.add(roomId);
+					message.add(postName);
+					message.add(phoneNum);
+					singleSender.sendWithParam(SystemConstants.note.COUNTRY,phoneNumber, 55976, message, "", "", "");
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			if(flag == true){
+				JSONUtil.responseJSON(response, new AjaxResult(2, "处理失败!"));
+				return;
+			}
+		} finally{
+			if(flag == false){
+				JSONUtil.responseJSON(response, new AjaxResult(4, "处理成功!",houseflag));
+				return;
+			}
+		}
+	}
+	
+	/**
+	 * 维修申请(公寓)-页面加载时展示维修申请表数据（申请数据从App端来）
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/repairApartInHouseData.do")
+	public ModelAndView repairApartInHouseData(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		pagination.setRows(12);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchid = loginUser.getStaff().getBranchId();
+		String houseId = request.getParameter("houseId");
+		String sql = "repairInHouse";
+		List<?> result;
+		if(houseId == null || "".equals(houseId)){
+			result = apartmentRepairService.findBySQLWithPagination(sql, new String[] { loginUser.getStaff().getStaffId()}, pagination, true);
+			mv.addObject("result", result);
+		}
+		if(houseId != null && !"".equals(houseId)){
+			result = apartmentRepairService.findBySQLWithPagination(sql, new String[] { loginUser.getStaff().getStaffId(),houseId }, pagination, true);
+			mv.addObject("result", result);
+			mv.addObject("houseId",houseId);
+		}
+		
+		mv.addObject("pagination", pagination);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrepair/repairApplyInHouse");
+		return mv;
+	}
+	
+	/**
+	 * 维修申请(公寓)-页面加载时展示维修申请表数据
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/repairApartmentData.do")
+	public ModelAndView repairApartmentData(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		pagination.setRows(12);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+	//	String branchid = loginUser.getStaff().getBranchId();
+		String roomId = request.getParameter("roomId");
+		String sql = "loadRepairApply";
+		List<?> result;
+		if(roomId == null || "".equals(roomId)){
+			result = apartmentRepairService.findBySQLWithPagination(sql, new String[] { loginUser.getStaff().getStaffId()}, pagination, true);
+			mv.addObject("result", result);
+		}
+		if(roomId != null && (!"".equals(roomId))){
+			pagination.setRows(4);
+			result = apartmentRepairService.findBySQLWithPagination(sql, new String[] { loginUser.getStaff().getStaffId(),roomId }, pagination, true);
+			mv.addObject("result", result);
+			mv.addObject("roomId", roomId);
+		}
+		mv.addObject("pagination", pagination);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrepair/allRepairApplication");
+		return mv;
+	}
+	
+	/**
+	 * 维修申请(公寓)-单击维修人员选择
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/selectApartRepairPerson.do")
+	public ModelAndView selectApartRepairPerson(HttpServletRequest request, HttpServletResponse response) {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrepair/customDialog");
+		mv.setViewName("page/dialog/customDialog");
+		mv.addObject("dialogColumns", "staffId,staffName");
+		mv.addObject("dialogTarget", "Staff");
+		mv.addObject("dialogConditions", "status = '1' and branchId=$BRANCHID");
+		mv.addObject("dialogQuickAdd", null);
+		mv.addObject("selectType", "dialog");
+		mv.addObject("colName", "repairPerson");
+		return mv;
+		
+	}
+	
+	/**
+	 * 显示公寓下所选户型的所有房间-暂无使用
+	 * 
+	 * @param request
+	 * @param response
+	 * @param roomtype
+	 */
+	@RequestMapping("/showSimpleRoom.do")
+	public void showSimpleRoomD1(HttpServletRequest request,
+			HttpServletResponse response, String roomtype) {
+
+		LoginUser loginuser = (LoginUser) request.getSession(true)
+				.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId();
+		List<?> result = apartmentRepairService.findBySQL("showFlatRoomId",
+				new String[] { branchid, roomtype }, true);
+		JSONUtil.responseJSON(response, result);
+	}
+}

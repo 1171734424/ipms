@@ -1,0 +1,178 @@
+@charset "utf-8";
+
+.rp_right_title{
+	margin: 1% 0% 1% 70%;
+	color:red;
+}
+.apply_one {
+   height: 0%;
+    overflow: hidden;
+    margin-bottom: 2%;
+}
+.apply_two {
+    height: 50%;
+    overflow-y: auto;
+}
+.apply_three {
+    height: 26%;
+    overflow: hidden;
+    margin: 0 0 0 4%;
+}
+.apply_table_input{
+   border:none;
+   width:68%;
+   text-align: center;
+   line-height: 19px;
+}
+
+.rpapply_table,.rpapply_th,.rpapply_table_td{ border:1px solid #d3dbde;text-align:center;font-size:0.75rem;padding: 3px;}
+ .rpapply_table { text-align: center; border-collapse: collapse; padding:2px;margin: 0% 3.5%; width: 94%;}
+.apply_table_edit_input{
+    width: 84%;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    margin: 0 auto;
+}
+ .rp_img{
+    border: none;
+    display: block;
+    margin: -3px 2px;
+}
+
+ .img_div{
+  	float: right;
+    width: 26%;
+    background-color: #E5E5E5;
+    height: 22px;
+}
+.table {
+	width: 98.1%;
+	margin: 1% 1%;
+	border: none;
+	height: 16%;
+}
+.rpappply_main .table td{
+	font-size: 0.75rem;
+	line-height: 30px;
+}
+.rpapply_time_input{
+	width: 95%;
+    height: 30px;
+    padding: 0 4px;
+}
+.table_input {
+	width: 63%;
+    height: 30px;
+    font-size: 14px;
+    vertical-align: middle;
+}
+.appinfo_c{
+	height:36%;
+	overflow: hidden;
+}
+.appinfo_scroll{
+	height: 24%;
+	overflow: scroll;
+}
+.appinfo_scroll textarea{
+	border:1px solid #ddd;
+	border-radius:2px;
+}
+.appinfo_c .table tr td{
+	padding-bottom:1%;
+}
+.appinfo_c label,.appinfo_scroll label,.address label{
+	font-size:14px;
+    display: inline;
+    vertical-align: middle;
+}
+.auditMessageP{
+	height: 80px;
+	 border: 1px solid #DDDDDD; 
+	 width: 80%; 
+	 margin-left: 10%; 
+	 margin-bottom: 2%;
+}
+.address table,.tableInfoTitleLog table{
+	border:none;
+}
+.address textarea{
+    height: 25%;
+    border: 1px solid #ddd;
+    width: 88.6%;
+    border-radius: 2px;
+    margin-left: 2px;
+    margin-top: -4px;
+}
+.address label{
+    width: 60px;
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: top;
+}
+.address .button,.tableInfoTitleLog .button{
+	border:1px solid #ddd;
+	background:#f1f1f1;
+	color:#333;
+	float: left;
+    margin-left: 10px;
+}
+.address table tr td{
+    padding: 1% 0 11px 42%;
+}
+
+.tableInfoTitleLog .button{
+	float:right;
+	margin-right: 4px;
+}
+.text_margin{
+	margin-top: 17px;
+}
+.text_margin lable{
+	line-height:40px;
+}
+
+.rptextarea{
+    width: 91.5%;
+    height: 70px;
+    padding: 4px;
+    font-size: 0.85rem;
+    margin: 6px 0;
+}    
+.rpapplysubmit_button{
+    float: left;	
+    margin-left: 38%;
+    background: #5A5D9D;
+    border-radius: 4px;
+    color: #fff;
+    border: none;
+    line-height: 33px;
+}
+.rpapplyclose_button{
+    float: left;
+    margin-left: 6%;
+    background: #FC8A15;
+    border-radius: 4px;
+    color: #fff;
+    border: none;
+    line-height: 33px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

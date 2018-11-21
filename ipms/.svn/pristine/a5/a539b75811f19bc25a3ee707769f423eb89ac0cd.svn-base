@@ -1,0 +1,346 @@
+/*控制盒子的mrgin&&padding*/
+
+.room_margin,.stopsell_margin,.integral_margin{
+	background: #fff;
+    height: 100%;
+   /* overflow: scroll;*/
+}
+
+/*订单头部*/
+.header_roomlist{
+	width: 100%;
+    height: 60px; 
+    padding-left: 10px;
+}
+.header_roomlist ul .header_roomlist_li{
+    width: 107px;
+    height: 38px;
+    line-height: 37px;
+    float: left;
+    border: 1px solid #ccc;
+    margin: 10px 0 0 10px;
+    text-align: center;
+    border-radius: 4px;
+    color: #535474;
+    font-size: 15px;
+    transition:all 0.3s ease-in-out;
+    position:relative;
+}
+.header_roomlist span{
+	cursor:pointer;	
+}
+.header_roomlist .highsearch,.header_roomlist .createhouse{
+	display: inline-block;
+    margin: 10px 20px;
+    padding: 1px 10px;
+    height: 38px;
+    line-height: 35px;
+    border:none;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+    background: #535474;
+    color: #fff;
+    
+}
+.header_roomlist .createhouse{
+    margin: 10px 19px 0 -12px;
+    background: #FC8A15;
+    border: 1px solid #f1f1f1;
+}
+.header_roomlist ul li.active{
+	background:#535474;
+	color:#fff;	
+	border: none;
+}
+/*操作*/
+.cancel_span{
+	background:url(../../../../css/ipms/img/backgroundimg/cancel.png) no-repeat center;
+	display:inline-block;
+	width:20px;
+	height:20px;
+}
+.cancel_span:hover{}
+.undone{
+	background:url(../../../../css/ipms/img/backgroundimg/undone.png) no-repeat center;
+	display:inline-block;
+	width:20px;
+	height:20px;
+} 
+.undone:hover{backgroud:url(../../../../css/ipms/img/backgroundimg/undone3.png) no-repeat center;}
+/*订单头部结束*/
+/*高级查询*/
+.high_header{
+    height: 425px;
+    width: 557px;
+	background: #fff;
+	border:1px solid #ccc;
+	position: absolute;
+	top:50%;
+	margin-top:-300px;
+	left:50%;
+	margin-left:-400px;
+	display:none;
+	border-radius:4px;
+	transition: all 0.3s;
+}	
+
+
+.high_header h3{
+    padding-left: 10px;
+    width: 100%;
+    height: 34px;
+    line-height: 30px;
+    background: #4A5064;
+    font-size: 16px;
+    color: #fff;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+.fadeOutUp{
+	-webkit-animation-name: fadeOutUp;
+	animation-name: fadeOutUp;
+	animation-duration: 0.25s;
+}
+@-webkit-keyframes fadeOutUp {
+	0% {
+		opacity: 1;
+		-webkit-transform: translateY(0);
+		transform: translateY(0)
+	}
+	100% {
+		opacity:0;
+		-webkit-transform: translateY(-50px);
+		transform: translateY(-50px)
+	}
+}
+
+@keyframes fadeOutUp {
+	0% {
+		opacity: 1;
+		-webkit-transform: translateY(0);
+		-ms-transform: translateY(0);
+		transform: translateY(0)
+	}
+	100% {
+		opacity: 0;
+		-webkit-transform: translateY(-50px);
+		-ms-transform: translateY(-50px);
+		transform: translateY(-50px)
+	}
+}
+.high_header ul:first-child li:nth-child(3) .label_name_roomid{
+	width:80px;
+}
+/*同城房态*/
+.rowspan_hover{
+	background: #fff;
+    font-size: 14px !important;
+    color: red;
+    font-weight: bolder;
+}
+.city_border table.myTable td{
+	border: 1px solid #dadada;
+}
+.city_border table.myTable thead tr .header{
+	border: 1px solid #dadada;
+}
+.cityroome_height{
+	padding:10px;
+}
+
+.city_border .high_header{
+	top:0;
+}
+/*停售房*/ 
+.stopsell_margin .stop{
+	height: 290px;
+    width:567px;
+}
+.stopsell_margin .button_margin{
+	float:right;
+	border: none;
+}
+.stopsell_margin .cancel{
+	margin: 41px 39px 0 4px;
+}
+.stopsell_margin .confirm{
+	margin: 41px 0 0 0;
+}
+.stopsell_margin .imooc_stop{
+    top: 0px;
+    font-size: 38px;
+    left: 93%;
+    transition: all 0.15s ease-in-out;
+}
+.stopsell_margin .imooc_stop:hover{
+    transform: rotate(90dge);
+    -ms-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+}
+/*查询条件*/
+.high_header ul:first-child li{
+	float:left;
+	line-height: 38px;
+	margin:4px;
+	position:relative;
+}
+.high_header ul:first-child li:nth-child(3) .label_name {
+    
+}
+.high_header ul:nth-child(2) li, .high_header ul:nth-child(3) li,.high_header ul:nth-child(4) li{
+	float:left;
+    margin-top: 15px;
+	line-height: 38px;
+	margin:4px;
+	position: relative;
+}
+.high_header ul:nth-child(5) li{
+	
+}
+.stopsell_margin  .high_header ul:last-child li{
+	 float: right;
+}
+.high_header .margintop{
+	margin-top:10px;
+}
+.high_header .label_name {
+    float: left;
+    width: 74px;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+input {
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    color: #323232;
+    background-color: #fff;
+    border: 1px solid #DDDDDD;
+    line-height: 1.2;
+    font-size: 0.85rem;
+    -webkit-box-shadow: none!important;
+    box-shadow: none!important;
+    -webkit-transition-duration: .1s;
+    transition-duration: .1s;
+}
+.high_header .text_search {
+	padding: 10px 5px;
+   width: 175px;
+   margin-left: 10px;
+}
+
+/*关联房*/
+.connec_room{
+	background:#fff;
+}
+.connec_room  ul li{
+	float:left;
+	margin:2px;
+	line-height: 38px;
+}
+
+.button_margin{
+	height: 34px;
+    line-height: 30px;
+    width: 77px;
+    border:none;
+    font-size: 14px;
+    margin-top: 3px;
+    margin-left: 4px;
+    float: right;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+    background: #535474;
+    color: #fff;
+}
+.connec_room .select_search{
+	padding:6px 5px;
+}
+.cancel{
+	margin-right:15px;
+	margin-left: 10px;
+	background: #F6C90E;
+}
+.high_header .room_search_li{
+	
+}
+.fa{
+	position: absolute;
+    z-index: 1;
+    right: 6px;
+    top: 12px;
+    color: #333;
+}
+.control_margin .box_margin{
+	hegiht:380px;
+}
+.control_margin{
+	
+}
+.room_search{
+	padding: 8px 5px;
+    width: 163px;
+    margin-left: 10px;
+}
+.margintop{
+	height:111px;	
+	padding-top:12px;
+}
+.connec_room .search_li{
+	margin-left:69px;
+}
+/*日志*/
+.integral_margin .imooc_log{
+	left: 95%;
+    top: 1px;
+    font-size: 30px;
+    transition:0.3s all ease-in-out;
+}
+/*日志*/
+.integral_margin .imooc_log:hover{
+	 transform: rotate(90dge);
+    -ms-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+}
+.integral_margin .in_select{
+	line-height: 36px;
+    width: 74px;
+}
+.integral_margin .btn_style{
+	margin-right:15px;
+}
+.integral_margin .reset{
+	background: #FC8A15;
+    margin-right: 26px;
+}
+
+.integral_margin table.myTable td {
+    vertical-align: middle;
+    padding: 10px;
+    font-size: 0.7rem;
+    white-space: normal;
+    border: none;
+    text-align: center;
+    word-break: initial;
+}
+
+.integral_margin section.box_content_widget .content {
+    padding: 10px 10px 0 0;
+}
+
+/*转单*/
+.transf_margin{
+	padding:10px;
+}
+.time_div{
+	width: 100%;
+    float: left;
+}
+.submit_div{
+    float: right;
+    margin-top: 10px;
+    width: 100%;
+}

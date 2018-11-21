@@ -1,0 +1,370 @@
+package com.ideassoft.basic.controller;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.basic.service.CommentBasicService;
+import com.ideassoft.bean.Comment;
+import com.ideassoft.bean.Order;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Transactional
+@Controller
+public class CommentBasicController {
+	@Autowired
+	private CommentBasicService commentBasicService;
+	
+	
+	/*
+	 * 
+	 * 新增订单评论
+	 */
+	@RequestMapping("addOrderComment.do")
+	public void addOrderComment(HttpServletRequest req,HttpServletResponse resp) throws IOException{
+		LoginUser loginuser = (LoginUser) req.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		MultipartHttpServletRequest mr = (MultipartHttpServletRequest)req;
+		MultipartFile photo = mr.getFile("pictureId");
+		String content = req.getParameter("content");
+		String houseId = req.getParameter("brandtype_CUSTOM_VALUE");
+		String serScore = req.getParameter("serviceScore");
+		String serviceComment = req.getParameter("serviceComment");
+		String fScore = req.getParameter("facilityScore");
+		String facilityComment = req.getParameter("facilityComment");
+		String secScore = req.getParameter("securityScore");
+		String securityComment = req.getParameter("securityComment");
+		String commentContent = req.getParameter("commentContent");
+		
+		// 定义接收评分数变量
+		double serviceScore = 0D;
+		double facilityScore = 0D;
+		double securityScore = 0D;
+		double score = 0D;
+		
+		// 使用方法判空判null后 将String转为double
+		serviceScore = StringToDouble(serScore, serviceScore);
+		facilityScore = StringToDouble(fScore, facilityScore);
+		securityScore = StringToDouble(secScore, securityScore);
+		// 平均分=计算总评分数/3
+		score = (serviceScore + facilityScore + securityScore) / 3.0;
+		String newScore = String.format("%.2f", score);
+		score = Double.valueOf(newScore);
+		
+		FileOutputStream fos = null;
+		InputStream is = null;
+		String originalFilename = null;
+		String fileName_timestamp = null;
+		File tarFile = null;
+		String pictureUrl = null;
+		if(photo != null){
+			 originalFilename=photo.getOriginalFilename();
+			 if(!"".equals(originalFilename)){
+				 fileName_timestamp = new Date().getTime() + originalFilename.substring(originalFilename.lastIndexOf("."));
+
+			 }
+		}
+		
+		if((!"".equals(originalFilename)) && (originalFilename !=null)){
+			String webPath = RequestUtil.getWebPath(req);
+			try{
+				pictureUrl = CommonConstants.Domain.DOMAINNAME +"commentPhoto/" + fileName_timestamp;
+				File srcFolder = new File(webPath + File.separator+"upload" +File.separator+"commentPhoto");
+				if (!srcFolder.exists()) {
+					srcFolder.mkdirs();
+				}
+				tarFile = new File(srcFolder.getAbsolutePath() + File.separator+ fileName_timestamp);
+				if(!tarFile.exists()){
+					tarFile.createNewFile();
+				}
+				fos = new FileOutputStream(tarFile);
+				is = photo.getInputStream();
+				if(is.available() <= 0){
+					JSONUtil.responseJSON(resp, new AjaxResult(2,"不可上传空的照片!"));
+					return;
+				}
+				int ln = 0;
+				byte[] buf = new byte[1024];
+				while ((ln = is.read(buf)) != -1) {
+					fos.write(buf, 0, ln);
+				}
+				fos.flush();
+			}catch(IOException e){
+				e.printStackTrace();
+				 JSONUtil.responseJSON(resp, new AjaxResult(2, "文件传输失败!"));
+			}finally{
+				if (fos != null) {
+					fos.close();
+				}
+				if (is != null) {
+					is.close();
+				}
+			}
+		}
+		Comment comment = new Comment();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
+		comment.setCommentContent(content);
+		comment.setCommentId(sdf.format(new Date())+commentBasicService.getSequence("SEQ_COMMENT_ID"));
+		comment.setPicture(pictureUrl);
+		comment.setBranchId(houseId);
+		comment.setRecordTime(new Date());
+		comment.setStatus("1");
+		comment.setCommentContent(commentContent);
+		/*comment.setSpecialLabel(req.getParameter("shortcutName_CUSTOM_VALUE"));*/
+		comment.setTotalScore(score);
+		comment.setRecordUser(loginuser.getStaff().getStaffName());
+		comment.setServiceScore(serviceScore);
+		comment.setServiceComment(serviceComment);
+		comment.setFacilityScore(facilityScore);
+		comment.setFacilityComment(facilityComment);
+		comment.setSecurityScore(securityScore);
+		comment.setSecurityComment(securityComment);
+		commentBasicService.save(comment);
+		JSONUtil.responseJSON(resp, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, "1"));
+	}
+	
+	/**
+	 * 舆情管理弹出评论民宿
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/selectToShortcutName.do")
+	public ModelAndView selectToShortcutName(HttpServletRequest request) {
+		ModelAndView mv = new ModelAndView();
+		// 获取types类别名称
+		mv.setViewName("page/dialog/customDialog");
+		mv.addObject("dialogColumns", "shortcutId,shortcutName");
+		mv.addObject("dialogTarget", "Shortcut");
+		mv.addObject("dialogConditions", "status='1'");
+		mv.addObject("dialogQuickAdd", null);
+		mv.addObject("selectType", "dialog");
+		mv.addObject("colName", "shortcutName");
+		return mv;
+	}
+	
+	
+	/**
+	 * 舆情管理弹出评论民宿
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/selectHouseOnAddComment.do")
+	public ModelAndView selectHouseOnAddComment(HttpServletRequest request) {
+		ModelAndView mv = new ModelAndView();
+		// 获取types类别名称
+		String types = request.getParameter("types");
+		mv.setViewName("page/dialog/customDialog");
+		mv = ForwardPage(mv, "民宿",types,"houseId,housename","House","status<>'0'");
+		return mv;
+	}
+	/**
+	 * 用于多个不同页面调用的公共方法
+	 * 
+	 * @param mv 页面
+	 * @param nowTypes 比对的类别
+	 * @param types 传入的类别
+	 * @param argsIdName 需要查询的ID和名称
+	 * @param argsBean Bean名称
+	 * @param argsStatus 状态
+	 */
+	private ModelAndView ForwardPage(ModelAndView mv, String nowTypes,String types,String argsIdName,String argsBean,String argsStatus) {
+		if (nowTypes.equals(types)) {
+			mv.addObject("dialogColumns", argsIdName);
+			mv.addObject("dialogTarget", argsBean);
+			mv.addObject("dialogConditions", argsStatus);
+			mv.addObject("dialogQuickAdd", null);
+			mv.addObject("selectType", "dialog-radio");
+			mv.addObject("colName", "brandtype");
+		}
+		return mv;
+	}
+	/*
+	 * 舆情订单新增跳转
+	 */
+	@RequestMapping("addOrderCommentCrm.do")
+	public ModelAndView addOrderCommentCrm(HttpServletRequest req,HttpServletResponse resp){
+		ModelAndView mv = new ModelAndView("page/basic/comment/orderCommentAdd");
+		List <?>list = commentBasicService.findByProperties(Order.class, "status", "4","theme","3");
+		mv.addObject("proBrandList", list);
+		return mv;
+	}
+	
+	/*
+	 * 
+	 * 舆情订单编辑跳转
+	 */
+	@RequestMapping("editOrderCommentCrm.do")
+	public ModelAndView editOrderCommentCrm(HttpServletRequest req,HttpServletResponse resp){
+		String commentId = req.getParameter("commentId");
+		List<?> list = commentBasicService.findBySQL("getCommentById", new String[]{commentId},true);
+		// 将获取的list数据转为Map
+		Map<?,?> mList = (Map<?,?>)list.get(0);
+		// 定义个变量用于储存标签名称
+		String commentContent = "";
+		// 当获取的标签名称不等于NULL时进行转型并赋值给specialLabel变量
+		if (mList.get("COMMENT_CONTENT") != null) {
+			commentContent = (String)mList.get("COMMENT_CONTENT") ;
+		}
+		
+		ModelAndView mv = new ModelAndView("page/basic/comment/orderCommentEdit");
+		JSONArray ja = JSONArray.fromObject(list);
+		if(ja.size()>0){
+			JSONObject jo = ja.getJSONObject(0);
+			mv.addObject("comment", jo);
+		}
+		mv.addObject("commentContent", commentContent);
+		return mv;
+	}
+	
+	
+	/*
+	 * 
+	 * 更新品宣评论
+	 */
+	@RequestMapping("editOrderComment.do")
+	public void editOrderComment(HttpServletRequest req,HttpServletResponse resp) throws IOException{
+		MultipartHttpServletRequest mr = (MultipartHttpServletRequest)req;
+		MultipartFile photo = mr.getFile("pictureId");
+		String content = req.getParameter("content");
+		String houseId = req.getParameter("brandtype_CUSTOM_VALUE");
+		String commentId = req.getParameter("commentId");
+		String serScore = req.getParameter("serviceScore");
+		String serviceComment = req.getParameter("serviceComment");
+		String fScore = req.getParameter("facilityScore");
+		String facilityComment = req.getParameter("facilityComment");
+		String secScore = req.getParameter("securityScore");
+		String securityComment = req.getParameter("securityComment");
+		String commentContent = req.getParameter("commentContent");
+		
+		// 定义接收评分数变量
+		double serviceScore = 0D;
+		double facilityScore = 0D;
+		double securityScore = 0D;
+		double score = 0D;
+		
+		// 使用方法判空判null后 将String转为double
+		serviceScore = StringToDouble(serScore, serviceScore);
+		facilityScore = StringToDouble(fScore, facilityScore);
+		securityScore = StringToDouble(secScore, securityScore);
+		// 平均分=计算总评分数/3
+		score = (serviceScore + facilityScore + securityScore) / 3.0;
+		String newScore = String.format("%.2f", score);
+		score = Double.valueOf(newScore);
+		
+		FileOutputStream fos = null;
+		InputStream is = null;
+		String originalFilename = null;
+		String fileName_timestamp = null;
+		File tarFile = null;
+		String pictureUrl = null;
+		if(photo != null){
+			 originalFilename=photo.getOriginalFilename();
+			 if(!"".equals(originalFilename)){
+				 fileName_timestamp = new Date().getTime() + originalFilename.substring(originalFilename.lastIndexOf("."));
+
+			 }
+			 
+		}
+		
+		if((!"".equals(originalFilename)) && (originalFilename !=null)){
+			String webPath = RequestUtil.getWebPath(req);
+			try{
+				pictureUrl = CommonConstants.Domain.DOMAINNAME +"commentPhoto/" + fileName_timestamp;
+				File srcFolder = new File(webPath + File.separator+"upload" +File.separator+"commentPhoto");
+				if (!srcFolder.exists()) {
+					srcFolder.mkdirs();
+				}
+				tarFile = new File(srcFolder.getAbsolutePath() + File.separator+ fileName_timestamp);
+				if(!tarFile.exists()){
+					tarFile.createNewFile();
+				}
+				fos = new FileOutputStream(tarFile);
+				is = photo.getInputStream();
+				if(is.available() <= 0){
+					JSONUtil.responseJSON(resp, new AjaxResult(2,"不可上传空的照片!"));
+					return;
+				}
+				int ln = 0;
+				byte[] buf = new byte[1024];
+				while ((ln = is.read(buf)) != -1) {
+					fos.write(buf, 0, ln);
+				}
+				fos.flush();
+			}catch(IOException e){
+				e.printStackTrace();
+				 JSONUtil.responseJSON(resp, new AjaxResult(2, "文件传输失败!"));
+			}finally{
+				if (fos != null) {
+					fos.close();
+				}
+				if (is != null) {
+					is.close();
+				}
+			}
+		}
+		
+		Comment comment = (Comment)commentBasicService.findOneByProperties(Comment.class, "commentId", commentId);
+		if(originalFilename != null&&!originalFilename.equals("")){
+			comment.setPicture(pictureUrl);
+		}
+		comment.setTotalScore(score);
+		comment.setCommentContent(content);
+		comment.setBranchId(houseId);
+		comment.setRecordTime(new Date());
+		comment.setCommentContent(commentContent);
+		/*comment.setSpecialLabel(req.getParameter("shortcutName_CUSTOM_VALUE"));*/
+		comment.setServiceScore(serviceScore);
+		comment.setServiceComment(serviceComment);
+		comment.setFacilityScore(facilityScore);
+		comment.setFacilityComment(facilityComment);
+		comment.setSecurityScore(securityScore);
+		comment.setSecurityComment(securityComment);
+		comment.setRecordTime(new Date());
+		commentBasicService.update(comment);
+		JSONUtil.responseJSON(resp, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, "1"));
+	}
+	
+	private double StringToDouble(String strParam, double dbParame) {
+		if (!StringUtils.isEmpty(strParam)) {
+			dbParame = Double.parseDouble(strParam);
+		}
+		return dbParame;
+	}
+	
+	@RequestMapping("/toAddCommentReply")
+	public ModelAndView toAddCommentReply(HttpServletRequest request, HttpServletResponse response) {
+		ModelAndView mv = new ModelAndView();
+		String commentId = request.getParameter("commentId");
+		mv.setViewName("/page/comment/commentReply");
+		mv.addObject("commentId", commentId);
+		Comment comment = (Comment) commentBasicService.findOneByProperties(Comment.class, "relativeComment", commentId, "status","1");
+		mv.addObject("reply", comment);
+		return mv;
+		
+	}
+}

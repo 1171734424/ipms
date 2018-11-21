@@ -1,0 +1,22 @@
+@CHARSET "UTF-8";
+.container{
+
+    margin: 1%;
+}
+.container tr td:nth-child(2n-1){
+	text-align:right;
+}
+.container tr td:nth-child(2n){
+	text-align: left;
+}
+.container tr:nth-child(6) td:nth-child(2),.container tr:nth-child(7) td:nth-child(2){
+	text-align: left;
+}
+.container input,.container select,.container textarea{
+	margin:4px;
+}
+@media screen and (min-width: 1280px) {
+    textarea {
+       width: 462px;
+    }
+}

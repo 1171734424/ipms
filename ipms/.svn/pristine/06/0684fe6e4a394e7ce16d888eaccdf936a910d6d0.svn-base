@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="ipms"
+  id="myeclipse.1528775358879"
+  context-root="/ipms"
+  j2ee-spec="5.0"
+  archive="ipms.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+

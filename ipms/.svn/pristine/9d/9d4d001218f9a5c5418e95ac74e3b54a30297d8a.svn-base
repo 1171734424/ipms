@@ -1,0 +1,149 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ page import="net.sf.json.JSONObject"%>
+<%@ page import="com.ideassoft.core.page.Pagination"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%
+	JSONObject pagination = JSONObject.fromObject(request.getAttribute("pagination"));	
+%>
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/commom_table.css" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/roomlistfont.css" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/pagination.css" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/roomlist/roomlist.css" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/pagenation.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/jquery-dialog.css" />
+	<style type="text/css">
+		.button_margin{
+			float: none;
+		    height: 31px;
+		    line-height: 29px;
+		}
+		.stopedit .can{
+		    display: inline-block;
+		    width: 20px;
+		    height: 20px;
+		}
+		.cancel_button {
+			border-radius: 4px;
+		    padding: 3px;
+		    font-size: 0.75rem;
+		    background: #FC8A15;
+		    color: #fff;
+		    height: 30px;
+		    width: 55px;
+		}
+		.cancel_button_non {
+			border-radius: 4px;
+	        padding: 3px;
+		    font-size: 0.75rem;
+		    background: darkgrey;
+		    color: #fff;
+		    height: 30px;
+		    width: 55px;
+		}
+	</style>
+  </head>
+  <body>
+  	<form>
+	    <div style="height:826px;overflow: scroll;width: 101%" class="stopedit">
+	    	<table id="myTable" class="myTable" border="0" width="100">
+				<thead id="log">
+					<tr>
+						<th class="header">创建时间</th>
+						<th class="header">编号</th>
+						<th class="header">民宿编号</th>
+						<th class="header">类型</th>
+						<th class="header">状态</th>
+						<th class="header">开始日期</th>
+						<th class="header">结束日期</th>
+						<th class="header">创建者</th>
+						<th class="header">原因</th>
+						<th class="header">操作</th>
+					</tr>
+				</thead>
+				<tbody id="info">
+					<c:forEach items="${result}" var="list">
+						<tr ondblclick="showstophaltplan(this)">
+							<td>${list["RECORDTIME"] }</td>
+							<td>${list["LOGID"] }</td>
+							<td>${list["ROOMID"] }</td>
+							<td>${list["DECODEHALTTYPE"] }</td>
+							<!--<td>${list["USER_ID"] }</td>-->
+							<td>${list["DECODESTATUS"] }</td>
+							<td>${list["STARTTIME"] }</td>
+							<td>${list["ENDTIME"] }</td>
+							<td>${list["STAFFNAME"] }</td>
+							<td>${list["DECODEHALTREASON"] }</td>
+							<c:choose>
+								<c:when test="${list.STATUS == 1}">
+									<td>
+										<button type="button" class="cancel_button" onclick="tipcancel(this)">取消</button>
+										<!--<span class="can undoneo" onclick="tipcancel(this)" style="background: url(./css/ipms/img/backgroundimg/cancelone.png) no-repeat center;"></span>
+									--></td>
+								</c:when>
+								<c:otherwise>
+									<td><button type="button" class="cancel_button_non">取消</button><!-- <span class="can undonet"  style="background: url(./css/ipms/img/backgroundimg/cry.png) no-repeat center;" ></span> --></td>
+								</c:otherwise>
+							</c:choose>
+						</tr>
+					</c:forEach>
+				</tbody>
+			</table>
+		</div>
+		<div id="pager"></div>
+		<input type="hidden" id="logid" name="logid" value="${ multiqueryhalt.logid }">
+		<input type="hidden" id="roomid" name="roomid" value="${ multiqueryhalt.roomid }">
+		<input type="hidden" id="halttype" name="halttype" value="${ multiqueryhalt.halttype }">
+		<input type="hidden" id="haltreason" name="haltreason" value="${ multiqueryhalt.haltreason }">
+		<input type="hidden" id="starttime" name="starttime" value="${ multiqueryhalt.starttime }">
+		<input type="hidden" id="endtime" name="endtime" value="${ multiqueryhalt.endtime }">
+		<input type="hidden" id="status" name="status" value="${ multiqueryhalt.status }">
+		<input type="hidden" id="type" name="type" value="${ multiqueryhalt.type }">
+	</form>
+	<%@ include file="../../common/script.jsp"%>
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/pager.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/script/ipms/js/workbillroom/util.js"></script>
+	<script>
+		var path = "<%=request.getContextPath() %>";
+		
+		Pager.renderPager(<%=pagination%>);
+		var pagea = "1";
+		
+		$(function (){
+		});
+		
+		function showstophaltplan(e){
+			var logid = $(e).find("td:nth-child(2)").text();
+			var startTime = $(e).find("td:nth-child(6)").text();
+			var endTime = $(e).find("td:nth-child(7)").text();
+			window.JDialog.open("停售房编辑", path + "/page/ipmshouse/stophouse/stophouse_edit.jsp?logid=" + logid + "&startTime=" +startTime + "&endTime=" + endTime, 882,512);
+		}
+		
+		function tipcancel(e){
+			var logid = $(e.parentNode.parentNode).find("td:nth-child(2)").text();
+			showMsg("确定取消停售状态?", "cancelhaltplan('"+logid+"')");
+		}
+		
+		function cancelhaltplan(logid){
+			$.ajax({
+		         url: path + "/cancelhaltplanHouse.do",
+				 type: "post",
+				 data : {logid : logid},
+				 success: function(json) {
+				 	if(json.result == 1){
+				 		showMsg(json.message);
+				 		setTimeout("$('form').submit();", 2000);
+				 	}
+				 },
+				 error: function(json) {}
+			});
+		}
+		
+	</script>
+  </body>
+</html>

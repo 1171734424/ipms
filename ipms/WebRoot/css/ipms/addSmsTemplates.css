@@ -1,0 +1,80 @@
+@CHARSET "UTF-8";
+.add_box{
+	padding: 1%;
+}
+.add_box table{
+	border: 1px dotted #a6b5e6;
+}
+.add_box table tr td{
+	padding:2px;
+    border: 1px dotted #a6b5e6;  
+}
+.add_box table .label{
+	display:inline;
+}
+.add_box table .state{	
+	text-align:right;
+	width:13%;
+	padding-left:5px;
+}
+.add_box table  select{
+    font-size: 14px;
+    border: 1px solid #ddd;
+    background: #fff;
+    width: 30%;
+    height: 38px;
+    line-height: 45px;
+    margin: 2px;
+    border-radius: 2px;
+    
+}
+.add_box table textarea{
+ 	border: 1px solid #ddd;
+    width: 99%;
+    padding-left: 5px;
+    background: #fff;
+    text-align: left;
+    border-radius: 2px;
+    margin-left: 2px;
+	text-align:left;
+	line-height:25px;
+}
+.add_box  .div_button{
+    width: 75px;
+    line-height: 27px;
+    color: #333;
+    border-radius: 4px;
+    text-align: center;
+    padding: 3px;
+    margin: 15px 5px;
+    font-size: 14px;
+    font-family: Microsoft YaHei;
+    float: right;
+    background: #f0f0f0;
+    border: 1px solid #cccccc;
+    transition:all 0.3s ease-in-out;
+}
+.add_box .div_button:hover{
+	background: #4A5064;
+	color:#fff;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

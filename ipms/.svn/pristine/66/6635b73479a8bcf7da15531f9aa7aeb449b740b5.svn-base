@@ -1,0 +1,263 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@page import="java.text.SimpleDateFormat"%>
+<%@ include file="../../../common/taglib.jsp"%>
+<%@ include file="../../../common/script.jsp"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <base href="<%=basePath%>">    
+    <title>直接入住页面</title>
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<link rel="stylesheet" id="style" type="text/css"
+		href="<%=request.getContextPath()%>/css/ipms/css/order/order_details.css" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/jquery-dialog.css" />	
+	<link rel="stylesheet" id="style" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>	
+	<link rel="stylesheet" id="style" href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+	<link rel="stylesheet" id="style" href="<%=request.getContextPath()%>/css/ipms/css/fonticon.css"/>
+	<link rel="stylesheet" id="style"  href="<%=request.getContextPath()%>/css/fontawesome/css/font-awesome.min.css" />
+	<script src="<%=request.getContextPath()%>/script/common/jquery-ui.min.js"></script>	
+	<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/need/laydate.css"/>
+	<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/skins/molv/laydate.css"/>
+	
+	<script>var base_path = "<%=request.getContextPath()%>";</script>	
+  </head>
+  <style>
+  .direct_margin{
+  
+  /*height:510px*/
+  	height:690px;
+  	overflow:scroll
+  }
+  
+  </style>
+  <body>
+   	<div class="detail_wrap_margin detail_color directcheckIn" style="padding:0;">
+			<!--<div class="detail_title">
+				<span class="top_icon"><i class="imooc im_top" onclick="window.parent.JDialog.close();">&#xea0f;</i></span>
+				<span>直接入住</span>
+			</div>
+			--><div class="direct_margin">
+			<form action="" method="post">
+				<input id="memberId" class="" type="hidden" value=""/>
+				<input id="memberrank" class="" type="hidden" value=""/>
+				<input id="rpId" class="" type="hidden" value=""/>
+				<input id="rpName" class="" type="hidden" value=""/>
+				<input id="idnumber" class="" type="hidden" value="">
+				<input id="discountPerson" class="" type="hidden" value="">
+				<input id="checkuserMain" class="" type="hidden" value="">
+			</form>
+			<section class="detail_one">
+					<div class="detail_one_div clearfix">
+						<label class="label_title">入住信息</label>
+						<span role="button" class="button_margin timeroom" onclick="hourCheckIn()">钟点房</span>
+					</div>
+					<ul class="clearfix checkindirect">
+						<li class="mylistyle"><label class="label_name">房间类型</label>
+							<select id="roomtype" name="roomtype" class="check">
+								<option value="0">房间类型</option>
+								<c:forEach items="${roomtypes}" var="rt">
+								<c:choose>
+									<c:when test="${roomType == rt.ROOMTYPE}">
+										<option value="${rt['ROOMTYPE']}" selected>${rt.ROOMNAME}</option>
+									</c:when>
+									<c:otherwise>
+										<option value="${rt['ROOMTYPE']}">${rt['ROOMNAME']}</option>
+									</c:otherwise>
+								</c:choose>
+								</c:forEach>
+							</select>
+						</li>
+						<!-- jsm -->
+						<li class="mylistyle">
+							<label class="label_name">会员查询</label>
+							<input id="companyOrMemberSelect" name="companyOrMemberSelect" type="text" value="" class="check" placeholder="手机号/公司编号" maxlength = "40"/>
+							<%--<span role="button" class="button_margin submitbutton_order" onclick="queryFirstPriceInCheck()">会员查询</span>
+						--%></li>
+						<!-- jsm -->
+						<li class="mylistyle"><label class="label_name">房号</label>
+						<c:if test="${fn:length(roomType) >0}">
+								<input name="房号" value="${roomId}"  type="text" id="roomid" class="check room_select">
+						</c:if>
+						<c:if test="${fn:length(roomType) <=0}">
+								<input name="房号" placeholder="请选择房间号"  type="text" id="roomid" class="check room_select">
+						</c:if>
+						</li>
+						<li class="leavetime mylistyle"><label class="label_name">预离日期</label><input id="checkouttime" name="预离日期" type="text" class="check"></li>
+						<li Style = "display: none;" class="houflag">
+							<label class="label_name">时效</label>
+							<c:set	var="nowdate" value='<%=new SimpleDateFormat("H").format(new Date())%>'></c:set>
+							<c:choose>
+								<c:when test="${nowdate >= 6 && nowdate < 19}">
+									<select id="hours" name="时效" class="check">
+										<option value="1">1小时</option>
+										<option value="2">2小时</option>
+										<option value="3">3小时</option>
+										<option value="4">4小时</option>
+									</select>
+								</c:when>
+								<c:when test="${nowdate >= 19 && nowdate < 20}">
+									<select id="hours" name="时效" class="check">
+										<option value="1">1小时</option>
+										<option value="2">2小时</option>
+										<option value="3">3小时</option>
+									</select>
+								</c:when>
+								<c:when test="${nowdate >= 20 && nowdate < 21}">
+									<select id="hours" name="时效" class="check">
+										<option value="1">1小时</option>
+										<option value="2">2小时</option>
+									</select>
+								</c:when>
+								<c:when test="${nowdate >= 21 && nowdate < 22}">
+									<select id="hours" name="时效" class="check">
+										<option value="1">1小时</option>
+									</select>
+								</c:when>
+								<c:otherwise>
+									<select id="hours" name="时效" class="check">
+										<option value="1">1小时</option>
+										<option value="2">2小时</option>
+										<option value="3">3小时</option>
+										<option value="4">4小时</option>
+									</select>
+								</c:otherwise>
+							</c:choose>
+						</li>
+						<li class="mylistyle"><label class="label_name">积分账号</label><input id="checkuser" name="入住人" type="text"  class="check" disabled></li>
+						<li class="mylistyle"><label class="label_name">房价码</label><input id="rpname" name="房价码" type="text" class="check" disabled></li>
+						<li class="mylistyle"><label class="label_name">房价</label><input id="activity" name="房价" type="text" class="check" disabled></li>
+						<li style="display:none"><label class="label_name">门市价</label><input id="activity" name="门市价" type="text" class="check"></li>
+						<li class="mylistyle"><label class="label_name">押金</label> <input id="deposit" name="押金" type="text" class="check"></li>
+						<li><label class="label_name">备注</label>
+						<textarea  id="remark" name="remark" class="" rows="2" cols="124.5" ></textarea>
+						</li>
+					</ul>
+				</section>
+				<section class="detail_two check_detail">
+						<div class="two_left fl">
+							<label class="label_title cus_ino">
+								客人信息
+							</label>
+							<input id="memberselect" name="memberselect" type="text" value="" class="check check_one" placeholder="身份证号" />
+							<!--<span role="button" class="button_margin submitbutton_order check_color" onclick="querymember()">查询</span>
+							<input id="corporationIdSelect" name="corporationIdSelect" type="text" value="" class="check check_one" placeholder="公司会员编号" />
+							<span role="button" class="button_margin submitbutton_order" onclick="changePrice()">公司会员价</span>-->
+	 						
+	 						<span role="button" id="errorMsg" style="color: red;font-size: 17px;display:none"></span>
+ 						</div>
+ 						<div class="bottom_content fr">
+							<ul class="clearfix"><!--
+								<li><span class="button_margin" onclick="getGuestInfo()">读取证件</span></li>
+								-->
+								<li><span role="button" class="button_margin  check_color" onclick="checkInHand()" style="display:none" id="handSpan">手动入住</span></li>
+	 							<li><span role="button" class="button_margin  check_color" onclick="cancleHand()" style="display:none;margin-right: 40px;" id="cancleHandSpan">取消</span></li>
+								<li><span class="button_margin" onclick="setMainGuest();">设置主客人</span></li>
+ 								<li><span class="button_margin addcustomer" onclick="addCustomerByHand()">手动添加新客人</span></li>
+ 								<li><span class="button_margin" onclick="deleteCustomer()">减少客人</span></li>
+							</ul>
+						</div>					
+						<div class="info_write fl">
+							<ul class="check_ul clearfix" id="guest">
+								<li class='check_name active onShow' onclick="thisGuestInfo(this)"><label class="guestmemberid" style='display:none'></label><span><i class= "fa fa-star"></i><span>主客人</span></span></li>
+							</ul>
+							<ul class="customer_info check_div clearfix" id="guestInfo">
+								<li><label class="label_name">姓名</label><input name="username" type="text" id="username" class="check" disabled></li>
+								<li>
+									<label class="label_name" for="">性别</label>
+									<select id="gender" name="gender" class="gender-select" disabled='disabled' style="width:150px;height:36px;margin-left:10px" >
+										<option value="1">男</option>
+										<option value="0">女</option>
+									</select>
+									
+									<!--
+									<input id="gender" name="gender" type="text" value="" class="info_write_select" disabled="disabled">
+								--></li>
+								<li>
+									<label class="label_name" for="" >会员类型</label>
+									<select id="memberrank_select" name="memberrank_select" class="info_write_select" disabled='disabled'>
+										<option value="7" id="memberRank"></option>
+										<c:forEach items="${memberranks}" var="mr">
+											<c:choose>
+												<c:when test="${mr['MEMBERRANK'] == 1}">
+													<option value="${mr['MEMBERRANK']}">非会员</option>
+												</c:when>
+												<c:otherwise>
+													<option value="${mr['MEMBERRANK']}">${mr['MEMBERNAME']}</option>
+												</c:otherwise>
+											</c:choose>
+										</c:forEach>							
+									</select>
+								</li>
+								<li><label class="label_name">会员编码</label><input name="memberid" id="memberid" type="text" value="" class="check" disabled></li><%--
+								<li><label class="label_name">出生日期</label> <input name="birthday" id="birthday" type="text" value="" class="check" disabled></li>
+								--%><li><label class="label_name">手机号码</label> <input name="checkphone" id="checkphone" type="text" value="" class="check" disabled></li>
+								<li>
+									<label class="label_name" for="">证件类型</label>
+									<select class="info_write_select" name="cars" disabled='disabled'>
+										<option value="7">身份证</option><%--
+										<option value="1">居住证</option>
+									--%></select>
+								</li>
+								<li><label class="label_name">证件号码</label> <input name="idcard" type="text" value="" id="idcard" class="check" disabled></li>
+								<li><label class="label_name">备注</label><textarea  id="checkuserremark" name="checkuserremark" class="checkIn_textarea" rows="2"></textarea></li>
+							</ul>
+						</div>
+				</section>
+				<section class="detail_four" >
+					<div class="fr" role="button">
+						<ul class="clearfix">
+							<li onclick="checkin();"><span class="button_margin button_checkIn">入住</span></li>						
+						</ul>
+					</div>
+				</section>
+				<!--  房间选择-->
+				<section class="detail_five fadeInDown" style="display:none;">
+					<div class="high_header">
+						<h3>
+							房间选择
+						</h3>
+						<i class="imooc imooc_order" style="color: #fff" onclick="hide()">&#xe900;</i>
+						<div class="margintop">
+							<span class="span_title">房号： <span class="span_name" id="roomtype"></span></span>
+							 <ul class="clearfix" id="roomul">
+								<%--<li><span id="roomnumber"></span></li>--%> 
+							</ul>
+						</div>
+					</div>
+				</section>
+			</div> 
+		</div>
+		</div>
+		<script type="text/javascript" src="<%=request.getContextPath()%>/script/ipms/js/workbillroom/util.js"></script>
+		<script type="text/javascript" src="<%=request.getContextPath()%>/script/check.js"></script>
+		<script type="text/javascript" src="<%=request.getContextPath()%>/script/ipmshotel/leftmenu/checkinDirect/checkindirect.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/jquery-ui.min.js"></script>
+	    <script src="<%=request.getContextPath()%>/script/common/jquery.dialog.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+		<script src="<%=request.getContextPath()%>/script/ipms/js/laydate.dev.js" charset="utf-8"></script>
+		<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+		<script>
+			var path = "<%=request.getContextPath() %>";
+			$(document).ready(function(){});
+			laydate({
+		    	elem: '#checkouttime',
+		    	min:laydate.now(1) 
+			});
+			var memberranks = '${memberranks}';
+			var RoomType = '${roomType}';
+			var RoomId = '${roomId}';
+			function hide(){
+				$(".detail_five").hide();
+			}
+		</script>
+  </body>
+</html>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M902" name="员工管理" show="true" icon="parameter" subSystem="UPMS">
+				<page pageId="R90201" name="部门管理" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<conditions>DEPARTNAME,DEPARTLEVEL,SUPERDEPART,SUPPILERSTATUS</conditions>
+					<functions>FRESH,EDIT</functions>
+					<target>Department</target>
+					<strategy>branchRank</strategy>
+					<query type="sql">
+						<sql>departmentmanageall,departmentmanage</sql>
+					</query>
+					<columns>
+						<column columnId="DEPARTID" name="部门编号" hidden="true"  complexKey="DepartmentId" sequence="SEQ_DEPART_ID" sequenceSource = "cloud"/>
+						<column columnId="BRANCHID" name="门店编号" hidden="true" complexKey="DepartmentId"/>
+						<column columnId="DEPARTNAME" name="部门名称" editable="true" validateRule="NOTNULL,LENGTH:30"/>
+						<column columnId="DEPARTLEVEL" name="部门级别" editType="select" editValue="1:一级;2:二级" 
+								editable="true" validateRule="NOTNULL"/>
+						<column columnId="MANAGER" name="部门经理" editable="true" align="center" dialogTarget="Staff" 
+								editType="dialog" dialogColumns="staffId,staffName" dialogConditions=" (branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID)) and status = '1' " cellButtonFunc="clearText" buttonCls="button" funcName="清空" />	
+						<column columnId="SUPERDEPART" name="上级部门"  editable="true" 
+								editType="dialog" dialogTarget="Department"  dialogColumns="departmentId.departId,departName"
+								 dialogConditions="status = '1' and (departmentId.branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								departmentId.branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))" cellButtonFunc="clearText" buttonCls="button" funcName="清空" />
+						<!-- <column columnId="SUPERDEPART" name="上级部门"  editable="true" align="center" editType="dialog"
+								dialogTarget="Department" dialogColumns="departLevel" dialogConditions="rank = '2'"
+									dataEvent1="departLevel:DEPARTLEVEL"
+						/> -->
+						<column columnId="STATUS" name="状态"  editValue="1:有效;0:已删除" editType="select" editable="true"
+								validateRule="NOTNULL,LENGTH:1"/>
+						<column columnId="REMARK" name="备注" editType="textarea" editable="true" align="left"/>
+					</columns>
+				</page>
+				
+				<page pageId="R90202" name="职务管理" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<conditions>POSTNAME,SUPPILERSTATUS</conditions>
+					<functions>FRESH,EDIT</functions>
+					<target>Post</target>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>postmanage</sql>
+					</query>
+					<columns>
+						<column columnId="POSTID" name="职位编号" width="120" align="center" hidden="true" primaryKey="true" sequenceSource = "cloud" sequence="SEQ_POST_ID"/>
+						<column columnId="POSTNAME" name="职位名" width="120" editable="true" align="center" validateRule="NOTNULL,LENGTH:30,UNIQUE"/>
+						<column columnId="DESCRIBE" name="职能描述" width="120" editable="true" align="center"/>
+						<column columnId="STATUS" name="状态	" editType="select" editValue="1:有效;0:已删除" width="120" align="center" validateRule="NOTNULL,LENGTH:1" editable="true"/>
+						<column columnId="REMARK" name="备注" editType="textarea" width="120" editable="true" align="left"/>
+					</columns>
+				</page>
+			
+				<page pageId="R90203" name="员工管理" editing="form" loadOnRender="true" showMenu="true" sync="true" role="*">
+					<conditions>STAFFNAME,LOGINNAME,IDCARD,MOBILE,ZT</conditions>
+				   	<functions>FRESH,ADD,DELETE,UPDATE</functions>
+					<target>Staff</target>
+					<strategy>branchRank</strategy>
+					<formSubmitUrl>staffUpdate</formSubmitUrl>
+					<delFunc>delStaff</delFunc>
+					<query type="sql">
+						<sql>staffmanageall,staffmanage</sql>
+					</query>
+					<columns>
+						<column columnId="STAFFID" name="员工编号" hidden="true" primaryKey="true" sequence="SEQ_STAFF_ID" sequenceSource = "cloud"/>
+						<column columnId="STAFFNAME" name="员工姓名" editable="true" validateRule="NOTNULL,LENGTH:20"/>
+						<column columnId="LOGINNAME" name="登录名" editable="true"  validateRule="NOTNULL,LENGTH:20,UNIQUE"/>
+						<column columnId="PASSWORD" name="密码" edithidden="true" editable="true" hidden="true" />
+						<column columnId="BRANCHID" name="归属门店" editable="true" editType="dialog-radio" initValue="BRANCHNAME"
+								dialogTarget="Branch" dialogColumns="branchId,branchName" dialogConditions="status = '1' 
+								and (branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))" validateRule="NOTNULL"/>
+						<column columnId="DEPARTID" name="部门" width="120" editable="true" align="center" dialogTarget="Department" 
+								editType="dialog" dialogColumns="departmentId.departId,departName" dialogConditions="status = '1' and 
+								(departmentId.branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								departmentId.branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))" validateRule="LENGTH:15" cellButtonFunc="clearText" buttonCls="button" funcName="清空"/>					
+						<column columnId="POST" name="职务" editable="true" dialogTarget="Post" 
+								editType="dialog-radio" dialogColumns="postId,postName" dialogConditions="status != '0' "
+								validateRule="NOTNULL"/>
+						<column columnId="IDCARD" name="身份证" width="150" editable="true"  validateRule="NOTNULL,IDCARD,UNIQUE"/>
+						<column columnId="MOBILE" name="手机号" editable="true" validateRule="NOTNULL,MOBILE,UNIQUE"/>	
+						<column columnId="GENDOR" name="性别" editType="select" editValue="1:男;0:女"  editable="true"
+								validateRule="NOTNULL"/>
+						<column columnId="BIRTHDAY" name="生日"  hidden="true" edithidden="true" editable="true" editType="datetime"/>
+						<column columnId="ENTRYTIME" name="入职时间" editable="true" editType="datetime" 
+								validateRule="NOTNULL"/>
+						<column columnId="STATUS" name="状态	" editType="select" editable="true" editValue="1:正常员工;2:自营;3:加盟" 
+								validateRule="NOTNULL"/>
+						<column columnId="EMAIL" name="邮件" hidden="true" editable="true" validateRule="LENGTH:40,EMAIL,UNIQUE"/>
+						<column columnId="ADDRESS" name="地址" hidden="true"  editable="true" validateRule="LENGTH:60"/>
+						<column columnId="REMARK" name="备注" editType="textarea" editable="true" align="left" validateRule="LENGTH:200"/>
+					</columns>
+				</page>
+				<page pageId="R90204" name="民宿账号管理" editing="form" loadOnRender="true" showMenu="true" editFunc="editorHouseAccount" role="4">
+					<conditions>HOUSEACCOUNTNAME,HOUSEMANAGER</conditions>
+					<functions>FRESH,EDIT</functions>
+					<funcCondRate>60,40</funcCondRate>
+					<delFunc>delHouseAccount</delFunc>
+					<strategy>default</strategy>
+					<target>HouseAccount</target>
+					<query type="sql">
+					<sql>queryHouseAccount</sql>
+					</query>
+					<columns>
+					<column columnId="ROWNUM" name="序号" width="120" editable="true" align="center" hidden="true"/> 
+					<column columnId="HOUSEACCOUNTNAME" name="账号名称" width="120" editable="true" align="center"/>
+					<column columnId="HOUSEMANAGER" name="账号管理员" width="120" editable="true" align="center"/>
+					<column columnId="STATUS" name="账号状态" width="120" editable="true" align="center"/>
+					</columns>
+				  </page>
+				
+				<page pageId="R90205" name="个人资料" role="*">
+					<url>personInfo</url>
+				</page>
+				
+				<page pageId="R90206" name="密码修改" role="*">
+					<!-- <firstPage>page/system/password</firstPage> -->
+					<url>password</url>
+				</page>
+			</model>
+		</models>
+	</config>
+</configs>

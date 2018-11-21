@@ -1,0 +1,607 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="../../../common/taglib.jsp"%>
+<%@ include file="../../../common/script.jsp"%>
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="<%=request.getContextPath()%>/css/reset.css" rel="stylesheet" type="text/css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/jquery-ui.css"/>
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/jquery-dialog.css"/>
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/need/laydate.css"/>
+	    <link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/skins/molv/laydate.css"/>
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css" media="all" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/campaigns.css" media="all" />
+		<title>合同新增</title>
+	</head>
+	<style>
+	
+	.gray{
+	    background: #f0f0f0;
+	}
+	td.must{
+	color:red;
+	}
+	
+	.addContrart .gdsbutton_clean{
+		height: 32px;
+	    line-height: 26px;
+	    text-align: center;
+	    width: 70px;
+	    border:none;
+	    background-color:#5A5D9C;
+	    color: #fff;
+	    cursor: pointer;
+}
+.addContrart input.registermember{
+	margin-top: 0;
+	background-color: #FC8A15;
+}
+
+.basicInfo .contrart_table{
+    border: none;
+    width: 87%;
+    margin-left: 61px;
+    margin-top: 16px;
+}
+
+	</style>
+	<body>
+	<div class="addContrart">
+		<form id="basicInfo" name="basicInfo" class="basicInfo"  method="POST" enctype="multipart/form-data">
+			<input type="hidden" id="contrartid" name="contrartid" value="${contrartId}" />
+				<table class="contrart_table">
+				<tr>
+				<td style="width:8%;">查会员信息&nbsp</td>
+				<td>
+					<input id="memberselect" name="memberselect" type="text" value="" placeholder="手机号" onKeyUp="this.value = this.value.replace(/\D/g, '')"; onafterpaste="this.value=this.value.replace(/\D/g,'')"/>
+			        <input type="button" name="" id="" class="gdsbutton_clean" value="查询" onclick="selectmember()"/>
+				</td>
+				<td></td>
+					<td>
+					 <input type="button" name="" id="" class="gdsbutton_clean registermember" value="注册会员" onclick="addmember()"/>
+					</td>
+				</tr>
+					<tr>
+					<td style="width:8%;">订单号</td>
+				    <td><input id="orderid" name="orderid" value="" readonly/></td>
+						
+						
+					</tr>
+					<tr>
+					<td style="width:8%;" >
+							合同
+						</td>
+						<td>
+							<input type="file" id ="contrartFile" name="contrartFile" />
+						</td>
+					<td style="width:8%;" class="must">
+							合同人
+						</td>
+						<td>
+							<input id="member_id" name="member_id" value="${memberName }" class="gray" readonly/>
+							<input type="hidden" id="member_id_CUSTOM_VALUE" name="member_id_CUSTOM_VALUE" value="${contrart.memberId }" />
+						    <input type="hidden" id="member_rank" name="member_rank" value="" />
+						</td>
+					<td style="width:8%;">
+							手机号
+						</td>
+						<td>
+							<input id="mobile" name="mobile" value="${contrart.mobile }" class="gray" readonly/>
+							
+						</td>
+					</tr>
+					<tr>
+						<td style="width:8%;" class="must">
+							开始时间
+						</td>
+						<td>
+							<input id="startTimeTemp" name="startTimeTemp" class="date" value="${starttime }" readonly />
+						</td>
+						<td style="width:8%;" class="must"> 
+							租赁时间
+ 						</td> 
+ 						<td >
+							<select name="time" id="time" class="ui-select" onchange="timechange()" > 
+							 <option value="">--请选择--</option> 
+ 							 <option value="1">一个月</option> 
+ 							  <option value="3">三个月</option> 
+ 							   <option value="6">六个月</option> 
+ 							     <option value="12">一年</option> 
+ 							      <option value="24">两年</option> 
+ 							       <option value="36">三年</option> 
+ 							</select> 
+							
+ 						</td> 
+						<td style="width:8%;" >
+							到期时间
+						</td>
+						<td>
+							<input id="endTimeTemp" name="endTimeTemp"  value="${endtime }"  class="gray" readonly/>
+						</td>
+						
+						</tr>
+					<tr>
+					<td style="width:8%;" class="must">
+							房间号
+						</td>
+						<td>
+							<input id="room_id" name="room_id" value="${contrart.roomId }" readonly/>
+							<input type="hidden" id="room_type" name="room_type" value="${roomType }" />
+	<!--						<input type="hidden" id="room_id_CUSTOM_VALUE" name="room_id_CUSTOM_VALUE" value="${contrart.roomId }" />-->
+						</td>
+						<td style="width:8%;">
+							单价
+						</td>
+						<td>
+							<input style="width:150px" id="unitprice" name="unitprice" value="${contrart.unitPrice }" class="gray" readonly="readonly"/>
+							<span>元</span>
+						</td>
+						<td style="width:8%;">
+							定金
+						</td>
+						<td>
+							<input style="width:147px" id="advanceCash" name="advanceCash" value="" maxlength="6" class="gray" readonly/>
+							<span>元</span>
+						</td>
+						
+						
+					</tr>
+					<tr>
+					
+						<td style="width:8%;" class="must">
+							租赁方式
+						</td>
+						<td >
+							<select name="typeofpayment" id="typeofpayment" class="ui-select"  onchange="Money()">
+								<option value="">--请选择--</option>
+								<option value="1">月付</option>
+								<option value="3">季付</option>
+								<option value="6">半年付</option>
+								<option value="12">年付</option>
+							</select>
+							<input type="hidden" id="usingType_CUSTOM_VALUE" name="usingType_CUSTOM_VALUE" value="" />
+						</td>
+						<td style="width:8%;">
+							应付房租
+						</td>
+						<td>
+							<input style="width:150px" id="totalprice" name="totalprice" value="" class="gray" readonly/>
+						<span>元</span>
+						</td>
+						<td style="width:8%;">
+							实付房租
+						</td>
+						<td>
+							<input style="width:147px" id="actualCash" name="actualCash" value="" class="gray" readonly/>
+						<span>元</span>
+						</td>
+						
+					</tr>
+					<tr>
+					
+<!-- 						<td style="width:8%;" class="must"> -->
+<!-- 							支付方式： -->
+<!-- 						</td> -->
+<!-- 						<td > -->
+<!-- 							<select name="payment" id="payment" class="ui-select"   disabled> -->
+<!-- 							 <option value="1">现金</option> -->
+<!-- 							<c:forEach items="${paymentList}" var="paymentList"> -->
+<!-- 							  <option value="${paymentList.content}">${paymentList.paramName}</option> -->
+<!-- 							</c:forEach> -->
+								
+<!-- 							</select> -->
+							
+<!-- 						</td> -->
+						<td style="width:8%;">
+	                                                              房租到期
+						</td>
+						<td >
+							<input id="contrart_end_time" name="contrart_end_time" value="${contrartEndTime }" class="gray" readonly="readonly"/>
+						</td>
+						
+						<td style="width:8%;" class="must" >
+							押金
+						</td>
+						<td>
+							<input style="width:150px" id="cash" name="cash" value="${contrart.cash}"  maxlength="6"/>
+							<span>元</span>
+						</td>
+						<td style="width:8%;" class="must">
+						自动退租
+						</td>
+						<td>
+							<select name="autorefund" id="autorefund" class="ui-select"  >
+							   
+								<option value="1">否</option>
+								<option value="0">是</option>
+							</select>
+						</td>
+						</tr>
+				</table>
+				<div id="campaignDetail" name="campaignDetail">
+				</div>
+			</form>
+			<div class="button_div fr" style="width:100%;margin-top: -13px;">
+				<!--<div class="button div_button close" style="display:inline-block;float:right;margin: 8px;" onclick="campaignClose();">
+					<span>关闭</span>
+				</div>
+				--><div class="button div_button save" style="display:inline-block;float:right;margin: -169px 64px;" onclick="submitform();">
+					<span>保存</span>
+				</div>
+	<!--			<div class="button div_button reset" style="display:inline-block;float:right;margin: 8px 68px;" onclick=" window.parent.JDialog.close();">-->
+	<!--				<span>取消</span>-->
+	<!--			</div>-->
+			</div>
+		</div>
+		<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+<!--		<script src="<%=request.getContextPath()%>/script/common/ui.datetimepicker.js"></script>-->
+<!--		<script src="<%=request.getContextPath()%>/script/common/datepickerCN.js"></script>-->
+		<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+		<script src="<%=request.getContextPath()%>/script/ipms/js/laydate.dev.js" charset="utf-8"></script>
+		<script type="text/javascript">
+			$(function (){
+				//$("#typeofpayment option[value='${contrart.typeOfPayment}']").attr("selected", true);
+				//$(".date").datepicker({ dateFormat: "yy/mm/dd " });
+               //     $("#startTime").css('font-size','0.9em');
+              //      $("#endTime").css('font-size','0.9em');
+            laydate({
+	        	elem: '#startTimeTemp',
+	        	min:laydate.now(0),
+	        	choose :change
+	        	
+	        	
+    		});
+    		//laydate({
+	        //	elem: '#endTimeTemp',
+	        //	min:laydate.now(1)
+    		//});
+    		//laydate({
+	        //	elem: '#contrart_end_time'
+	        	
+    		//});
+		
+			});
+			
+		</script>
+		<script>
+		var base_path ="<%=request.getContextPath()%>";	
+		$(function() {
+			//$(".date").datetimepicker({ dateFormat: "yy/mm/dd" })
+		//$("#datetimepicker_div").css('font-size','0.9em');
+
+		//	$("#member_id").bind("click",function(){
+		//	 	JDialog.open("合同人", base_path + "/contrartselectmember.do",450,350);
+		//	});
+			$("#orderid").bind("click",function(){
+				$("#typeofpayment,#time,#room_id,#cash,#startTimeTemp").attr("disabled","disabled").addClass("gray");
+				//$("#room_id,#cash,#startTimeTemp").addClass("gray");
+			 	JDialog.open("订单号", base_path + "/contrartaptorder.do",470,350);
+			});
+			
+			$("#room_id").bind("click",function(){
+			if($("#member_id").val() == ""){
+			  showMsg("请选择合同人!");
+			  return false;
+			}
+			var memberrank = $("#member_rank").val();
+			 	JDialog.open("房间号 ", base_path + "/contrartselectroomid.do?memberrank="+memberrank,450,350);
+			});
+			
+			//初始化开始日期
+			var now = new Date(); 
+			//var d = new Date();   
+		    var starttime = dealLocalDate(now);
+		   // d.setMonth(d.getMonth()+12);
+		   // var endime = dealLocalDate(d);
+		    $("#startTimeTemp").val(starttime);
+		   // $("#endTimeTemp").val(endime);
+		    
+		    //初始化截日期
+		    
+			
+		});
+
+		function timechange(){
+			if($("#startTimeTemp").val() == ""){
+			 showMsg("开始时间不可为空!");
+	            return false;
+			
+			}
+			
+			var timemonth = Number($("#time").val());
+	        var starttime_c1 =  $("#startTimeTemp").val();
+		    var startdate_c1 = new Date(starttime_c1);
+		    startdate_c1.setDate(startdate_c1.getDate()-1);
+			startdate_c1.setMonth(startdate_c1.getMonth() + timemonth);
+			var contrart_end_time = dealLocalDate(startdate_c1);
+			$("#endTimeTemp").val(contrart_end_time);
+			
+			//清空数据
+			Money();
+			
+		}
+		function findunitprice(){
+		
+		var roomid = $("#room_id").val();
+		var memberrank = $("#member_rank").val();
+		$.ajax({
+  	  			url: base_path + "/findunitprice.do",
+  	  			dataType: "json",
+  	  			type: "post",
+  	  			data:{
+  	  				'roomid' : roomid,
+  	  				'memberrank' : memberrank
+  	  			},
+  	  			success: function(json) {
+  			        $("#unitprice").val(json);
+  	  				   
+  	  			},
+  	  			error:function(json){
+  					
+  	  			}
+  	  		});
+
+		}
+		
+		function submitform(){
+		//$("#typeofpayment,#time,#room_id,#cash,#startTimeTemp").attr("disabled","disabled").addClass("gray");
+		 $("#typeofpayment,#time,#room_id,#cash,#startTimeTemp").removeAttr("disabled").removeClass("gray");
+		var arr=new Array(
+		   // new Array('contrartFile','请选择合同!'),
+		     new Array('autorefund','请选择是否自动退租!'),
+		     new Array('member_id','合同人不可为空!'),
+		    // new Array('mobile','手机号不可为空!'), 
+		     //new Array('time','租赁时间不可为空!'), 
+		     new Array('startTimeTemp','开始时间不可为空!'), 
+		     new Array('endTimeTemp','到期时间不可为空!'), 
+		     new Array('room_id','房间号不可为空!'),
+		     new Array('typeofpayment','请选择租赁方式!'), 
+		     new Array('unitprice','单价不可为空!'), 
+		     new Array('contrart_end_time','房租到期时间不可为空!'),
+		   //  new Array('payment','支付方式不可为空!'),
+		     new Array('cash','押金不可为空!')
+		 );
+		var phonejudge = /^1[34578]\d{9}$/;
+		//var reg = /^(([1-9]\d*)|0)$/;
+		var regdouble=/^\d+(\.\d{1,2})?$/;
+		var moneyReg = /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/; //校验是金额
+		if(!checkFormIsNull(arr) ){
+	     return false;
+	 }
+	 
+	 //校验上传文件格式只能为docx
+	
+    var zswb = $("#contrartFile").val();
+    if(zswb.length>1 && zswb != ''){
+        var lodt = zswb.lastIndexOf(".");
+        var type = zswb.substring(lodt+1);
+        if( type != "docx"){
+           showMsg("合同文件格式请设置为.docx!");
+            return false;
+        }
+    }
+
+	 
+	 /*
+	    if(isNaN($("#mobile").val())){
+			window.parent.showMsg("手机号请填写数字!");
+		    return false;	
+	     }else if(phonejudge.test($("#mobile").val()) == false){
+	    		window.parent.showMsg("手机号输入不合法");
+	    		$("#mobile").val("");
+				$("#mobile").focus();
+		    return false;
+	   }
+	
+	  if(isNaN($("#unitprice").val())){
+			window.parent.showMsg("单价请填写数字!");
+		    return false;	
+	     }else if(regdouble.test($("#unitprice").val()) == false){
+	    		window.parent.showMsg("请输入正确单价格式!");
+	    		$("#unitprice").val("");
+				$("#unitprice").focus();
+		    return false;
+	   }
+
+	   */
+	  
+	   if(isNaN($("#cash").val())){
+			showMsg("押金请填写数字!");
+		    return false;	
+	     }else if(moneyReg.test($("#cash").val()) == false){
+	    		showMsg("押金格式错误!");
+	    		$("#cash").val("");
+				$("#cash").focus();
+		    return false;
+	   }
+	
+	  
+	 
+	
+		
+		
+		var formData = new FormData($("#basicInfo")[0]); 
+		
+		$.ajax({
+		url : base_path + "/saveContrart.do",
+		data: formData,
+		 contentType: false,
+         processData: false,
+		dataType : "json",
+		type : "post",
+		success : function(json) {
+		if(json.result == 1){
+		    showMsg(json.message);
+		}else if(json.result == 2){
+			showMsg(json.message);
+			window.setTimeout("window.parent.document.getElementById('menu_910').click();window.parent.JDialog.close();", 2000);
+			}
+		},
+		error : function(json) {
+			showMsg("设置失败!");
+		}
+		});
+		}
+		
+	//批量验证表单非空
+		function checkFormIsNull(arr){
+			 for(var i=0;i<arr.length;i++){
+				 if($("#"+arr[i][0]).val()==''){
+					 showMsg(arr[i][1]);
+					 return false;
+				 }
+			 }
+			 return true; 
+		};	
+		
+		function Money(){
+  		var paymonth = Number($("#typeofpayment").val());
+  		var time = Number($("#time").val());
+  		if(paymonth > time){
+		   showMsg("租赁方式所选时间不得超过租赁期限!");
+		   $("#typeofpayment").val("");
+		   $("#totalprice").val("");
+		   $("#actualCash").val("");
+		   $("#contrart_end_time").val("");
+		   return false;
+		}
+  		
+		var money = (paymonth * (Number($("#unitprice").val()).toFixed(2))).toFixed(2);
+		$("#totalprice").val(money);
+        var advanceCash = Number($("#advanceCash").val()).toFixed(2);
+        $("#actualCash").val((money - advanceCash).toFixed(2));
+        var starttime_c1 =  $("#startTimeTemp").val();
+	    var startdate_c1 = new Date(starttime_c1);
+	    startdate_c1.setDate(startdate_c1.getDate()-1);
+		startdate_c1.setMonth(startdate_c1.getMonth() + paymonth);
+		var contrart_end_time = dealLocalDate(startdate_c1);
+		$("#contrart_end_time").val(contrart_end_time);
+		
+		
+		
+		
+  	}	
+  		
+
+  	function  change(){
+		  	$("#contrart_end_time").val("");
+		  //	$("#paymonth").val("");
+		  	$("#totalprice").val("");
+		  	$("#typeofpayment").val("");
+		  	$("#time").val("");
+		  	$("#endTimeTemp").val("");
+		  		//初始化开始日期
+			 
+		  //  var starttime_c =  $("#startTimeTemp").val();
+		   // var startdate_c = new Date(starttime_c);
+		    
+		  //  startdate_c.setMonth(startdate_c.getMonth()+12);
+		   
+		  //  $("#endTimeTemp").val(dealLocalDate(startdate_c));
+		 
+  	}
+  	function dealLocalDate(myT){
+	var year = myT.getFullYear();
+	var month = myT.getMonth() + 1;
+	var strDate = myT.getDate();
+    if (month >= 1 && month <= 9) {
+        month = "0" + month;
+    }
+    if (strDate >= 0 && strDate <= 9) {
+        strDate = "0" + strDate;
+    }
+    var currentdate = year + "/" + month + "/" + strDate;
+    return currentdate;
+}
+
+function selectmember(){
+	var idcard = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;//身份证校验
+	var mobReg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/; //手机校验
+	var Mnumber = $("#memberselect").val();
+	if(Mnumber == ""){
+	       showMsg("请填写查询条件!");
+			    return false;	
+	}
+	if(Mnumber.length > 11){
+		if(!idcard.test(Mnumber)){
+			showMsg("手机号或身份证输入错误!");
+			return false;
+		}
+	}else{
+		if(!mobReg.test(Mnumber)){
+			showMsg("手机号或身份证输入错误!");
+			return false;
+		}
+	}
+/*	if(mobReg.test($("#memberselect").val()) == false){
+	    		showMsg("请输入正确手机号格式!");
+	    		$("#memberselect").val("");
+				$("#memberselect").focus();
+		        return false;
+	} 
+*/  
+
+$("#typeofpayment,#time,#room_id,#cash,#startTimeTemp").removeAttr("disabled").removeClass("gray");
+	if (Mnumber) {
+	
+		$.ajax({
+			url : base_path + "/memberSelectForContrart.do",
+			type : "post",
+			dataType : "json",
+			data : {
+				'Mnumber' : Mnumber
+			},
+			success : function(json) {
+			
+			if(json.result == 0){
+			
+			showMsg(json.message);
+			}else{
+			
+			    $("#member_id").val(json.data[1]);
+		   		$("#mobile").val(json.data[3]);
+		   		$("#member_rank").val(json.data[2]);
+		   		$("#member_id_CUSTOM_VALUE").val(json.data[0]);
+		   		$("#room_id").val("");
+		   		$("#unitprice").val("");
+		   		$("#cash").val("");
+		   		$("#orderid").val("");
+		   		$("#typeofpayment").val("");
+		   		$("#totalprice").val("");
+		   		$("#contrart_end_time").val("");
+		   		$("#actualCash").val("");
+		   		$("#payment").val("");
+		   		//$("#autorefund").val("");
+		   		$("#contrartFile").val("");
+			}
+				
+			},
+			error : function() {
+				
+			} 
+		});
+	} else {
+		showMsg("请先输入会员手机号进行查询！");
+		window.setTimeout("location.reload(true)", 1800);
+	}
+	
+
+}
+
+
+
+	/* 会员注册 */	
+function addmember() {
+	JDialog.open("会员注册", base_path + "/apartmentMemberAdd.do", 850, 410);
+}
+function showMsg(msg, fn) {
+	if (!fn) {
+		TipInfo.Msg.alert(msg);
+	} else {
+		TipInfo.Msg.confirm(msg, fn);
+	}
+}
+	</script>
+	</body>
+</html>

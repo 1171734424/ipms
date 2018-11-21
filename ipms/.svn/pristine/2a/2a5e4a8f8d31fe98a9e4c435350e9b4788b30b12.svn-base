@@ -1,0 +1,184 @@
+package com.ideassoft.bean;
+
+import java.util.Date;
+
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import com.ideassoft.core.annotation.interfaces.ColumnDefaultValue;
+
+@Entity
+@Table(name = "TB_P_ROOMPRICE", schema = "UCR_PMS")
+public class RoomPrice implements java.io.Serializable {
+
+	// Fields
+	private static final long serialVersionUID = -8096598427900834396L;
+	private RoomPriceId roomPriceId;
+	private String rpName;
+	private Double roomPrice;
+	private String packId;
+	private String rpType;
+	private Double discount;
+	private Date recordTime;
+	private String recordUser;
+	private String remark;
+	private String memberRank;
+	private String theme;
+	private String state;
+
+	// Constructors
+
+	/** default constructor */
+	public RoomPrice() {
+	}
+
+	/** minimal constructor */
+	public RoomPrice(RoomPriceId roomPriceId, String rpName, String rpType, Double discount, String recordUser,
+			String theme) {
+		this.roomPriceId = roomPriceId;
+		this.rpName = rpName;
+		this.rpType = rpType;
+		this.discount = discount;
+		this.recordUser = recordUser;
+		this.theme = theme;
+	}
+
+	/** full constructor */
+	public RoomPrice(RoomPriceId roomPriceId, String rpName, Double roomPrice, String packId, String rpType,
+			Double discount, Date recordTime, String recordUser, String remark, String theme, String state) {
+		this.roomPriceId = roomPriceId;
+		this.rpName = rpName;
+		this.roomPrice = roomPrice;
+		this.packId = packId;
+		this.rpType = rpType;
+		this.discount = discount;
+		this.recordTime = recordTime;
+		this.recordUser = recordUser;
+		this.remark = remark;
+		this.theme = theme;
+		this.state = state;
+	}
+
+	// Property accessors
+	@EmbeddedId
+	@AttributeOverrides( {
+			@AttributeOverride(name = "branchId", column = @Column(name = "BRANCH_ID", nullable = false, length = 6)),
+			@AttributeOverride(name = "rpId", column = @Column(name = "RP_ID", nullable = false, length = 3)),
+			@AttributeOverride(name = "roomType", column = @Column(name = "ROOM_TYPE", nullable = false, length = 3)),
+			@AttributeOverride(name = "status", column = @Column(name = "STATUS", nullable = false, length = 1)) })
+	public RoomPriceId getRoomPriceId() {
+		return this.roomPriceId;
+	}
+
+	public void setRoomPriceId(RoomPriceId roomPriceId) {
+		this.roomPriceId = roomPriceId;
+	}
+
+	@Column(name = "RP_NAME", nullable = false, length = 8)
+	public String getRpName() {
+		return this.rpName;
+	}
+
+	public void setRpName(String rpName) {
+		this.rpName = rpName;
+	}
+
+	@Column(name = "ROOM_PRICE", precision = 9)
+	public Double getRoomPrice() {
+		return this.roomPrice;
+	}
+
+	public void setRoomPrice(Double roomPrice) {
+		this.roomPrice = roomPrice;
+	}
+
+	@Column(name = "PACK_ID", length = 3)
+	public String getPackId() {
+		return this.packId;
+	}
+
+	public void setPackId(String packId) {
+		this.packId = packId;
+	}
+
+	@Column(name = "RP_TYPE", nullable = false, length = 1)
+	public String getRpType() {
+		return this.rpType;
+	}
+
+	public void setRpType(String rpType) {
+		this.rpType = rpType;
+	}
+
+	@Column(name = "DISCOUNT", nullable = false, precision = 3)
+	public Double getDiscount() {
+		return this.discount;
+	}
+
+	public void setDiscount(Double discount) {
+		this.discount = discount;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "RECORD_TIME", insertable = false, updatable = true)
+	@ColumnDefaultValue(value = "sysdate", insertable = false)
+	public Date getRecordTime() {
+		return this.recordTime;
+	}
+
+	public void setRecordTime(Date recordTime) {
+		this.recordTime = recordTime;
+	}
+
+	@Column(name = "RECORD_USER", nullable = false, length = 8)
+	public String getRecordUser() {
+		return this.recordUser;
+	}
+
+	public void setRecordUser(String recordUser) {
+		this.recordUser = recordUser;
+	}
+
+	@Column(name = "REMARK", length = 200)
+	public String getRemark() {
+		return this.remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	@Column(name = "MEMBER_RANK", nullable = false, length = 2)
+	public String getMemberRank() {
+		return memberRank;
+	}
+
+	public void setMemberRank(String memberRank) {
+		this.memberRank = memberRank;
+	}
+
+	@Column(name = "THEME", nullable = false, length = 1)
+	public String getTheme() {
+		return this.theme;
+	}
+
+	public void setTheme(String theme) {
+		this.theme = theme;
+	}
+
+	@Column(name = "STATE", length = 1)
+	public String getState() {
+		return this.state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+}

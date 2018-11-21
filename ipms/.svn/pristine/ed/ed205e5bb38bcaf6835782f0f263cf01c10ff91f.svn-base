@@ -1,0 +1,109 @@
+package com.ideassoft.basic.service;
+
+
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.ideassoft.bean.City;
+import com.ideassoft.bean.Location;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.core.dao.GenericDAOImpl;
+
+@Service
+public class BranchBasicService extends GenericDAOImpl {
+	public List<SysParam> queryBranchType(){
+		String paramType="BRANCHRANK";
+		return this.findByProperties(SysParam.class, "paramType",paramType);
+	}
+	public List<?> getReroomtype(String roomtype, String themeid, String branchid) throws Exception {
+		List<?> result = findBySQL("reroomtype", new String[] { roomtype, themeid, branchid },
+				true);
+		return result;
+	}
+	public List<?> getUnusedata(String branchiD, String rooomiD) throws Exception {
+		List<?> result = findBySQL("unuseroomdata", new String[] { branchiD, rooomiD }, true);
+		return result;
+	}
+	public List<?> getExitroomstatus(String branchid, String rproomtype) throws Exception {
+		List<?> result = findBySQL("exitroomstatus", new String[] { branchid, rproomtype }, true);
+		return result;
+	}
+	public List<?> getUniqueroom(String branchid, String roomid) throws Exception {
+		List<?> result = findBySQL("uniqueroom", new String[] { branchid, roomid }, true);
+		return result;
+	}
+	public List<SysParam> queryTheme(){
+		String paramType="THEME";
+		return this.findByProperties(SysParam.class, "paramType",paramType);
+	}
+	
+	public List<City> queryCity(){
+		String cityRank="1";
+		return this.findByProperties(City.class, "rank",cityRank,"status","1");
+	}
+	
+	public Location queryBranchLocation(String branchId){
+		return (Location) this.findOneByProperties(Location.class, "branchId",branchId);
+	}
+	public List<?> getRpbranchid() throws Exception {
+		return findBySQL("rpbranchid", true);
+	}
+	public List<?> getRptheme() throws Exception {
+		return findBySQL("rptheme", true);
+	}
+	public List<?> getRproomtype(String branchId) throws Exception {
+		List<?> result = findBySQL("rproomtype", new String[] { branchId}, true);
+		return result;
+	}
+	public List<?> getStatus() throws Exception {
+		return findBySQL("rpstatus", true);
+	}
+	public List<?> getRpapplystatus() throws Exception {
+		return findBySQL("rpapplystatus", true);
+	}
+	public List<?> getRppack() throws Exception {
+		return findBySQL("rppack", true);
+	}
+	public List<?> getRpsetup() throws Exception {
+		return findBySQL("rpsetup", true);
+	}
+	public List<?> getRpapplyroomtype(String themeid, String rpthemeid, String branchid, String rpking, String statusid)
+			throws Exception {
+		List<?> result = findBySQL("rpapplyroomtype", new String[] { themeid, rpthemeid, branchid, branchid,rpking, statusid },
+				true);
+		return result;
+	}
+	public List<?> getRoomBedType() throws Exception {
+		return findBySQL("roomBedType", true);
+	}
+	public List<?> getHouseDevice() throws Exception {
+		return findBySQL("houseDevice", true);
+	}
+	public List<?> getRoomPosition() throws Exception {
+		return findBySQL("roomPositionDesc", true);
+	}
+	public List<?> getRoomBroadband() throws Exception {
+		return findBySQL("roomBroadbandParam", true);
+	}
+	public List<?> getThemeList() throws Exception {
+		return findBySQL("getThemeList", true);
+	}
+	public List<?> getApartmentDevice() throws Exception {
+		return findBySQL("apartmentDevice", true);
+	}
+	public List<?> getHotelDevice() throws Exception {
+		return findBySQL("hotelDevice", true);
+	}
+	public List<?> getTips() throws Exception {
+		return findBySQL("getTips", true);
+	}
+	public List<?> getHouseList() throws Exception {
+		return findBySQL("getHouseList", true);
+	}
+	public List<?> getShiftcontent(String branchid) throws Exception {
+		//return findBySQL("shiftcontent", true);
+		return findBySQL("newshiftcontent",new String[]{branchid} ,true);
+	}
+}

@@ -1,0 +1,940 @@
+
+/* 初始化加载数据*/
+$(document).ready(
+		function() {
+			$(".mySelect").select( {
+				width : "150px"
+			});
+			
+			/* 现金~银行卡~积分联动加载对应项*/
+			$("#paymethod").children('input[type=checkbox]').click(
+					function() {
+						if ($(this).is(':checked')) {
+							$(this).attr('checked', true).siblings().attr(
+									'checked', false);
+							if ($(this).attr('id') == "yhk") {
+								$("#order_pzh").show();
+								$("#card").attr("disabled", false);
+								$("#cash").val("");
+								$("#cash").attr("disabled", true);
+							} else if ($(this).attr('id') == "xj") {
+								$("#card").val("");
+								$("#order_pzh").val("");
+								$("#card").attr("disabled", true);
+								$("#cash").attr("disabled", false);
+								$("#order_pzh").hide();
+							}
+						} else {
+							$(this).attr('checked', false).siblings().attr(
+									'checked', false);
+							$("#cash").val("");
+							$("#card").val("");
+							$("#order_pzh").val("");
+							$("#order_pzh").hide();
+							$("#card").attr("disabled", true);
+							$("#cash").attr("disabled", true);
+						}
+					})
+
+			$("#exscore").children('input[type=checkbox]').click(function() {
+				if ($(this).is(':checked')) {
+					$("#excash").show();
+					$("#scorecash").val("");
+					$("#excash").hide();
+					$("#score").attr("disabled", false);
+				} else {
+					$("#score").val("");
+					$("#scorecash").val("");
+					$("#excash").hide();
+					$("#score").attr("disabled", true);
+				}
+			})
+
+			$("#score").bind(
+					"click",
+					function() {
+						var MemberId = $("#memberId").val();
+						var sjscore = $("#score").val();
+						if (MemberId) {
+							JDialog.open("", base_path
+									+ "/hotelscoreExchange.do?MemberId=" + MemberId
+									+ "&sjscore=" + sjscore, 600, 200);
+						} else {
+							showMsg("预订人（会员）信息不能为空！");
+						}
+					})
+					
+            /* 旧时间插件方法 */
+			// $(".date").datetimepicker({ datetimeFormat: "yy/mm/dd" });
+			// $("#ui-datepicker-div").css('font-size','0.9em');
+			// $(".date").datepicker({ dateFormat: "yy/mm/dd " });
+			
+			/*
+			 * $(".date").datepicker( { minDate : 0, maxDate : date });
+			 * $(".ldate").datepicker( { minDate : 0 });
+			 */
+					
+			var date = new Date();
+			date.setMonth(date.getMonth() + 3);		
+			$("#arrivedate").css('font-size', '0.9em');
+			$("#leavedate").css('font-size', '0.9em');
+			$("#theme").change(function() {
+				if ($("#theme").val() == 2) {
+					$("#roomtype").attr("disabled", true);
+					var label_a = document.getElementById("arrive");
+					label_a.innerText = "开始日期";
+					$("#arrive").html("开始日期");
+					var label_r = document.getElementById("leave");
+					label_r.innerText = "结束日期";
+					$("#leave").html("结束日期");
+				} else if ($("#theme").val() == 1) {
+					$("#roomtype").removeAttr("disabled");
+					var label = document.getElementById("arrive");
+					label.innerText = "抵店日期";
+					$("#arrive").html("抵店日期");
+					var label_r = document.getElementById("leave");
+					label_r.innerText = "离店日期";
+					$("#leave").html("离店日期");
+				}
+			})
+			
+			$('#arrivedate').val(laydate.now(0, 'YYYY/MM/DD'));
+	        $('#leavedate').val(laydate.now(1, 'YYYY/MM/DD'));
+	      	
+	        monitorinput();
+	        
+	        
+		});
+
+function monitorinput(){
+	$("#userorder").on("input propertychange",function(){
+		$("#user").val($(this).val());
+	})
+	
+	$("#ordemobile").on("input propertychange",function(){
+		$("#mobile").val($(this).val());
+	})
+	
+	$("#ordergendor").on("input propertychange",function(){
+		$("#gender").val($(this).val());
+	})
+	
+//	$("#ordergendor").change(function(){
+//		alert("变化了");
+//	})
+	
+}
+
+
+
+/* 预订时间限制方法 */
+// var now = new Date();
+// 加五天.
+// var newDate = DateAdd("d ", 5, now);
+// alert(newDate.toLocaleDateString())
+// 加两个月.
+// newDate = DateAdd("m ", 2, now);
+// alert(newDate.toLocaleDateString())
+// 加一年
+// newDate = DateAdd("y ", 1, now);
+// alert(newDate.toLocaleDateString())
+
+function DateAdd(interval, number, date) {
+    switch (interval) {
+    case "y ": {
+        date.setFullYear(date.getFullYear() + number);
+        return date;
+        break;
+    }
+    case "q ": {
+        date.setMonth(date.getMonth() + number * 3);
+        return date;
+        break;
+    }
+    case "m ": {
+        date.setMonth(date.getMonth() + number);
+        return date;
+        break;
+    }
+    case "w ": {
+        date.setDate(date.getDate() + number * 7);
+        return date;
+        break;
+    }
+    case "d ": {
+        date.setDate(date.getDate() + number);
+        return date;
+        break;
+    }
+    case "h ": {
+        date.setHours(date.getHours() + number);
+        return date;
+        break;
+    }
+    case "m ": {
+        date.setMinutes(date.getMinutes() + number);
+        return date;
+        break;
+    }
+    case "s ": {
+        date.setSeconds(date.getSeconds() + number);
+        return date;
+        break;
+    }
+    default: {
+        date.setDate(d.getDate() + number);
+        return date;
+        break;
+    }
+    }
+}
+
+Date.prototype.Format = function (fmt) { // author: meizz
+ var o = {
+"M+": this.getMonth() + 1, // 月份
+"d+": this.getDate(), // 日
+"h+": this.getHours(), // 小时
+"m+": this.getMinutes(), // 分
+"s+": this.getSeconds(), // 秒
+"q+": Math.floor((this.getMonth() + 3) / 3), // 季度
+"S": this.getMilliseconds() // 毫秒
+};
+if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+for (var k in o)
+if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+return fmt;
+}
+var now = new Date();
+var newDate = DateAdd("m ", 3, now);
+var time1 = newDate.Format("yyyy/MM/dd");
+	laydate({
+		elem: '#arrivedate',
+		min:laydate.now(0) ,
+		max:time1
+	})
+	laydate({
+		elem: '#leavedate',
+		min:laydate.now(0) ,
+	})
+	
+	$(document).ready(function(){
+		$("#memberselect").focus();
+	})
+
+/* showMsg */
+function showMsg(msg, fn) {
+	if (!fn) {
+		TipInfo.Msg.alert(msg);
+	} else {
+		TipInfo.Msg.confirm(msg, fn);
+	}
+}
+
+	/* 会员注册 */	
+function addmember() {
+	JDialog.open("会员注册", base_path + "/ordermemberAdd.do", 850, 410);
+}
+
+ /* 减少房间 */	
+function subNum() {
+	var c = parseInt($("#acount").val());
+	if (c >= 2) {
+
+		document.getElementById("acount").value = c - 1;
+		var nown = document.getElementById("acount").value;
+	} else {
+		showMsg("数量不可为小于1的数字！");
+	}
+}
+
+/* 增加房间 */	
+function addNum() {
+	var c = parseInt($("#acount").val());
+	document.getElementById("acount").value = c + 1;
+}
+
+$(".info_write ul li").on("click", function() {
+	$(this).addClass("active");
+	$(this).siblings().removeClass("active");
+});
+
+$(".detail_four .look_order")
+		.on(
+				"click",
+				function() {
+					window.location.href = "<%=request.getContextPath()%>/page/ipmspage/order/order_check.jsp";
+
+				});
+
+var webstatus = "inline";
+/* 查询会员 */	
+function selectmember() {
+	
+	$("#rpid").val("");
+	$("#price").val("");
+	$("#roomid").val("");
+	$("#roomtype ").val("");
+	var Mnumber = $("#memberselect").val();
+	var arrivaltime = $("#arrivedate").val();
+	if (Mnumber) {
+		$.ajax({
+			url : base_path + "/hotelmemberSelect.do",
+			type : "post",
+			dataType : "json",
+			data : {
+				'Mnumber' : Mnumber
+			},
+			success : function(json) {
+				debugger
+				if (1 == json.result) {
+					if (json.message) {
+						  var message = json.message;
+						 if(message.indexOf("本地网络未连接")>-1){
+							 showMsg(json.message);
+							 webstatus = "outline";
+							 $("#rpid").attr("disabled",false); 
+						 }else{
+							 
+							 showMsg(json.message);
+							 $("#memberselect").val("");
+						 }
+						// window.setTimeout("location.reload(true)", 6000);
+						 $("#ordergendor").attr("disabled",false);
+						 $("#userorder").val("");
+						 $("#ordemobile").val("");
+						 $("#limited").val("");
+					} else {
+						$("#ordergendor").attr("disabled",true);
+						JDialog.open("", base_path + "/hoteljudgeUser.do?Mnumber="
+								+ Mnumber+"&arrivedate="+arrivaltime, 300, 150);
+					}
+					$("#newMemberId").val(json.data);
+					readonlyinput();
+				} else {
+					showMsg("没有该会员的信息，请输入正确的会员卡号或手机号！");
+				}
+			},
+			error : function() {
+				webstatus = "outline";
+				showMsg("网络未连接或操作失败，请手动选择会员价格！")
+				$("#rpid").attr("disabled",false); 
+			} 
+		});
+	} else {
+		showMsg("请先输入会员手机号进行查询！");
+		window.setTimeout("location.reload(true)", 1800);
+	}
+}
+
+function readonlyinput(){
+	$("#userorder").attr("disabled", true);
+	$("#ordergendor").attr("disabled", true);
+	$("#ordemobile").attr("disabled", true);
+}
+
+
+/* 选择房间(暂时不用) */	
+$("#roomid").bind(
+		"click",
+		function() {
+			var theme = $("#theme").val();
+			var roomtype = $("#roomtype").val();
+			var roomacount = $("#acount").val();
+			if (roomtype) {
+				JDialog.open("", base_path + "/hotelroomSelect.do?roomtype="
+						+ roomtype + "&theme=" + theme + "&roomacount="
+						+ roomacount, 800, 410);
+			} else {
+				showMsg("请先选择房间类型！");
+			}
+		})
+
+/* input保留俩位数字 */		
+function num(obj) {
+	obj.value = obj.value.replace(/[^\d.]/g, ""); // 清除"数字"和"."以外的字符
+	obj.value = obj.value.replace(/^\./g, ""); // 验证第一个字符是数字
+	obj.value = obj.value.replace(/\.{2,}/g, "."); // 只保留第一个, 清除多余的
+	obj.value = obj.value.replace(".", "$#$").replace(/\./g, "").replace("$#$",
+			".");
+	obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3'); // 只能输入两个小数
+}
+
+/* 选择房型刷对应房价 */
+function rtChange() {
+	if(webstatus=="inline"){
+	if(!$("#memberselect").val()){
+		var t = $("#roomtype").val();
+		var s = $("#rooprice_msj").val();
+		var first = s.replace(/=/g, ":'");
+		var second = first.replace(/,/g, "',");
+		var third = second.replace(/}/g, "'}");
+		var fouth = third.replace(/}',/g, "},");
+		var array = eval(fouth);
+		for ( var i = 0, l = array.length; i < l; i++) {
+			var rpName = array[i].ROOMTYPE
+			if (t == rpName) {
+				/*var rpId = array[i].RP_NAME;*/
+				var rpIdid = array[i].RP_ID;
+				var price = array[i].ROOM_PRICE;
+				 $("#rpid option[value='"+rpIdid+"']").attr("selected",true);
+				/*$("#rpid").val(rpId);*/
+				/*$("#rpidid").val(rpIdid);*/
+				$("#price").val(price);
+			} else {
+			}
+		}
+		var g = $("#guarantee_msj").val();
+		var first_g = g.replace(/=/g, ":'");
+		var second_g = first_g.replace(/,/g, "',");
+		var third_g = second_g.replace(/}/g, "'}");
+		var fouth_g = third_g.replace(/}',/g, "},");
+		var array_g = eval(fouth_g);
+		for ( var j = 0, k = array_g.length; j < k; j++) {
+			var rpName = array_g[j].PARAMNAME;
+			var rpidg = $("#rpid").val();
+			if (rpidg== rpName) {
+				var guraanteevalue = array_g[j].CONTENT;
+				$("#limited").val(guraanteevalue);
+			}
+		}
+	}else{
+		$("#roomid").val("");
+		var t = $("#roomtype").val();
+		var s = $("#roomprice").val();
+		var discount = $("#discount").val();
+		var first = s.replace(/=/g, ":'");
+		var second = first.replace(/,/g, "',");
+		var third = second.replace(/}/g, "'}");
+		var fouth = third.replace(/}',/g, "},");
+		var array = eval(fouth);
+		for ( var i = 0, l = array.length; i < l; i++) {
+			var rpName = array[i].ROOMTYPE ==null ?array[i].ROOM_TYPE :array[i].ROOMTYPE;
+			if (t == rpName) {
+			/*	var rpId = array[i].RP_NAME;*/
+				var rpIdid = array[i].RPID;
+				var price = array[i].ROOMPRICE==null ?array[i].ADJUSTMEM :array[i].ROOMPRICE ;
+				if($("#memberrank").val() == '0'){
+					$("#rpid option[value='CMJ']").prop("selected",true);
+					$("#price").val(price*(discount/100));
+				}else{
+					$("#rpid option[value='"+rpIdid+"']").prop("selected",true);
+					$("#price").val(price);
+				}
+				/*$("#rpid").val(rpId);
+				$("#rpidid").val(rpIdid);*/
+				//$("#price").val(price*(discount/100));
+			} else {
+			}
+		}
+	}
+	}else{
+		$("#rpid").val("");
+		$("#price").val("");
+    	$("#limited").val("");
+	}
+}
+
+/* 新选择房型刷对应房价 */
+function newrtChange() {
+	debugger
+	if(webstatus=="inline"){
+		$("#roomid").val("");
+		var t = $("#roomtype").val();
+		$.ajax({
+			url : base_path + "/hotelorderprice.do",
+			type : "post",
+			dataType : "json",
+			data : {
+				roomType: t,
+				memberId: $("#newMemberId").val()
+			},
+			success : function(json) {
+				if(json.result == 1){
+					var res = json.data;
+					$("#price").val(res.roomprice);
+					$("#rpid").val(res.rpid);
+				}
+			},
+			error : function() {
+			}
+		});
+	}else{
+		$("#rpid").val("");
+		$("#price").val("");
+    	$("#limited").val("");
+	}
+}
+
+function rpChange() {
+    var rty = $("#roomtype").val();
+    var rpd = $("#rpid").val();
+    var rpnull = ""
+    $("#rpid option[value='"+rpnull+"']").attr("selected",true);
+    if(!rty){
+    	showMsg("请先选择房型");
+    	$("#rpd").val("");
+    }
+    else{
+    	var outlineroomprice = $("#outlineroomprice").val();
+    	var first = outlineroomprice.replace(/=/g, ":'");
+    	var second = first.replace(/,/g, "',");
+    	var third = second.replace(/}/g, "'}");
+    	var fouth = third.replace(/}',/g, "},");
+    	var array = eval(fouth);
+    	for ( var i = 0, l = array.length; i < l; i++) {
+    		var outrty = array[i].ROOM_TYPE;
+    		var outrpd = array[i].RP_ID;
+    		if((rty==outrty)&&(rpd==outrpd)){
+    	    $("#price").val(array[i].ROOM_PRICE);	
+    		}
+
+    	}
+    	var g = $("#guarantee_msj").val();
+		var first_g = g.replace(/=/g, ":'");
+		var second_g = first_g.replace(/,/g, "',");
+		var third_g = second_g.replace(/}/g, "'}");
+		var fouth_g = third_g.replace(/}',/g, "},");
+		var array_g = eval(fouth_g);
+		for ( var j = 0, k = array_g.length; j < k; j++) {
+			var rpName = array_g[j].PARAMNAME;
+			var rpidg = $("#rpid").val();
+			if (rpidg== rpName) {
+				var guraanteevalue = array_g[j].CONTENT;
+				$("#limited").val(guraanteevalue);
+			}else if(rpidg==""){
+				$("#price").val("");
+				$("#limited").val("");
+			}
+		}
+    }
+	
+	
+}
+
+/* 动态新增入住人 */
+var InputCount = 0;
+
+$("#addnewtab")
+		.click(function() {
+
+			InputCount++;
+			var tabCon = "tabCon_" + InputCount;
+			var rzr = "rzr_" + InputCount;
+			var span = "span_" + InputCount;
+			var tabtitle = "tabtabtitle_" + InputCount;
+			var user = "user_" + InputCount;
+			var mobile = "mobile_" + InputCount;
+			var gender = "gender_" + InputCount;
+			var idcard = "idcard_" + InputCount;
+			var imgid = "img_"+ InputCount;
+				$("#tabtitlenew").append(
+						' <li class="tabli" id=' + tabtitle
+								+ ' onclick="changeTab(' + InputCount
+								+ ')"><span id=' + rzr + '>入住人</span></li><span id=' + span
+								+ ' class="deletespan"><img id=' + imgid
+								+ ' src="images/leftorder_close.png" width="24px"></span>');
+				$("#tabCon")
+						.append(
+								'<div id='
+										+ tabCon
+										+ ' style="display:none" class="hiddenuser"> <ul id="tabcontent" class="clearfix">'
+										+'<li><label class="orlabel_name orlabel_red">姓名</label><input  id= '+user+' name="check_user" type="text"  class="check order_input" maxlength="10"></li>'
+										+'<li><label class="orlabel_name orlabel_red">性别</label><select id= '+gender+' name="check_gender" class="check order_input"><option value="1">女</option><option value="0">男</option></select></li>'
+										+'<li><label class="orlabel_name orlabel_red">手机号 </label><input id= '+mobile+' name="check_mobile" type="text" class="check order_input" maxlength="11" ></li>'
+										+'<li><label class="orlabel_name">身份证</label><input id= '+idcard+' name="check_idcard" type="text"  class="check order_input"  maxlength="18" ></li>'
+										+'</ul></div>');
+				document.getElementById("tabCon_" + InputCount).style.display = "block";
+				var usercount = InputCount
+				for (i = 0; i < usercount; i++) {
+					if($("#tabCon_" + i).length==0){
+						
+					}else{
+					document.getElementById("tabCon_" + i).style.display = "none";
+						$("#span_" + i).hide();
+					}
+				}
+				document.getElementById("tabCon_" + InputCount).style.display = "block";
+				$("#span_" + InputCount).show();
+			});
+
+/* 点击入住人,显示当前入住人,隐藏其他入住人 */
+function changeTab(tabCon_num) {
+	var usercount = InputCount;
+	for (i = 0; i <= usercount; i++) {
+		if($("#tabCon_" + i).length==0){
+		}else{
+			document.getElementById("tabCon_" + i).style.display = "none";
+			$("#tabtabtitle_" + i).removeClass("active");
+		}
+		$("#span_" + i).hide();
+	}
+	$("#tabCon_" + tabCon_num).show();
+	var _ul_li_ = "#tabtabtitle_" +tabCon_num;
+	$(_ul_li_).addClass("active");
+	$("#span_" + tabCon_num).show();
+	$("#img_"+tabCon_num).attr("src","images/leftorder_close_two.png");
+	
+	
+	/* 入住人删除按钮 */
+	$("#span_" + tabCon_num).click(function(e) {
+		$("#user_" + tabCon_num).val("");
+		$("#mobile_" + tabCon_num).val("");
+		$("#gender_" + tabCon_num).val("");
+		$("#mobile_" + tabCon_num).val("");
+		$("#tabCon_" + tabCon_num).hide();
+		var next_num = tabCon_num-1;
+		$("#tabtabtitle_" + tabCon_num).remove();
+		$("#span_" + tabCon_num).remove();
+	    $("#tabCon_" + tabCon_num).prev().show();
+	    $("#tabCon_" + tabCon_num).remove();
+	})
+}
+
+
+//$(".deletespan").click(function(e) {
+	//$(this).remove();
+//})
+
+  $("body").on("click",".deletespan", function(e){ 
+	  var tabnum_now = ($(this).attr('id')).slice(5);
+	  var tabnumid = "#tabCon_"+tabnum_now;
+	  var tabtabtitleid = "#tabtabtitle_"+tabnum_now;
+	  var spanid =  "#span_"+tabnum_now;
+	  $(tabtabtitleid).remove();
+	  $(tabnumid).hide();
+	  $(tabnumid).prev().show();
+	  $(tabnumid).remove();
+	  $(spanid).remove();
+	   });
+
+
+
+/* parseToJson */
+function parseToJson(msg, end) {
+	var json = "[{";
+	var msg2 = msg.split("&"); // 先以“&”符号进行分割，得到一个key=value形式的数组
+	var t = false;
+	for ( var i = 0; i < msg2.length; i++) {
+		var msg3 = msg2[i].split("="); // 再以“=”进行分割，得到key，value形式的数组
+		for ( var j = 0; j < msg3.length; j++) {
+			json += "\"" + msg3[j] + "\"";
+			if (j + 1 != msg3.length) {
+				json += ":";
+			}
+			if (t) {
+				json += "}";
+				if (i + 1 != msg2.length) { // 表示是否到了当前行的最后一列
+					json += ",{";
+				}
+				t = false;
+			}
+			if (msg3[j] == end) { // 这里的“canshu5”是你的表格的最后一列的input标签的name值，表示是否到了当前行的最后一个input
+				t = true;
+			}
+		}
+		if (!msg2[i].match(end)) { // 同上
+			json += ";";
+		}
+
+	}
+	json += "}]";
+
+	return json;
+}
+
+/* 预订 */
+function orderbegin() {
+	$("#order-button").css('background','gray');
+	$("#order-button").addClass('disabledinput');
+	var ordertheme = $("#theme").val();
+	var orderroomtype = $("#roomtype").val();
+	var orderarrivedate = $("#arrivedate").val();
+	var orderleavedate = $("#leavedate").val();
+	var orderacount = $("#acount").val();
+	var orderrpid = $("#rpid").val();
+	var orderprice = $("#price").val();
+	var orderuser = $("#userorder").val();
+	var ordermobile = $("#ordemobile").val();
+	var orderlimited = $("#limited").val();
+	var receptionremark = $("#receptionremark").val();
+	var roomremark = $("#roomremark").val();
+	var t = $("#roomtype").val();
+	var s = (document.getElementsByName(t)[0].id)
+	var maxusers = parseInt(s * orderacount);
+	var ordercash = $("#cash").val();
+	var ordercard = $("#card").val();
+	var ordervoucher = $("#voucher").val();
+	var orderscore = $("#score").val();
+	var ordergurantee = "1";
+	if ((ordercash != null && ordercash != "")
+			|| (ordercard != null && ordercard != "")) {
+		ordergurantee = "2";
+	}
+	if ((!orderarrivedate) && (!orderleavedate)) {
+		showMsg("日期不能为空！");
+		$("#order-button").css('background','#5A5D9C');
+		$("#order-button").removeClass('disabledinput');
+	} else if ((new Date(orderarrivedate.replace(/\-/g, "\/"))) > (new Date(
+			orderleavedate.replace(/\-/g, "\/")))) {
+		showMsg("起始时间不得晚于结束时间！");
+		$("#order-button").css('background','#5A5D9C');
+		$("#order-button").removeClass('disabledinput');
+	} else if ((!orderroomtype) && (orderroomtype == "")) {
+		showMsg("请先选择房间类型！");
+		$("#order-button").css('background','#5A5D9C');
+		$("#order-button").removeClass('disabledinput');
+	} else if (!orderuser) {
+		showMsg("预订人 不能为空！");
+		$("#order-button").css('background','#5A5D9C');
+		$("#order-button").removeClass('disabledinput');
+	} else if (!ordermobile) {
+		showMsg("预订人手机号不能为空！");
+		$("#order-button").css('background','#5A5D9C');
+		$("#order-button").removeClass('disabledinput');
+	} else if (/^(1[358][0-9]{9})$/.test(ordermobile)==false) {
+		showMsg("预订人手机号输入不正确，请重新输入！");
+		$("#order-button").css('background','#5A5D9C');
+		$("#order-button").removeClass('disabledinput');
+	}else if (ordercash) {
+		if (!/^\d+|\d+\.\d{1,2}$/gi.test(ordercash)) {
+			showMsg("预付现金应为数字或保留俩位小数，请重新输入！");
+			$("#order-button").css('background','#5A5D9C');
+			$("#order-button").removeClass('disabledinput');
+			$("#cash").val("");
+		} else {
+			orderdata();
+		}
+	} else if (ordercard) {
+		if (!/^\d+|\d+\.\d{1,2}$/gi.test(ordercard)) {
+			showMsg("预付现金应为数字或保留俩位小数，请重新输入！");
+			$("#card").val("");
+			$("#order-button").css('background','#5A5D9C');
+			$("#order-button").removeClass('disabledinput');
+		} else if (!ordervoucher) {
+			showMsg("银行卡预付，必须输入凭证号！");
+			$("#order-button").css('background','#5A5D9C');
+			$("#order-button").removeClass('disabledinput');
+		} else if (!/^\d+$/.test(ordervoucher)) {
+			showMsg("凭证号必须为数字，请重新输入！");
+			$("#order-button").css('background','#5A5D9C');
+			$("#order-button").removeClass('disabledinput');
+			$("#voucher").val("");
+		} else if ((ordervoucher.length) != 6) {
+			showMsg("凭证号位数应为6位，请重新输入！");
+			$("#order-button").css('background','#5A5D9C');
+			$("#order-button").removeClass('disabledinput');
+			$("#voucher").val("");
+		} else {
+			orderdata();
+		}
+	}else {
+		orderdata();
+
+	}
+
+}
+
+/* 预订~添加入住人数组 */
+function  ObjStory(name,gender,idcard,mobile)
+{
+   this.name = name;
+   this.gender= gender;
+   this.idcard= idcard;
+   this.mobile = mobile; 
+}
+
+
+function orderdata() {
+	var map = [];   
+	var userlist =document.getElementsByName("check_user");
+	var genderlist =document.getElementsByName("check_gender");
+	var idcardlist  =document.getElementsByName("check_idcard");
+	var mobilelist =document.getElementsByName("check_mobile");
+	for(var i=0; i<userlist.length; i++ ){
+		  if((userlist[i].value==null)||(userlist[i].value=="")||(userlist[i].value=="%")){
+		  }else{
+			  if((idcardlist[i].value=="")==false){
+				  var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+		            if (reg.test( idcardlist[i].value) === false) {
+		            	showMsg(userlist[i].value+"身份证输入不合法，请重新输入");
+		            	$("#order-button").css('background','#5A5D9C');
+		            	$("#order-button").removeClass('disabledinput');
+		                return;
+		             }
+			  }
+			
+	            
+	            var re = /^(1[358][0-9]{9})$/;
+	            if (re.test(mobilelist[i].value)==false) {
+	            	showMsg(userlist[i].value+"手机号码输入为空或输入不合法，请重新输入");
+	            	$("#order-button").css('background','#5A5D9C');
+	            	$("#order-button").removeClass('disabledinput');
+	                return; 
+	            }
+			  
+		   var namedata = userlist[i].value;
+		   var genderdata = genderlist[i].value;
+		   var idcarddata = idcardlist[i].value;
+		   var mobiledata = mobilelist[i].value;
+		   map.push(new ObjStory(namedata,genderdata,idcarddata,mobiledata));
+		  }
+		   }
+	var checkuserarray = JSON.stringify(map);
+	var ordertheme = $("#theme").val();
+	var orderroomtype = $("#roomtype").val();
+	var orderarrivedate = $("#arrivedate").val();
+	var orderleavedate = $("#leavedate").val();
+	var orderacount = $("#acount").val();
+	var orderrpid = $("#rpid").val();
+	var orderprice = $("#price").val();
+	var orderuser = $("#userorder").val();
+	var ordermobile = $("#ordemobile").val();
+	var orderlimited = $("#limited").val();
+	var receptionremark = $("#receptionremark").val();
+	var roomremark = $("#roomremark").val();
+	var t = $("#roomtype").val();
+	var s = (document.getElementsByName(t)[0].id)
+	var maxusers = parseInt(s * orderacount);
+	var ordercash = $("#cash").val();
+	var ordercard = $("#card").val();
+	var ordervoucher = $("#voucher").val();
+	var orderscore = $("#score").val();
+	var ordergurantee = "1";
+	var membergendor = $("#ordergendor").val();
+	if ((ordercash != null && ordercash != "")
+			|| (ordercard != null && ordercard != "")) {
+		ordergurantee = "2";
+	}
+	$.ajax({
+		url : base_path + "/hotelorderRoom.do",
+		type : "post",
+		dataType : "json",
+		data : {
+			'ordertheme' : ordertheme,
+			'orderroomtype' : orderroomtype,
+			'orderarrivedate' : orderarrivedate,
+			'orderleavedate' : orderleavedate,
+			'orderacount' : orderacount,
+			'orderrpid' : orderrpid,
+			'orderprice' : orderprice,
+			'orderuser' : orderuser,
+			'ordermobile' : ordermobile,
+			'orderlimited' : orderlimited,
+			'receptionremark' : receptionremark,
+			'roomremark' : roomremark,
+			'ordercash' : ordercash,
+			'ordercard' : ordercard,
+			'ordervoucher' : ordervoucher,
+			'orderscore' : orderscore,
+			'ordergurantee' : ordergurantee,
+			'checkuserarray' :checkuserarray,
+			'membergendor' :membergendor
+		},
+		success : function(json) {
+			if (1 == json.result) {
+				if (json.message) {
+					showMsg(json.message);
+					window.setTimeout("window.location.reload(true)", 2500);
+					$("#order-button").css('background','#5A5D9C');
+					$("#order-button").removeClass('disabledinput');
+				} else {
+					showMsg("预订成功!");
+					window.setTimeout("window.parent.location.reload(true)",
+							2500);
+				}
+
+			} else {
+				showMsg("预订失败！");
+				window.setTimeout("window.parent.location.reload(true)", 1800);
+				$("#order-button").css('background','#5A5D9C');
+				$("#order-button").removeClass('disabledinput');
+			}
+		},
+		error : function() {
+			showMsg("操作失败，请重新操作！");
+			window.setTimeout("window.parent.location.reload(true)", 1800);
+			$("#order-button").css('background','#5A5D9C');
+			$("#order-button").removeClass('disabledinput');
+		}
+	});
+
+}
+//公司会员价格
+function changePrice(){
+	var corporationIdSelect = $("#corporationIdSelect").val();
+	var roomtype = $("#roomtype").val();
+	var arrivedate = $("#arrivedate").val();
+	if(corporationIdSelect==""){
+		showMsg("请输入公司会员编号");
+		return;
+	}
+	if(roomtype ==0){
+		showMsg("请选择房间类型");
+		return;
+	}
+	$.ajax({
+		url: base_path+"/OrderdiscountPrice.do",
+		type: "post",
+		data: {
+		"roomtype" : roomtype,
+		"corporationIdSelect" : corporationIdSelect,
+		"arrivedate" : arrivedate
+	},
+		success: function(json){
+		var array = json.data.split(":");
+		$("#price").val(array[0]);
+		$("#rpid").val("CMJ");
+		$("#userorder").val(array[3]);
+		$("#ordergendor").val(array[2]);
+		$("#ordemobile").val(array[5]);
+		$("#limited").val(array[6]+":"+array[7]);
+	},
+		error: function(){}
+	});
+}
+// function removediv(){
+
+// alert($(this).parent().attr(id))
+// $(this).parent().remove();
+// $('.tabli').click(function(e){
+// // alert($(this).attr('id'));
+// });
+// }
+
+// $(".tabli").click(function(e){
+// var id = $(e.target).attr('id');
+// alert(id);
+// })
+
+// var list=eval("("+s+")");
+// for(int i=0;i<list.length;i++){
+// name=list[i].RP_NAME;
+// //alert(name)
+// }
+
+// var mycars=new Array(s )
+// var json = {};
+// for (var i = 0; i < mycars.length; i++) {
+// json[i]=mycars[i];
+// alert(json[i])
+// }
+// var r = eval(s);
+// /var r = eval(s.replace(/=/g,":"));
+
+// document.write{'<room_type>'+r[0].room_type+'</room_type>'}
+// alert(r[0].room_type)
+// alert(r[1].room_type)
+// for(var r in s){
+// for(var i=0; i<r.length; i++ ){
+// alert(r);
+// alert(r[i])
+// var v = s[i];
+// if(t.equal(s[v].get("room_type"))){
+// //alert("124")
+// }
+
+// for(var i=0; i<t.length; i++ ){
+// if(w[i].value == t){
+// alert(w[i].room_type)
+// }
+// }

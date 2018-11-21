@@ -1,0 +1,67 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="../common/taglib.jsp"%>
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>系统初始化设置</title>
+		<link href="<%=request.getContextPath()%>/css/initialcss/bootstrap.min.css" rel="stylesheet" type="text/css" />
+		<link href="<%=request.getContextPath()%>/css/initialcss/bootstrap-responsive.min.css" rel="stylesheet" type="text/css" />
+		<link href="<%=request.getContextPath()%>/css/initialcss/bwizard.min.css" rel="stylesheet" type="text/css" />
+		<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	</head>
+	<body>
+		<div class="well" style="height:540px;">
+			<div id="step1" role="tabpanel" class="bwizard-activated" aria-hidden="false">
+				<p>
+					亲爱的用户您好！
+				</p>
+				<p>
+					初次登录系统需要将相关基本数据录入，方可进行正常的营业活动，该流程将指导您进行相应的操作，详细的数据录入请在正常营业日去crm后台管理系统的相关模块录入！
+				</p>
+				<p style="color:red;">
+					基本步骤为：门店管理 →员工管理 →权限管理 →房型管理 →房间管理 →参数设置→导向完成  
+				</p>
+				<p>
+					1)当前门店的录入是总店录入信息，并设置当前账号${loginInfo.staff.loginName}，具有超级管理员的权限，<span style="color:red;">但此账号仅用于此导向流程和查看部分信息，不可用于正常营业时的业务操作！</span>
+				</p>
+				<p>
+					2)员工管理，若之前已设置过，该流程中只展示，反之将有页面进行录入数据，待以后流程使用！
+				</p>
+				<p>
+					3)权限管理，为第二步骤新增的员工赋予店长的操作权限！
+				</p>
+				<p>
+					4)店长职位，会员等级由参数初始化来完成，该流程只展示当前会员等级！
+				</p>
+				<p>
+					5)房型管理，若之前已设置过，该流程中只展示，反之将有页面进行录入房型数据，待以后流程使用！
+				</p>
+				<p>
+					6)房价申请通过点击房价初始化按钮进行录入房型价格数据，待以后流程使用！
+				</p>
+				<p>
+					7)参数设置根据当前门店类型来决定是设置酒店账户，还是设置保洁参数！
+				</p>
+				<br>
+				<span>当前登录：</span><span style="color:red;">${loginInfo.staff.loginName}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>权限：</span><span style="color:red;">分超管</span>
+			</div>
+		</div>
+		<script src="<%=request.getContextPath()%>/script/initialData/jquery.min.js"></script>
+		<script src="<%=request.getContextPath()%>/script/initialData/bootstrap.min.js"></script>
+		<!--<script src="<%=request.getContextPath()%>/script/initial/bwizard.min.js"></script>-->
+		<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+		<script src="<%=request.getContextPath()%>/script/initialData/initialPage.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+		<script type="text/javascript">
+		 var base_path ="<%=request.getContextPath()%>";
+		   $(document).ready(function(){
+		   	//$("#wizard").bwizard();
+		   
+		   });
+	   
+		</script>
+	</body>
+</html>
+

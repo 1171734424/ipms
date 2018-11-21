@@ -1,0 +1,189 @@
+@CHARSET "UTF-8";
+/*订单*/
+
+.imooc_order {
+	top: -10px;
+	left: 96%;
+}
+body,html{
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+}
+/*查询*/
+.sonepa .check{
+	margin-left:-19px;
+}
+.order_height{
+	height:716px;
+	overflow: scroll;
+}
+/*数量*/
+input.numcount{
+	width:60px;
+	margin-left:12px;
+    text-align: center;
+   
+}
+.order_detail .count{
+	width: 30px;
+    height: 33px;
+    line-height: 30px;
+    display: inline-block;
+    border: 1px solid #ddd;
+    text-align: center;
+    border-radius: 4px;
+    margin-left: 9px;
+    text-align: center;
+    cursor: pointer;
+  
+}
+.order_detail .jia{
+}
+.order_detail textarea{
+	width: 841px;
+	height: 38px;
+}
+.order_detail .label_name{
+	width: 75px;
+}
+.order_height .tab_select{
+	height: 34px;
+    line-height: 31px;
+    text-align: center;
+    width: 100px;
+    border: 1px solid #CCCCCC;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    border-radius: 2px;
+}
+/*数量结束*/
+.submitbotton {
+	font-size: 14px;
+	font-family: "微软雅黑";
+	height: 34px;
+	line-height: 31px;
+	text-align: center;
+	width: 80px;
+	margin-left: 4px;
+	border: 1px solid #CCCCCC;
+	background: #4A5064;
+	color: #fff;
+	cursor: pointer;
+}
+
+.sonepa {
+	padding: 2% 0 0 0;
+}
+
+.infohidden {
+	display: none;
+}
+
+.info_write {
+	margin-top: 7px;
+	background: #FFFFFF;
+	overflow-x: scroll;
+	overflow-y: hidden;
+}
+
+.subcontainer {
+	overflow-x: scroll;
+	overflow-y: hidden;
+}
+
+.info_write ul {
+	border: 1px solid;
+	width: auto;
+	display: table-row;
+}
+
+.info_write ul li {
+	
+}
+
+.xx_wrap {
+	width: 90%;
+    height: 50px;
+    margin-left: 5%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-bottom: 2px solid #3F72AF;;
+}
+
+.nav {
+	padding: 0;
+	margin: 0;
+	list-style: none;
+}
+
+.xx_wrap ul {
+	display: flex;
+}
+
+.xx_wrap li {
+	padding: 5px 20px;
+	margin: 0 5px;
+	border: 1px solid #DADADA;
+}
+
+.order_height .tabli {
+	width: 10%;
+	display: inline-table;
+	margin-bottom:0;
+	
+}
+
+.showuser {
+	display: block;
+}
+
+.hiddenuser {
+	display: none;
+}
+.detail_one_order{
+	background: #FFFFFF;
+	height:142px;
+}
+.detail_one_order .label_name_order {
+	text-align: right;
+	font-weight: normal;
+	font-size: 0.85rem;
+}
+
+.order_pzh {
+	margin-left: 19.6%;
+	margin-top: 1%;
+	display: none;
+}
+
+.yfk {
+	color: red;
+	border: none;
+	font-size: 15px;
+	margin-left: 5px;
+	width: 35px;
+}
+
+.yfkspan {
+	margin-left: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

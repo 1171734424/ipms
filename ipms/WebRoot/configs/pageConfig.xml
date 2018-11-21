@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M999" name="配置管理" show="false" icon="setting" subSystem="CRM" >
+				<page pageId="R99999" name="error页测试">
+					<url>ABC</url>
+				</page>
+				
+				<page pageId="R99901" name="界面配置">
+					<tabs>R9990101,R9990102,R9990103,R9990104</tabs>
+				</page>
+				
+				<page pageId="R9990101" name="模块配置" tab="true" containerId="R99901" editing="line">
+					<functions>EDIT</functions>
+					<target>ModelBean</target>
+					<columns>
+						<column columnId="MODELID" name="模块编号" align="right" editable="true" validateRule="NOTNULL" primaryKey="true"/>
+						<column columnId="MODELNAME" name="模块名称" width="200" align="right" editable="true" validateRule="NOTNULL"/>
+						<column columnId="SHOW" name="是否展示" width="80" editable="true" editType="checkbox" editValue="true:false"/>
+						<column columnId="DESCRIPTION" name="描述" width="350" align="right" editable="true"/>
+					</columns>
+				</page>
+				
+				<page pageId="R9990102" name="页面配置" tab="true" containerId="R99901" editing="form">
+					<conditions>MODELID</conditions>
+					<functions>EDIT</functions>
+					<target>PageBean</target>
+					<columns>
+						<column columnId="MODELID" name="模块编号" align="right" editable="true" validateRule="NOTNULL"/>
+						<column columnId="PAGEID" name="页面编号" width="80" align="right" editable="true" validateRule="NOTNULL" primaryKey="true"/>
+						<column columnId="NAME" name="页面名称" width="100" align="right" editable="true" validateRule="NOTNULL"/>
+						<column columnId="TAB" name="是否子页" width="50" editable="true" editType="checkbox" editValue="true:false"/>
+						<column columnId="containerId" name="父页编号" width="100" align="right" editable="true"/>
+						<column columnId="TABS" name="下属子页编号" width="100" align="right" editable="true"/>
+						<column columnId="DESCRIPTION" name="描述" width="300" align="right" editable="true"/>
+					</columns>
+				</page>
+				
+				<page pageId="R9990103" name="列配置" tab="true" containerId="R99901" editing="form" noShrink="true">
+					<conditions>PAGEID</conditions>
+					<functions>EDIT</functions>
+					<target>ColumnBean</target>
+					<requiredData>EDITTYPE</requiredData>
+					<dataFormats>
+						<sql name="EDITTYPE" lazy="true">
+							select 'test1' label, '1' value from dual where 'select' = :EDITTYPE
+							union all
+							select 'test2' label, '2' value from dual
+							union all
+							select 'test3' label, '3' value from dual
+						</sql>
+					</dataFormats>
+					<columns>
+						<column columnId="PAGEID" name="页面编号" width="80" align="right" editable="true" validateRule="NOTNULL" primaryKey="true"/>
+						<column columnId="COLUMNNO" name="序号" width="80" align="right" editable="true" validateRule="NOTNULL" primaryKey="true"/>
+						<column columnId="COLUMNID" name="列名" width="80" align="right" editable="true" validateRule="NOTNULL"/>
+						<column columnId="NAME" name="标题" width="80" align="right" editable="true" validateRule="NOTNULL"/>
+						<column columnId="WIDTH" name="列宽" width="80" align="right" editable="true" validateRule="NOTNULL"/>
+						<column columnId="ALIGN" name="对齐" width="80" align="right" editable="true" editType="select" editValue="left:left;center:center;right:right"/>
+						<column columnId="HIDDEN" name="是否隐藏" width="80" editable="true" editType="checkbox" editValue="true:false"/>
+						<column columnId="EDITABLE" name="可编辑" width="80" editable="true" editType="checkbox" editValue="true:false"/>
+						<column columnId="EDITTYPE" name="编辑类型" width="80" editable="true"   editType="select" 
+							editValue="null:none;select:select;checkbox:checkbox;date:date"    dataEvent="MULTI:EDITVALUE"    eventRule="EDITTYPE"/>
+						<column columnId="EDITVALUE" name="简化值" width="80" align="right" editable="true" editType="select"/>
+						<column columnId="VALUE" name="查询值" width="80" align="right" editable="true"/>
+						<column columnId="SORTABLE" name="可排序" width="80" editable="true" editType="checkbox" editValue="true:false"/>
+						<column columnId="VALIDATERULE" name="校验规则" align="right" editable="true"/>
+						<column columnId="PRIMARYKEY" name="是否主键" width="80" editable="true" editType="checkbox" editValue="true:false"/>
+						<column columnId="COMPLEXKEY" name="复合主键" width="80" align="right" editable="true"/>
+						<column columnId="SEQUENCE" name="序列" width="80" align="right" editable="true"/>
+						<column columnId="SEQPREFIX" name="序列前缀" width="80" align="right" editable="true"/>
+						<column columnId="ASSIGNED" name="指定生成规则" width="80" align="right" editable="true"/>
+						<column columnId="DATAEVENT" name="数据事件" width="80" align="right" editable="true"/>
+						<column columnId="EVENTRULE" name="事件取值" width="80" align="right" editable="true"/>
+					</columns>
+				</page>
+				
+				<page pageId="R9990104" name="参数配置" tab="true" containerId="R99901" editing="form">
+					<conditions>PAGEID,NAME,AGE</conditions>
+					<paramUrl>testparam</paramUrl>
+					<functions>EDIT,PRINT</functions>
+					<printTemplate></printTemplate>
+					<target>ParamBean</target>
+					<columns>
+						<column columnId="PAGEID" name="页面编号" width="80" align="right" editable="true" validateRuleRule="NOTNULL" primaryKey="true"/>
+						<column columnId="TYPE" name="类型" width="150" editable="true" editType="select" 
+							editValue="target:实体类;conditions:查询条件;charts:统计图表;latitude:图表维度;functions:页面功能;printTemplate:打印模板;url:访问路径;type:查询类型;sql:sql/proc;requiredData:动态查询值;dataFormats:数据取值"/>
+						<column columnId="NAME" name="名称" width="200" editable="true"/>
+						<column columnId="VALUE" name="值" width="400" editable="true" validateRule="NOTNULL"/>
+					</columns>
+				</page>
+				
+				<page pageId="R99913" name="模板一" editFunc="testFunc(1111)" loadOnRender="true">
+					<charts caption="统计图表" subCaption="本周" latitude="HPZL:SCSL">Pie,Column,Line</charts>
+					<chartEvent>testFunc</chartEvent>
+					<chartDataEvent>testFunc</chartDataEvent>
+					<functions>PRINT,EXCEL</functions>
+					<printTemplate>PRT01</printTemplate>
+					<sumCols>SCSL</sumCols>
+					<!-- <afterLoad>testFunc</afterLoad> -->
+					<query type="sql">
+						<sql>
+							select 1 BH, 'a' HPZL, 200 SCSL from dual
+							union all
+							select 2 BH, 'b' HPZL, 0 SCSL from dual
+							union all
+							select 3 BH, 'c' HPZL, 300 SCSL from dual
+						</sql>
+					</query>
+					<dataFormats>
+						<sql name="THRESHOLD" lazy="true">
+							select 210 value from dual where 'a' = :HPZL
+						</sql>
+					</dataFormats>
+					<requiredData>THRESHOLD</requiredData>
+					<columns>
+						<column columnId="BH" name="编号" width="30"/>
+						<column columnId="HPZL" name="种类" align="right"/>
+						<column columnId="SCSL" name="数量" align="right" threshold="LT:THRESHOLD" thresholdParam="HPZL"/>
+						<column columnId="MS" name="描述" align="right" editable="true"/>
+					</columns>
+				</page>
+				
+				<page pageId="R99914" name="模板二" editing="form">
+					<charts title="统计图表" latitude="HPZL:SCSL">Pie,Line</charts>
+					<chartInfo>infoTest</chartInfo>
+					<conditions>STARTDATE,ENDTIME</conditions>
+					<functions>PRINT,EXCEL,EDIT</functions>
+					<printTemplate>PRT02</printTemplate>
+					<recordLog>true</recordLog>
+					<query type="sql">
+						<sql>
+							select 2 BH, 2 HPZL, 200 SCSL from dual 
+								where to_char(sysdate, 'yyyy/mm/dd') like :STARTDATE
+							union all
+							select 3 BH, 4 HPZL, 600 SCSL from dual
+							union all
+							select 4 BH, 5 HPZL, 300 SCSL from dual
+							union all
+							select 5 BH, 2 HPZL, 800 SCSL from dual
+						</sql>
+					</query>
+					<dataFormats>
+						<sql name="TESTDIALOG">
+							select 1 T1, 2 T2 from dual
+						</sql>
+						<sql name="THRESHOLD" lazy="true">
+							select 1600 value from dual where 2 = :HPZL
+						</sql>
+					</dataFormats>
+					<requiredData>TESTDIALOG,THRESHOLD</requiredData>
+					<columns>
+						<column columnId="BH" name="编号" align="left" editable="true"/>
+						<column columnId="HPZL" name="种类" align="right" editable="true"
+							editType="dialog" dialogTarget="User" dialogColumns="userId,userName"/>
+						<column columnId="SCSL" name="数量" width="40"
+							editType="funcbutton" callFunc="addAdjustButton"/>
+						<column columnId="MS1" name="描述1" width="50" align="right" editable="true" 
+							editType="link" funcName="测试" callFunc="testFunc" buttonCls="b_save"/>
+						<column columnId="MS2" name="描述2" align="right" editable="true" 
+							customCallback="testFunc"/>
+					</columns>
+				</page>
+				
+				<page pageId="R99915" name="模板三" showType="grid" loadOnRender="true">
+					<charts title="统计图表" latitude="HPZL:SCSL">Pie,Column</charts>
+					<conditions>MODELID</conditions>
+					<functions>PRINT,EXCEL</functions>
+					<printTemplate>PRT03</printTemplate>
+					<sumCols>SCSL</sumCols>
+					<query type="sql">
+						<sql>
+							select 1 BH, 'a' HPZL, 200 SCSL from dual
+							union all
+							select 2 BH, 'b' HPZL, 600 SCSL from dual
+							union all
+							select 3 BH, 'c' HPZL, 300 SCSL from dual
+							union all
+							select 2 BH, 'd' HPZL, 600 SCSL from dual
+							union all
+							select 3 BH, 'a' HPZL, 300 SCSL from dual
+							union all
+							select 2 BH, 'c' HPZL, 600 SCSL from dual
+							union all
+							select 3 BH, 'd' HPZL, 300 SCSL from dual
+							union all
+							select 2 BH, 'b' HPZL, 600 SCSL from dual
+							union all
+							select 3 BH, 'a' HPZL, 300 SCSL from dual
+						</sql>
+					</query>
+					<columns>
+						<column columnId="BH" name="编号" width="30"/>
+						<column columnId="HPZL" name="种类" align="right" editable="true"/>
+						<column columnId="SCSL" name="数量" align="right" editable="true"/>
+						<column columnId="MS" name="描述" align="right" editable="true" dialogCustom="testFunc"/>
+					</columns>
+				</page>
+			</model>
+		</models>
+	</config>
+	
+</configs>

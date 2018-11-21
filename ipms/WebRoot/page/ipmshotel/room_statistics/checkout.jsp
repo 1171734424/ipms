@@ -1,0 +1,413 @@
+
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="../../common/script.jsp"%>
+<!DOCTYPE HTML>
+<html>
+  <head>
+  
+    <title>退房</title>
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/roomlist/roomlist_check.css"/>
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>
+  </head>
+  <style>
+  	#multicheckout{
+	  	left: 465px;
+	  	display: none;
+  	}
+  	.newdatail_six ul li:nth-child(7){
+  		position:relative !important;
+  		width: auto;
+    	top: auto;
+    	z-index: 0;
+  	}
+  	.newdatail_six ul li:nth-child(8){
+  		display: none;
+  		margin-top: 0;
+  	}
+  	#voucher {
+  	    border-color: #f78d8d;
+  	}
+  	#projectid{
+  	    margin-left: 5px;
+  	    width: 39.6em;
+  	}
+  	#remark{
+  		height: 30%;
+  		margin-left: 9px;
+  	}
+  	.line{
+  		height:1px;
+  		width:100%;
+  		border:1px solid #ccc;
+  	}
+  	.newdatail_six ul li:nth-child(9) label{
+		float: left;
+  	}
+  	.tips{
+	  	line-height: 6;
+	    padding-left: 34px;
+	    font-size: 14px;
+  	}
+  	.roomappingtips {
+  		display: none;
+  		color: red;
+  	}
+  	.clearfix input{
+	  	width: 38.5em;
+  	}
+  	#totalfee {
+    	/*width: 29em;*/
+	}
+  	.feetips{
+	    color: red;
+	    font-size: 14px;
+	    display: none;
+  	}
+  	#checkoutType{
+	    width: 140px;
+	    margin-left: -5px;
+	    height: 34px;
+	    font-size: 12px;
+  	}
+  	.checkoutDiv {
+	  	float: right;
+	    margin-right: 146px;
+	    margin-top: 79px;
+	    position: fixed;
+    	left: 297px;
+    	top: 387px;
+  	}
+  </style>
+  <body>
+   <!--入账开始 -->
+		<section class="detail_six newdatail_six">
+			<div class="high_header">
+				<!--  <i class="imooc detail_imooc" style="color:#3B3E40;"></i>	-->
+					<div class="margintop">
+						<form id="bill_date">
+							<ul class="clearfix">
+						      <li><label class="label_name">房单号</label><input name="checkId" type="text"  id="checkId" class="text_edit" readonly></li>
+						      <li><label class="label_name">日租</label><input id="roomprice" name="roomprice" type="text" class="text_number" readonly></li>
+						      <li><label class="label_name">账面金额</label><input id="accountfee" name="accountfee" type="text" class="text_number" readonly></li>
+						      <li><label class="label_name">平账金额</label><input id="totalfee" name="totalfee" type="text" class="text_number" readonly></li>
+						      <hr style="height:1px;border:0px;background-color:#D5D5D5;color:#D5D5D5;width:90%;margin-left: 26px;"/>
+						      <li style="position:relative;">
+							      <label class="label_name">支付方式</label>
+									<select name="projectid" id="projectid" class="text_search" onchange="selectpaytype(this)">
+										<option value="">--请选支付方式--</option>
+										<option value="2001">现金支出</option>
+										<option value="2002">现金收取</option>
+										<option value="2003">银行卡</option>
+									</select>
+						      <!-- 
+							      <input id="project" name="project" type="text" value="" class="text_edit margin_text" onclick="onbill()">
+							      <div id="ontime" class="ontime fadeIn"></div> -->
+						      </li>
+						      <li><label class="label_name">金额</label><input id="amount" name="amount" type="number" min=0 value="" class="text_number" ></li>
+						      <li><label class="label_name">支付凭证</label><input id="voucher" name="voucher" type="text" min=0 value="" class="text_number" ></li>
+						      <li><label class="label_name">备注</label> <textarea id="remark" name="remark" onchange="autosaveRemark()" ></textarea></li>
+						      <li onclick="checkout()" >
+						      <span role="button" class="button confirm" style="position: absolute;right: 52px;">结算</span>
+						      </li>
+			       		   </ul>
+			       		   <!-- <input type="hidden" id="projectid" name="projectid"> -->
+			       		   <input type="hidden" id="subprice" name="subprice">
+			       		   <input type="hidden" id="strbillids" name="strbillids"/>
+		       		   </form>
+	    		 </div>
+	    		 <!-- <div class="tips"><font class="roomappingtips">注意：集体结算前需确保所有账目已平!</font> -->
+				<div class="checkoutDiv">
+				<label class="label_name" style="margin-right: 6px;">结算方式</label>
+				<select name="checkoutType" id="checkoutType" class="text_search" onchange="selectcheckoutType(this)">
+					<option value="0">个人结算</option>
+				</select>
+				</div>
+				</div>
+	    		 <!-- 
+	    		 <span role="button" id="multicheckout" class="button confirm" onclick="checkout(2)">集体结算</span> -->
+			</div>
+		</section>
+		<script type="text/javascript" src="<%=request.getContextPath()%>/script/ipms/js/workbillroom/util.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+		<script type="text/javascript">
+			var path = "<%=request.getContextPath() %>";
+			var checkid = '<%=request.getParameter("checkid")%>';
+			var strbillids = '<%=(request.getParameter("strbillids") == null ? "": request.getParameter("strbillids"))%>';
+			var freshtype = '<%=request.getParameter("freshtype")%>';
+			var pagea = window.parent.pagea;
+			$(function(){
+				loadCheckData();
+				loadpayandcost();
+				veritfycheckout();
+				$("#checkId").val(checkid);
+			});
+			
+			
+			function loadCheckData(){
+				$.ajax({
+			         url: path + "/loadCheckData.do",
+					 type: "post",
+					 data : {checkid : checkid},
+					 success: function(json) {
+					 	$("#roomprice").val(json[0]["ROOMPRICE"]);
+					 	$("#remark").val(json[0]["REMARK"]);
+					 },
+					 error: function(json) {}
+				});
+			}
+			
+			function loadpayandcost(){
+				$.ajax({
+			         url: path + "/loadpayandcost.do",
+					 type: "post",
+					 data : {
+					 	checkid : checkid,
+					 	strbillids : strbillids
+					 },
+					 success: function(json) {
+						 //从账单带过来，需要结掉的账单编号，结算带过来
+						 if(strbillids){
+						 	 $("#accountfee").val((json["chosedCost"] - json["chosedPay"]).toFixed(2));
+						 	 $("#totalfee").val((json["chosedCost"]  - json["chosedPay"]).toFixed(2));
+						 	 $("#amount").val( Math.abs(( json["chosedCost"] - json["chosedPay"] )).toFixed(2));
+							 if( json["chosedPay"] - json["chosedCost"] > 0){
+							 	$("#projectid").val("2001");
+							 }else {
+							 	$("#projectid").val("2002");
+							 }
+						 }
+						 else {
+						 	let noonpay = json["shouldPay"] - json["subPrice"];
+						 	 
+						 	 //只对于状态为1的，也就是在住的生效
+						 	 if(json.checkStatus == 1){
+								 //中午十二点半半到两点之间是否要添加房费判断
+								 if(json["subpriceType"] && json["subpriceType"] == "FullDayRoom"){
+								 	var todat = new Date();
+								 	var T1230 = new Date();
+								 	T1230.setHours(12);
+								 	T1230.setMinutes(30);
+								 	T1230.setSeconds(0);
+								 	var T1400 = new Date();
+								 	T1400.setHours(14);
+								 	T1400.setMinutes(0);
+								 	T1400.setSeconds(0);
+								 	if( todat >= T1230 && todat < T1400){
+								 		json["subPrice"] = json["subPrice"] - (json["roomPrice"] / 2);
+								 		showMsg("是否添加半天房费!", "addsubprice()");
+								 	}
+								 }
+							 }
+							 $("#accountfee").val((json["uncheckoutCost"] - json["uncheckoutPay"]).toFixed(2));
+							 $("#totalfee").val((noonpay + json["subPrice"]).toFixed(2));
+							 $("#amount").val(Math.abs(noonpay + json["subPrice"]).toFixed(2));
+							 if( (noonpay + json["subPrice"]) > 0){
+							 	$("#projectid").val("2002");
+							 }else {
+							 	$("#projectid").val("2001");
+							 }
+						 }
+						 
+						 //如果账单应付金额为零，则不在需要输入金额
+						 if(json["shouldPay"] == 0){
+						 	//("#amount,#project,#reamrk").attr("disabled", "disabled");
+						 }
+						 
+						 //subprice会跟随表单提交到后台结算判断
+						 $("#subprice").val(json["subPrice"]);
+					 },
+					 error: function(json) {}
+				});
+			}
+			
+			//集体结算，将多个房间的个人结算加起来
+			function loadallroompayandcost(){
+				$.ajax({
+			         url: path + "/loadallroompayandcost.do",
+					 type: "post",
+					 data : {
+					 	checkid : checkid
+					 },
+					 success: function(json) {
+					 	let noonpay = json["shouldPay"] - json["subPrice"];
+					 	 
+					 	 //只对于状态为1的，也就是在住的生效
+					 	 if(json.checkStatus == 1){
+							 //中午十二点半半到两点之间是否要添加房费判断
+							 if(json["subpriceType"] && json["subpriceType"] == "FullDayRoom"){
+							 	var todat = new Date();
+							 	var T1230 = new Date();
+							 	T1230.setHours(12);
+							 	T1230.setMinutes(30);
+							 	T1230.setSeconds(0);
+							 	var T1400 = new Date();
+							 	T1400.setHours(14);
+							 	T1400.setMinutes(0);
+							 	T1400.setSeconds(0);
+							 	if( todat >= T1230 && todat < T1400){
+							 		json["subPrice"] = json["subPrice"] - (json["roomPrice"] / 2);
+							 		showMsg("是否添加半天房费!", "addsubprice()");
+							 	}
+							 }
+						 }
+						 
+						 $("#accountfee").val((json["uncheckoutCost"] - json["uncheckoutPay"]).toFixed(2));
+						 $("#totalfee").val((noonpay + json["subPrice"]).toFixed(2) );
+						 $("#amount").val(Math.abs(noonpay + json["subPrice"]).toFixed(2));
+						 if( (noonpay + json["subPrice"]) > 0){
+						 	$("#projectid").val("2002");
+						 }else {
+						 	$("#projectid").val("2001");
+						 }
+						 
+						 //如果账单应付金额为零，则不在需要输入金额
+						 if(json["shouldPay"] == 0){
+						 	//("#amount,#project,#reamrk").attr("disabled", "disabled");
+						 }
+						 
+						 //subprice会跟随表单提交到后台结算判断
+						 $("#subprice").val(json["subPrice"]);
+					 },
+					 error: function(json) {}
+				});
+			}
+			
+			$(".margin_text").on("click",function(){
+				$(".ontime").css("display","block");
+			})
+			
+			function addsubprice(){
+				$("#amount").val(  Math.abs((  parseFloat($("#amount").val()) + ($("#roomprice").val() / 2) )).toFixed(2)  );
+				$("#subprice").val($("#roomprice").val()/2);
+				if( (parseFloat($("#totalfee").val()) + parseFloat($("#subprice").val())) > 0){
+				 	$("#projectid").val("2002");
+				 }else {
+				 	$("#projectid").val("2001");
+				}
+			}
+			
+			function autosaveRemark(){
+				var remark = $("#remark").val();
+				if(remark){
+					$.ajax({
+				         url: path + "/autosaveRemark.do",
+						 type: "post",
+						 data : {
+						 	checkid : checkid,
+						 	remark : remark
+						 },
+						 success: function(json) {
+						 	if(json.result == 0){
+						 		showMsg(json.message);
+						 	}
+						 },
+						 error: function(json) {}
+					});
+				}
+			}
+			
+			//判断这个房单是否是部分结算还是关联房结算，还是个人结算
+			function veritfycheckout(){
+				$.ajax({
+			         url: path + "/veritfycheckout.do",
+					 type: "post",
+					 data : { checkid : checkid},
+					 success: function(json) {
+					     //存在关联房
+					 	if(json.result == 1){
+					 		$(".roomappingtips").show();
+					 		$("#checkoutType").append("<option value='2' checked>集体结算</option>");
+					 		$("#checkoutType").val(2);
+					 		if(!strbillids){
+					 		    loadallroompayandcost();
+					 		}
+					 	//不存在关联房
+					 	}else if(json.result == 0){
+					 		
+					 	}
+					 	//判断是否选中了账单，去除个人结算、集体结算，去除部分结算选项
+						if(strbillids){
+							$("#checkoutType").empty();
+							$("#checkoutType").append("<option value='1' checked>部分结算</option>");
+							$("#checkoutType").val(1);
+							$("#strbillids").val(strbillids);
+						}
+					 },
+					 error: function(json) {}
+				});
+			}
+			
+			function selectpaytype(e){
+				if($(e).val() == "2003"){
+					$(".newdatail_six ul li:nth-child(8)").show();
+				}else{
+					$(".newdatail_six ul li:nth-child(8)").hide();
+				}
+			}
+			
+			function selectcheckoutType(e){
+				if($(e).val() == "0"){
+					loadpayandcost();
+				}else if($(e).val() == "2"){
+					loadallroompayandcost();
+				}
+			}
+			
+			function checkout(e){
+				if(!isMoney($("#amount").val(), "金额：")){
+					return false;
+				}
+				if($("#amount").val() >= 10000000){
+					showMsg("金额太大!");
+					return false;
+				}
+				var checkUrl = "";
+				var checkType = $("#checkoutType").val();
+				if(checkType == 0)
+					checkUrl = "/checkoutbill.do";
+				if(checkType == 1)
+					checkUrl = "/partcheckoutbill.do";
+				if(checkType == 2)
+					checkUrl = "/allcheckoutbill.do";
+				$.ajax({
+			         url: path + checkUrl,
+					 type: "post",
+					 data : $("#bill_date").serialize(),
+					 success: function(json) {
+					 	 if(json.result == 1){
+							 showMsg(json.message);
+							 setTimeout("refreshpage()", 2000);
+					 	 }else if(json.result == 0){
+					 	 	showMsg(json.message);
+					 	 }
+					 },
+					 error: function(json) {}
+				});
+			}
+			
+			function refreshpage(){
+				//1代表来自roomlist_check
+				//2代表roomlist_bill
+				//pagea == -1代表来自与房单
+				if(pagea == -1){
+					$(window.parent.parent.parent.document).find("#menu_904").click();
+					window.parent.parent.parent.JDialog.close();
+				}else{
+					$(window.parent.parent.parent.parent.document).find("#contentFrame_first").click();
+					window.parent.parent.parent.JDialog.close();
+				}
+			}
+			
+			function onbill(){
+				document.getElementById("ontime").innerHTML='<iframe src="' + path +'/page/ipmshotel/common_addbill/commbill.jsp" width="100%" height="100%" frameborder=no  scrolling="no"></iframe>'
+			}
+		</script>
+  </body>
+</html>

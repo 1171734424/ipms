@@ -1,0 +1,166 @@
+.high_header_li{
+	float:left;
+	line-height: 38px;
+	margin:4px;
+	position: relative;
+}
+.high_header ul:last-child li{
+	float:right;
+}
+.high_header .margintop{
+	margin-top:10px;
+}
+.high_header .label_name {
+    float: left;
+    width: 70px;
+    line-height:42px;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+input {
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    color: #323232;
+    background-color: #fff;
+    border: 1px solid #DDDDDD;
+    line-height: 1.2;
+    font-size: 0.85rem;
+    -webkit-box-shadow: none!important;
+    box-shadow: none!important;
+    -webkit-transition-duration: .1s;
+    transition-duration: .1s;
+}
+.high_header .text_search {
+    padding: 10px 5px;
+    width: 175px;
+    margin-left: 10px;
+}
+.margintop{
+	margin-top:10px;
+}
+.div_button{
+    float: right;
+    margin: 5% 8%;
+}
+.div_margintop{
+    margin-top: 10px;
+    float: right;
+}
+.div_from{
+    float: left;
+    margin-top: 5%;
+    margin-left: 4%;
+}
+.cancel{
+	height: 34px;
+    line-height: 31px;
+    text-align: center;
+    width: 80px;
+    border:none;
+    color: #fff;
+    cursor: pointer;
+    border-radius:4px;
+    float:right;
+    margin:4px;
+    background-color:#FC8A15;
+}
+
+
+/*合同-换房*/
+.div_h{
+	padding-left: 10px;
+    width: 100%;
+    line-height:34px;
+    line-height: 34px;
+    background: #4A5064;
+    font-size: 16px;
+    color: #fff;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+i.imooc_log{
+	left: 94%;
+    top: 2px;
+    font-size: 30px;
+    transition: 0.3s all ease-in-out;
+}
+.imooc_log:hover{
+    transform: rotate(90dge);
+    -ms-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+}
+.big_div{
+	width: 600px;
+}
+.left_div{
+	float: left;
+	width: 50%;
+}
+.right_div{
+	float: left;
+	width: 50%;
+}
+.div_label{
+	display:block;
+	width: 70px;
+	float: left;
+	text-align: right;
+	line-height: 34px;
+}
+.div_input{
+	margin-left: 20px;
+}
+.initially_li{
+	text-align: center;
+	font-size: 20px;
+	font-family: "微软雅黑";
+}
+.next_li{
+	margin: 10px 0;
+}
+.check_span{
+	height: 34px;
+    line-height: 34px;
+    text-align: center;
+    width: 85px;
+    margin-left: 8px;
+    border:none;
+    border-radius: 4px;
+    color: #fff;
+    cursor:pointer;
+	background-color: #FC8A15;
+    margin-left: 169px;
+	margin-top:2px;
+}
+.normalroom{
+	font-weight:bold;
+	color:#535474;
+}
+
+
+/*补交费用*/
+.buprice{
+	float: left;
+    width: 50%;
+    line-height: 34px;
+    padding-left: 14px;	
+}
+
+input.inputb{
+	margin-left: 12px;
+    padding-left: 10px;
+    border: 1px solid #ddd;
+    width: 175px;
+}
+
+
+
+
+
+
+
+
+
+

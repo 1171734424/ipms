@@ -1,0 +1,133 @@
+/*容器大小*/
+.rent_width{
+	width:100%;
+}
+.rent_one{
+	width:100%;
+	height:400px;
+}
+/*数据展示区域*/
+
+.rent_width section.box_content_widget{
+	width: 100%;
+    background: #fff;
+    min-height:509px;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+}
+/* 房价修改*/
+.rent_footer span{
+	float: right;
+    display: block;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    width: 80px;
+    margin-left: 10px;
+    margin-right: 20px;
+    background: #535474;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    color: #FFF;
+}
+#roomprice_data .label_name {
+    float: left;
+    width: 70px;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+#roomprice_data  ul{
+	margin-top:20px;
+}
+#roomprice_data ul li{
+	float:left;
+	line-height: 38px;
+	margin:4px;
+}
+.text_edit{
+	width:175px;
+	padding:10px 5px;
+	margin-left:10px;
+}
+
+.li_mark{
+	width:100%;	
+}
+.li_mark .mark{
+	width:80%;
+}
+#roomprice_data ul li:last-child{
+	float:none;
+}
+#roomprice_data .button_margin{
+	float: right;
+    width: 80px;
+    background: #5A5D9D;
+    color: #fff;
+    margin: 5px;   
+}
+#roomprice_data  .cancel{
+	margin-right:30px;
+	background:#F6C90E;
+}
+#roomprice_data table.myTable td {
+    vertical-align: middle;
+    padding: 10px;
+    font-size: 0.7rem;
+    white-space: normal;
+    border: none;
+    text-align: center;
+}
+/*提示*/
+.prompt_header{
+    height: 65px;
+    padding-top: 10px;
+    width: 98%;
+    margin: 0 auto;
+    border-top: 1px solid #2D5C7F;
+}
+.prompt_one{
+    height: 628px;
+}
+.prompt_header .button{
+	height: 34px;
+    line-height: 34px;
+    text-align: center;	
+    background: #FC8A15;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 4px;	
+    padding: 0 10px;
+    display: inline-block;
+    float: right;
+    font-size: 14px;
+}
+.pager_padding{
+	padding:0 4px;
+}
+/**/
+.pro_cancel{
+	border: none;
+    display: inline-block;
+    padding: 0px 4px;
+    cursor:pointer;
+    background: #F79F24;
+    color:#fff;
+    border-radius:3px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

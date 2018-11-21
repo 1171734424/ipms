@@ -1,0 +1,13 @@
+@CHARSET "UTF-8";
+/*合同详情*/
+/*按钮位置转移*/
+.contract_margin .top_icon{
+	float:right;
+    margin: 6px 0px;
+}
+/*删除按钮状态*/
+.dl_status {
+		position:relative;
+	    background-color: #ccc !important;
+   		border-right: 1px solid #bbb1b1!important;
+}

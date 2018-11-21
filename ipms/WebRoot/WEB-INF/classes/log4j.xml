@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "log4j.dtd" "http://logging.apache.org/log4j/docs/api/org/apache/log4j/xml/log4j.dtd">
+<!-- 
+Note that filtering is only supported by the DOMConfigurator.
+The PropertyConfigurator does not support filters.
+That's a reason for me to migrate from log4j.properties to log4j.xml.
+-->
+<log4j:configuration threshold="all" debug="false" xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<appender name="Console" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%t [%c{3}]-[%-5p]:[%L]:%m%n"/>
+		</layout>
+	</appender>
+	<appender name="File" class="org.apache.log4j.RollingFileAppender">
+		<param name="File" value="../logs/ipms.log"/>
+		<param name="MaxFileSize" value="10MB"/>
+		<param name="MaxBackupIndex" value="10"/>
+		<param name="Append" value="true"/>
+		<layout class="org.apache.log4j.TTCCLayout">
+			<param name="DateFormat" value="ISO8601"/>
+		</layout>
+	</appender>
+	<category name="org.apache.log4j.xml">
+		<appender-ref ref="Console"/>
+	</category>
+	<category name="org.apache.commons.httpclient">
+		<priority value="INFO"/>
+		<appender-ref ref="Console"/>
+	</category>
+	<root>
+		<priority value="INFO"/>
+		<appender-ref ref="Console"/>
+		<appender-ref ref="File"/>
+	</root>
+</log4j:configuration>

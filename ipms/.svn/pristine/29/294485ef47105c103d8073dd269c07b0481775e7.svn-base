@@ -1,0 +1,78 @@
+@charset "utf-8";
+ul li{
+   width:100%;
+   line-height:38px;
+   margin:2px;
+}
+ul.editCity{
+	padding-left: 9%;
+    padding-top: 3%;
+}
+ul li label{
+   /* width: 12%; */
+   width: 17%;
+   text-align: right;
+   margin-right: 10px;
+}
+ul li input,ul li select{
+	/* width:74%; */
+	width: 65%;
+    padding: 7px;
+}
+input{
+	border: 1px solid #C0C0C0;
+	background-color: #EEEEEE;
+	padding-left: 10px;
+	height: 35px;
+	border-radius: 5px;
+}
+.addCustom_li,select{
+	font-size: 15px;
+}
+.submit,.cancel{
+    line-height: 30px;
+    text-align: center;
+    width: 80px;
+    border:none;
+    background: #5A5D9D;
+    color: #fff;
+    cursor: pointer;
+    border-radius:5px;
+    float:right;
+    margin:4px;
+    
+}
+.div_button input:first-child{
+	background:#5A5D9D;
+}
+.div_button input:last-child{
+	background:#FC8A15;
+}
+.div_desc{
+	margin-left: 65px;
+    width: 455px;
+    height: 90px;
+    padding: 5px 5px;
+    border: 1px dotted #CCCCCC;
+}
+.div_button{
+    float: right;
+    /* padding-right: 53px; */
+    padding-right: 78px;
+        margin-top: 14px;
+}
+.li_input{
+	background:#ffffff;
+}
+.ul_custom{
+	list-style: none;
+   text-align: center;
+   padding: 0 0;
+       margin: 40px 0;
+}
+#total_recharge{
+	background-color: #fff;
+}
+#discount_gift{
+	background-color: #fff;
+}

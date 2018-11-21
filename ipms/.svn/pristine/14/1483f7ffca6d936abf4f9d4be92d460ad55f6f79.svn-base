@@ -1,0 +1,131 @@
+package com.ideassoft.basic.controller;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.basic.service.BasicDataService;
+import com.ideassoft.bean.Branch;
+import com.ideassoft.bean.Member;
+import com.ideassoft.bean.Promotion;
+import com.ideassoft.bean.Staff;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.SystemConstants;
+import com.ideassoft.core.notifier.SmsSingleSender;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Transactional
+@Controller
+public class BasicDataCtrl {
+	@Autowired
+	private BasicDataService basicDataService;
+	
+	
+	@RequestMapping("/houseparameter.do")
+	public ModelAndView houseparameter(HttpServletRequest request,HttpServletResponse response){
+		String rank = "0";
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId()==null ?"": staff.getBranchId() ;
+		ModelAndView mv = new ModelAndView();
+		
+		if(!"admin".equals(staff.getStaffName())){
+			Branch branch = (Branch) basicDataService.findOneByProperties(Branch.class, "branchId", branchid);
+			rank = branch.getRank();
+		}
+
+		if("0".equals(rank)){
+			mv.setViewName("/page/basic/parameter/houseparameterforhead");
+			List paramter = basicDataService.findBySQL("headbranchparameter", true);//all
+			if(paramter != null && paramter.size() > 0){
+				Map<String,String> map = new HashMap<String, String>();
+				for (int i = 0; i < paramter.size(); i++) {
+					String paramvalue = ((Map<?, ?>) (paramter.get(i))).get("content").toString();
+					String paramname = ((Map<?, ?>) (paramter.get(i))).get("paramname").toString();
+					String paramsign = ((Map<?, ?>) (paramter.get(i))).get("sign").toString();
+					map.put(paramname, paramvalue+":"+paramsign);
+				}
+				mv.addObject("map",JSONUtil.fromObject(map));
+			}
+
+		}
+		if("1".equals(rank)){
+			mv.setViewName("/page/basic/parameter/houseparameterforsubbranch");
+			List<?> paramter = basicDataService.findBySQL("subbranchparameter", true);//subbranch
+			if(paramter != null && paramter.size() > 0){
+				Map<String,String> map = new HashMap<String, String>();
+				for (int i = 0; i < paramter.size(); i++) {
+					String paramvalue = ((Map<?, ?>) (paramter.get(i))).get("content").toString();
+					String paramname = ((Map<?, ?>) (paramter.get(i))).get("paramname").toString();
+					String paramsign = ((Map<?, ?>) (paramter.get(i))).get("sign").toString();
+					map.put(paramname, paramvalue+":"+paramsign);
+				}
+				mv.addObject("map",JSONUtil.fromObject(map));
+			}
+
+		}
+		
+		return mv;
+		 
+	}
+	
+	
+	//crm参数管理公寓tab
+	@RequestMapping("/apartmentparameter.do")
+	public ModelAndView apartmentparameter(HttpServletRequest request,HttpServletResponse response){
+		
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId()==null ?"": staff.getBranchId();
+		Map<String,String> map = new HashMap<String, String>();
+		String paramname = "";
+		String content = "";
+		String paramsign = "";
+		ModelAndView mv = new ModelAndView();
+	
+		SysParam sys = (SysParam) basicDataService.findOneByProperties(SysParam.class, "paramType", "CLEANAMOUNT","paramDesc",branchid);
+		if(null != sys){
+			content = sys.getContent();
+			paramname = sys.getParamDesc();
+			paramsign = sys.getParamType();
+			map.put("预置保洁次数", content+":"+paramsign);
+		}
+		mv.setViewName("/page/basic/parameter/apartmentparamset");
+		mv.addObject("map",JSONUtil.fromObject(map));
+		return mv;
+		 
+	}
+	
+	@RequestMapping("/sendmessage.do")
+	public void sendmessage(HttpServletRequest request, HttpServletResponse response, String promotionId) throws Exception{
+		//获取所有的有效会员手机号码
+		List<?> meberlist = basicDataService.findByProperties(Member.class, "status", "1");
+		//获取当前促销信息的时间和内容
+		Promotion promotion = (Promotion) basicDataService.findOneByProperties(Promotion.class, "promotionId", promotionId);
+		String starttime = new SimpleDateFormat("yyyy/MM/dd").format(promotion.getStartTime());
+		String endtime = new SimpleDateFormat("yyyy/MM/dd").format(promotion.getEndTime());
+		String content = promotion.getContentDesc();
+		SmsSingleSender singleSender = new SmsSingleSender(SystemConstants.note.APPID, SystemConstants.note.APPKEY);
+		ArrayList<String> params = new ArrayList<String>();
+		for(Object obj :meberlist){
+			params.add(starttime+"至"+endtime+"期间,"+content);
+			singleSender.sendWithParam(SystemConstants.note.COUNTRY, ((Member)obj).getMobile(), 132765, params, "", "", "");
+//			singleSender.sendWithParam(SystemConstants.note.COUNTRY, "15805189127", 132765, params, "", "", "");
+		}
+		JSONUtil.responseJSON(response, new AjaxResult(1, "已发送!"));
+	}
+}

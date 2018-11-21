@@ -1,0 +1,409 @@
+package com.ideassoft.apartment.controller;
+
+import java.math.BigDecimal;
+import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.hsqldb.lib.StringUtil;
+import org.json.JSONArray;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.apartment.service.ApartmentEmsService;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.SystemConstants;
+import com.ideassoft.core.jdbc.SqlBuilder;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.portal.DataDealPortalService;
+import com.ideassoft.portal.IDataDealPortal;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Controller
+public class ApartmentEmsController {
+	
+	@Autowired
+	private ApartmentEmsService apartmentemsService;
+	
+	/**
+	 * 水电查询
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("apartmentleavedHydropowerLog.do")
+	public ModelAndView aprtmentleavedHydropowerLog(HttpServletRequest request,HttpServletResponse response) throws Exception {
+		String type = request.getParameter("type");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		String contractId = request.getParameter("contractId");
+		String roomId = request.getParameter("roomId");
+		String moblie = request.getParameter("moblie");
+		String ctStatus = request.getParameter("ctStatus");
+		String leavetime = request.getParameter("leavetime") == null ? sdf.format(new Date()) : request.getParameter("leavetime");
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		if(CommonConstants.SystemTheme.APARTMENTS.equals(type)){
+			List<?> list = apartmentemsService.findBySQLWithPagination("leavedhydropower", new String[] {branchId, contractId,branchId, roomId, moblie, ctStatus, leavetime }, pagination, true);
+			mv.addObject("list", list);
+			mv.addObject("pagination", pagination);
+			mv.addObject("contractId", contractId);
+			mv.addObject("roomId", roomId);
+			mv.addObject("moblie", moblie);
+			mv.addObject("leavetime", leavetime);
+			mv.addObject("type", type);
+			mv.setViewName("page/apartment/apartmentmainmenu/apartmenthydropower/leavedHydropower");
+		} else if(CommonConstants.SystemTheme.HOMESTAY.equals(type)){
+			List<?> list = apartmentemsService.findBySQLWithPagination("roominghydropower", new String[] { branchId,ctStatus, contractId, roomId, moblie,null}, pagination, true);
+			mv.addObject("list", list);
+			/*mv.addObject("pagination", pagination);
+			mv.addObject("opertype", opertype);
+			mv.addObject("recorduser", recorduser);
+			mv.addObject("starttime", starttime);
+			mv.addObject("endtime", endtime);*/
+			mv.setViewName("page/apartment/apartmentmainmenu/apartmenthydropower/operatelog");	
+		}
+		return mv;
+	}
+	
+	@RequestMapping("apartmentroomContractHydropower.do")
+	public ModelAndView apartmentroomContractHydropower(HttpServletRequest request,HttpServletResponse response) throws Exception {
+		String type = request.getParameter("type");
+		String memberName = request.getParameter("memberName");
+		String mobile = request.getParameter("mobile");
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		if(CommonConstants.SystemTheme.APARTMENTS.equals(type)){
+			List<?> list = apartmentemsService.findBySQLWithPagination("queryApartmentByHyd", new String[] { branchId, memberName,mobile }, pagination, true);
+			mv.addObject("list", list);
+			mv.addObject("pagination", pagination);
+			mv.addObject("memberName", memberName);
+			mv.addObject("mobile", mobile);
+			mv.addObject("type", type);
+			mv.setViewName("page/apartment/apartmentmainmenu/apartmenthydropower/roomingContractHydropower");
+		}
+		return mv;
+	}
+	
+	@RequestMapping("apartmentroomingHydropowerLog.do")
+	public ModelAndView apartmentroomingHydropowerLog(HttpServletRequest request,HttpServletResponse response, String contractIdTsf, String typeTsf) throws Exception {
+		String type = request.getParameter("type");
+		if(typeTsf != null && !StringUtil.isEmpty(typeTsf)){
+			type = typeTsf;
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+		String contractId = request.getParameter("contractId");
+		if(contractIdTsf != null && !StringUtil.isEmpty(contractIdTsf)){
+			contractId = contractIdTsf;
+		}
+		String roomId = request.getParameter("roomId");
+		String moblie = request.getParameter("moblie");
+		String ctStatus = request.getParameter("ctStatus");
+		String leavetime = request.getParameter("leavetime") == null ? sdf.format(new Date()) : request.getParameter("leavetime") +" 59:59:59";
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		if(CommonConstants.SystemTheme.APARTMENTS.equals(type)){
+			pagination.setRows(12);
+			List<?> list = apartmentemsService.findBySQLWithPagination("roominghydropower", new String[] { branchId, contractId, roomId, null,ctStatus }, pagination, true);
+			mv.addObject("list", list);
+			mv.addObject("pagination", pagination);
+			mv.addObject("contractId", contractId);
+			mv.addObject("roomId", roomId);
+			mv.addObject("moblie", moblie);
+			mv.addObject("leavetime", leavetime);
+			mv.addObject("type", type);
+			mv.setViewName("page/apartment/apartmentmainmenu/apartmenthydropower/roomingHydropower");
+		} else if(CommonConstants.SystemTheme.HOMESTAY.equals(type)){			
+			mv.setViewName("page/apartment/apartmentmainmenu/apartmenthydropower/operatelog");	
+		}
+		return mv;
+	}
+	
+	/**
+	 * 用于跳转至水电缴费页面
+	 * 后台查询水电账单每月费用合计及支付状态
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/apartmentpayHydropower.do")
+	public ModelAndView payHydropower(HttpServletRequest request,
+			HttpServletResponse response, String contractIdTsf, String typeTsf)
+			throws Exception {
+		// 此处type 暂不使用，用于后期名宿扩容使用
+		String type = request.getParameter("type");
+		if (typeTsf != null && !StringUtil.isEmpty(typeTsf)) {
+			type = typeTsf;
+		}
+		// 获取订单编号
+		String contractId = request.getParameter("contractId");
+		if (contractIdTsf != null && !StringUtil.isEmpty(contractIdTsf)) {
+			contractId = contractIdTsf;
+		}
+		// 获取高级查询页面传的值
+		String roomId = request.getParameter("roomId");
+		String ctStatus = request.getParameter("ctStatus");
+		ModelAndView mv = new ModelAndView();
+		// 获取操作人后找到其对应的门店号branchId
+		LoginUser loginUser = (LoginUser) request.getSession(true)
+				.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+
+		// 根据高级查询输入的内容查询相关的水电用量及费用
+		List<?> list = apartmentemsService.findBySQLWithPagination("queryAWMonth",
+				new String[] { branchId, contractId, roomId, ctStatus },
+				pagination, true);
+		mv.addObject("list", list);
+		mv.addObject("pagination", pagination);
+		mv.addObject("contractId", contractId);
+		mv.addObject("roomId", roomId);
+		mv.addObject("type", type);
+		mv.setViewName("page/apartment/apartmentmainmenu/apartmenthydropower/payHydropower");
+		return mv;
+	}
+	
+	
+	/**
+	 * 后台查询水电账单每月费用合计及支付状态
+	 * 
+	 * @param request
+	 *            入参
+	 * @param response
+	 *            出参
+	 * @param orderId
+	 *            点单号
+	 * @param month
+	 *            月份
+	 * @param electric
+	 *            用电量
+	 * @param ammeterCost
+	 *            用电费用
+	 * @param water
+	 *            用水量
+	 * @param waterMemterCost
+	 *            用水费用
+	 * @param ammount
+	 *            合计费用
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/apartmentsingerPayMoney.do")
+	public ModelAndView apartmentsingerPayMoney(HttpServletRequest request,
+			HttpServletResponse response, String orderId, String month,
+			String electric, String ammeterCost, String water,
+			String waterMemterCost, String ammount) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// 通过request获取loginUser信息，从而获取操作人员Id和branchId
+		LoginUser loginUser = (LoginUser) request.getSession(true)
+				.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String loginstaff = loginUser.getStaff().getStaffId().toString();
+		String branchId = loginUser.getStaff().getBranchId();
+		// 获取是否可用的工作账，如果没有就需要创建
+		List<?> workbill = apartmentemsService.getWorkbill(branchId, loginstaff);
+		// 将获取的数据传至页面
+		mv.addObject("workbill", workbill);
+		mv.addObject("orderId", orderId);
+		mv.addObject("month", month);
+		mv.addObject("electric", electric);
+		mv.addObject("ammeterCost", ammeterCost);
+		mv.addObject("water", water);
+		mv.addObject("waterMemterCost", waterMemterCost);
+		mv.addObject("ammount", ammount);
+		mv.setViewName("page/apartment/apartmentmainmenu/apartmenthydropower/singerPayMoney");
+		return mv;
+	}
+	
+	/**
+	 * 成功支付后调用水电接口更新水电跑批表中的数据为已支付
+	 * 
+	 * @param request
+	 *            入参
+	 * @param resqonse
+	 *            出参
+	 * @param orderId
+	 *            合同编号
+	 * @param starMonth
+	 *            开始月份
+	 * @param sumPayCost
+	 *            费用合计
+	 * @param workBillId
+	 *            工作账
+	 * @param payment
+	 *            支付方式
+	 * @throws Exception
+	 *             异常
+	 */
+	@RequestMapping("/apartmentpayMonthHydropower.do")
+	public void apartmentpayMonthHydropower(HttpServletRequest request,
+			HttpServletResponse response, String orderId, String starMonth,
+			String sumPayCost, String workbillId, String payment)
+			throws Exception {
+		// 获取操作人ip地址
+		InetAddress address = InetAddress.getLocalHost();
+		String operIp = address.getHostAddress();
+		// 调用cdds中的接口
+		DataDealPortalService service = new DataDealPortalService();
+		IDataDealPortal portal = service.getDataDealPortalPort();
+		// 从request中获取session，从而获取到操作人信息
+		LoginUser loginUser = (LoginUser) request.getSession(true)
+				.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		// 根据操作人信息获取操作人姓名
+		String recordUser = loginUser.getStaff().getStaffId().toString();
+		// 调用水电接口
+		String data = portal.call(SystemConstants.PortStatus.PORT_NORMAL,
+				SystemConstants.PortStatus.PORT_INAVAILABLE,
+				"{function: \"apartmentList.updatPayHydropower\",  data:{orderId:"
+						+ orderId + ",starMonth:" + starMonth + ",sumPayCost:"
+						+ sumPayCost + ", recordUser:" + recordUser
+						+ ",payment:" + payment + ",workbillId:" + workbillId
+						+ ",operIp:" + operIp + "} }");
+		// 将值封装为json类型至前台
+		JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(data),
+				null));
+	}
+	
+	
+	/**
+	 * 跳转批量支付页面
+	 * 
+	 * @param request
+	 *            入参
+	 * @param response
+	 *            出参
+	 * @param myorderId
+	 *            合同编号数组类型
+	 * @param mymonth
+	 *            合同月份数据类型
+	 * @return 跳转页面
+	 * @throws Exception
+	 *             抛出异常
+	 */
+	@RequestMapping("/apartmentbatchPayHydropower.do")
+	public ModelAndView apartmentbatchPayHydropower(HttpServletRequest request,
+			HttpServletResponse response, String myorderId, String mymonth)
+			throws Exception {
+		String[] newMyorderId = myorderId.split(",");
+		String[] newMymonth = mymonth.split(",");
+		// 通过request获取loginUser信息，从而获取操作人员Id和branchId
+		LoginUser loginUser = (LoginUser) request.getSession(true)
+				.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String loginstaff = loginUser.getStaff().getStaffId().toString();
+		String branchId = loginUser.getStaff().getBranchId();
+		List<Object> list = new ArrayList<Object>();
+		List<?> mounthHy;
+		double oddSumAmount = 0;
+		// 根据月份和订单号循环查询当月的水电消费明细
+		for (int i = 0; i < newMymonth.length; i++) {
+			mounthHy = new ArrayList<Object>();
+			mounthHy = apartmentemsService
+					.findBySQL("queryBatchHy",
+							new String[] { newMyorderId[i].trim(),
+									newMymonth[i].trim() }, true);
+
+			list.addAll(mounthHy);
+		}
+
+		// 获取上述查询的ArrayList中的amount金额的合计
+		if (list != null) {
+			for (int j = 0; j < list.size(); j++) {
+				double amount = Double.parseDouble(((Map<?, ?>) (list.get(j)))
+						.get("AMOUNT").toString());
+				oddSumAmount += amount;
+			}
+		}
+		// 获取是否可用的工作账，如果没有就需要创建
+		List<?> workbill = apartmentemsService.getWorkbill(branchId, loginstaff);
+		// 将获取到的金额格式进行转换，转为为：四舍五入至两位小数
+		BigDecimal newSumAmount = new BigDecimal(oddSumAmount);
+		double sumAmount = newSumAmount.setScale(2, BigDecimal.ROUND_HALF_UP)
+				.doubleValue();
+		ModelAndView mv = new ModelAndView(
+				"page/apartment/apartmentmainmenu/apartmenthydropower/batchPayMoney");
+		mv.addObject("sumAmount", sumAmount);
+		mv.addObject("list", list);
+		mv.addObject("workbill", workbill);
+		return mv;
+	}
+	
+	/**
+	 * 用于批量支付，更新跑批表中数据
+	 * 
+	 * @param request
+	 *            入参
+	 * @param response
+	 *            出参
+	 * @param jsonList
+	 *            JSONArray类型数据集
+	 * @param workbillId
+	 *            工作账
+	 * @param payment
+	 *            支付方式
+	 * @throws Exception
+	 *             异常
+	 */
+	@RequestMapping("/apartmentbatchPayMonthHy.do")
+	public void apartmentbatchPayMonthHy(HttpServletRequest request,
+			HttpServletResponse response, String jsonList, String workbillId,
+			String payment) throws Exception {
+		// 获取操作人ip地址
+		InetAddress address = InetAddress.getLocalHost();
+		String operIp = address.getHostAddress();
+		// 调用cdds中的接口
+		DataDealPortalService service = new DataDealPortalService();
+		IDataDealPortal portal = service.getDataDealPortalPort();
+		// 从request中获取session，从而获取到操作人信息
+		LoginUser loginUser = (LoginUser) request.getSession(true)
+				.getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		// 根据操作人信息获取操作人姓名
+		String recordUser = loginUser.getStaff().getStaffId().toString();
+		// 将传入的jaso数据 存入值JSONArray
+		JSONArray ja = new JSONArray(jsonList);
+		// 定义JSONObject 待JSONArray遍历后存储数据
+		org.json.JSONObject jo = null;
+		// 获取接口返回
+		String data = null;
+		for (int i = 0; i < ja.length(); i++) {
+			jo = ja.getJSONObject(i);
+			// 遍历获取订单编号、起始月份、合计金额
+			String orderId = jo.getString("ORDER_ID");
+			String starMonth = jo.getString("MONTH");
+			String sumPayCost = jo.getString("AMOUNT");
+
+			// 调用水电接口
+			data = portal.call(SystemConstants.PortStatus.PORT_NORMAL,
+					SystemConstants.PortStatus.PORT_INAVAILABLE,
+					"{function: \"apartmentList.updatPayHydropower\",  data:{orderId:"
+							+ orderId + ",starMonth:" + starMonth
+							+ ",sumPayCost:" + sumPayCost + ", recordUser:"
+							+ recordUser + ",payment:" + payment
+							+ ",workbillId:" + workbillId + ",operIp:" + operIp
+							+ "} }");
+		}
+
+		// 将值封装为json类型至前台
+		JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(data),null));
+	}
+	
+	
+}

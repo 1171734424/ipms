@@ -1,0 +1,120 @@
+@CHARSET "UTF-8";
+body,html{
+	height:100%;
+	color:#333;
+	font-size:14px;
+}
+.spanbold {
+	font-weight: bold;
+	display: inline-block;
+    height: 33px;
+    line-height: 33px;
+    padding-left: 5%;
+    font-size: 15px;
+}
+
+.fontbold {
+	font-weight: bold;
+}
+
+.btn-contrl{
+    width: 100%;
+    clear: both;
+    overflow: hidden;
+    height: 49px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+#addBut .btn-contrl span{
+	display:inline-block;
+}
+#addBut span.add{
+	float:right;
+	margin-right: 8.5%;
+}
+table tr th,table tr td {
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    padding: 4px 13px;
+}
+table {
+    width: 92%;
+    height: 68%;
+    margin: 0 auto;
+    min-height: 25px;
+    line-height: 25px;
+    text-align: center;
+    border-collapse: collapse;
+}
+.userbox table{
+		
+}
+.userbox table  tbody {  
+    display:block;  
+    height:100%;  
+    overflow-y:scroll;  
+}  
+.userbox table thead, tbody tr {  
+    display:table;  
+    width:100%;  
+    table-layout:fixed;  
+}  
+.userbox table thead {  
+    width: calc( 100% - 1em ); 
+}  
+.userbox .btn{
+    background-color: #52B2E3;
+	height: 31px;
+    line-height: 31px;
+    font-size: 14px;
+    text-align: center;
+    width: 72px;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 2px;
+    float:none;
+    border:none;
+    margin:0;
+}
+
+.inputSpan{
+	width:160px;
+	height:31px;
+	padding-left:4px;
+}
+.confirm{
+	height: 31px;
+    line-height: 31px;
+    font-size: 14px;
+    text-align: center;
+    width: 72px;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 2px;
+    float:right;
+    margin:18px 0;
+	margin-right:8.5%;
+}
+#showData table tr td:not(#oper) {
+	text-align:center;
+	height:35px;
+	/* width:173px; */
+}
+
+.innerTable{
+	overflow:auto;
+}
+
+.TimeStyle{
+	display:none;
+}
+.TimeStyles{
+	display:none;
+}
+
+.inputSpanAnther{
+	width:135px;
+	height:31px;
+	padding-left:4px;
+}

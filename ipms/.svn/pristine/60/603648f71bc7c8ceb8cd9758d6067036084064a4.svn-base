@@ -1,0 +1,158 @@
+html{
+	font-size:20px;
+}
+html,body{
+	overflow:hidden;
+	height:100%;
+	padding:0;
+	margin:0;
+}
+/*整体盒子*/
+.box_content_section{
+	width: 100%;
+}
+.box_popup_member{
+	width: 100%;
+    height: 100%;
+    background: #EFF3F5;
+    box-shadow: 1px 1px 50px rgba(0, 0, 0, .3);
+    border-radius: 3px;
+    overflow: hidden;
+    z-index: 9999;
+}
+.box_popup_member_margin{
+	position: relative;
+   	padding: 15px 20px 20px 20px;
+}
+/*内容盒子*/
+.box_popup_member h2{
+	width: 100%;
+    font-size: 1.0rem;
+    height: 2.2rem;
+    color:#333333;
+   	line-height: 2.2rem;
+    padding-left: 10px;
+}
+.content_member{
+	position:relative;
+	width:100%;
+	height:50px;	
+	background:#FFFFFF;cannot checkout
+
+}
+.box_popup_member .icomoon{
+	
+}
+.box_popup_member .im_top{
+	color: #222;
+    left: 0;
+    top: 2px;
+    font-size: 26px;
+    position: relative;
+}
+.box_popup_member .top_icon{
+	display: inline-block;
+    line-height: 32px;
+    padding: 0 7px;
+    border: 1px solid #638CCC;
+    background: #fff;
+    border-radius: 2px;
+    position: absolute;
+    z-index: 1;
+    right: 19px;
+    top: 10px;
+}
+/*列表展示部分*/
+.content_member .search_style{
+	padding:0;
+	margin-bottom: 10px;
+}
+.content_member .search_member{
+	padding: 0;
+	margin-left: 5px;
+}
+.content_member .search_member li {
+    float: left;
+    height: 40px;
+    line-height: 40px;
+    margin-top: 5px;
+}
+.content_member .search_member .label_name {
+    float: left;
+    width: 70px;
+    text-align: right;
+    font-weight:normal;
+}
+.content_member .search_member  .search_text{
+	padding:5px 5px;
+	width:130px;
+	margin-left:10px;
+}
+
+/*查询按钮*/
+/*全部查询按钮样式*/
+.btn_style{
+	background:#535474;
+    text-align: center;
+    color: #FFF;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    transition: all ease .15s;
+}
+.search_style .search_member li .btn_search,.add_member_ul .btn_add,.add_member_ul .btn_update,.add_member_ul .btn_delete{
+    height: 27px;
+    line-height: 19px;
+    width: 60px;
+    color: #FFF;
+}
+.btn_style:hover{
+	background: #535474;
+}
+.search_style .search_member li:last-child{
+	margin-left: 10px;
+}
+/*右侧*/
+.add_member{
+	padding: 0.4rem 0.4rem 0 0.4rem;
+}
+.add_member_ul{
+	width: 100%;
+}
+.add_member_ul li{
+	float:left;
+	margin:5px;
+}
+
+/*房态统计*/
+.quota{
+	
+}
+
+/*会员信息展示区域*/
+.content_member_show{
+	width: 100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

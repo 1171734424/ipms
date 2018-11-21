@@ -1,0 +1,223 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ include file="../../common/script.jsp"%>
+<!DOCTYPE HTML>
+<html class="whitebg">
+  <head>
+    <title>会员注册</title>
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/roomlist/mebregister.css"/>
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/fonticon.css"/>
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>
+    <link rel="stylesheet"  id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/datetimepicker.css" media="all" />	
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	<style type="text/css">
+		.register_one{
+			padding: 53px 24px;
+		}
+		label{
+			width: 56px;
+		}
+	</style>
+  </head>
+  <body>
+  <div class="register_margin">
+     <form action="" method="post" id="omemberadd" name="omemberadd">
+	      <section class="register_one" style="padding-top:6px; ">
+	        <ul class="clearfix">
+			  <!-- <li><label class="label_name">房价</label><input id="amount" name="amount" value="0.00"  style="width: 250px" class="input_ms" type="number"/></li> -->
+			  <li style="padding-top:5px;"><label>房价</label><input id="amount" name="amount" style="width: 325px;height: 35px;vertical-align:top;"value="${ result }" class="input_ms"  type="number"></input></li>
+			  <li style="padding-top:5px;"><label>待补差价</label><input id="calcamount" name="calcamount" style="width: 325px;height: 35px;vertical-align:top;"value="${ result }" class="input_ms"  type="number" readonly ></input></li>
+			  <li><label>备注</label><textarea id="remark" name="remark" value="必填项" style="width: 325px;height: 65px;vertical-align:top;" class="input_ms"></textarea></li>
+			  <!-- <li style="padding-top: 30px;">
+			   	<br><input type="button" class="button_margin ms_re" style="width: 75px;" onclick="resetprice()" value="调整"/></br>
+			  </li> -->
+			  </ul>
+			  <ul>
+			  	<li style=" padding-left: 315px;">
+			  		<input type="button" class="button_margin ms_re" style="width: 75px;" onclick="resetprice()" value="调整"/>
+			  	</li>
+			  </ul>
+		   </section>
+		 </form>
+   </div>
+	<script src="<%=request.getContextPath()%>/script/common/jquery-ui.min.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/jquery.dialog.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/jquery.jqGrid.src.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/script/ipmsinhouse/workbillroomInHouse/tipInfo-lj.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/datepickerCN.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/script/ipms/js/workbillroom/util.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+	<script type="text/javascript">
+		var path = "<%=request.getContextPath() %>";
+		var checkid = "<%=request.getParameter("checkid")%>";
+		$(function (){
+			loadCheckData();
+			var dat = $("#amount").val();
+			calcprice(dat);
+		})
+		$('#amount').on('input propertychange', function() {
+			var dat = $(this).val();
+			if(dat){
+				calcprice(dat)
+			}
+		});
+		
+		function calcprice(dat){
+			$.ajax({
+	         url: path + "/calcprice.do",
+			 type: "post",
+			 data : {
+				 orderid: '${orderid}',
+				 price: dat
+			 },
+			 success: function(json) {
+			 	$("#calcamount").val(json.data);
+			 },
+			 error: function(json) {}
+			});
+		}
+	
+		function loadCheckData(){
+			$.ajax({
+		         url: path + "/loadCheckData.do",
+				 type: "post",
+				 data : {checkid : checkid},
+				 success: function(json) {
+				 	//$("#calcamount").val(json.data);
+				 },
+				 error: function(json) {}
+			});
+		}
+		
+		function resetprice(){
+			var moneyReg = /(^(\-)?[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^(\-)?[0-9]\.[0-9]([0-9])?$)/; //校验是金额
+			var amount = $("#calcamount").val();
+			var dayamount = $("#amount").val();
+			var remark = $("#remark").val();
+			if($("#amount").val().length == 0){
+				showMsg("金额：不能为空!");
+			}
+		   if(isNaN($("#amount").val())){
+				showMsg("金额请填写数字!");
+			    return false;	
+		     }else if(moneyReg.test($("#amount").val()) == false){
+		    		showMsg("金额格式错误!");
+		    		$("#amount").val("");
+					$("#amount").focus();
+			    return false;
+		   }
+			
+			/*if (remark.length < 1) {
+				showMsg("备注字符不能为空！");
+				return false;
+			}*/
+			if (remark.length > 100) {
+				showMsg("备注字符不能大于100个！");
+				return false;
+			}
+			/*if(amount <= 0){
+				showMsg("待补差价需大于0");
+				return false;
+			}*/
+			//resethouseorderprice(amount, dayamount, remark);
+			houseprice(amount, dayamount, remark, 'cancel')
+		}
+		
+		function resethouseorderprice(amount, dayamount, remark){
+			$.ajax({
+		         url: path + "/preresethouseorderprice.do",
+				 type: "post",
+				 data : {
+				 	orderid : '${orderid}',
+				 	amount : amount,
+				 	dayamount: dayamount,
+				 	remark : remark
+				 },
+				 success: function(json) {
+				 	console.log(json)
+				 	if(json.result == 2){
+				 		showMsg(json.message, confirm, cancel);
+				 	}else if(json.result == 0){
+				 		showMsg(json.message);
+				 	}else if(json.result == 1){
+				 		showMsg(json.message);
+				 		setTimeout("refresh()", 2000);
+				 	}
+				 	//resetprice(amount, dayamount, remark);
+				 },
+				 error: function(json) {}
+			});
+		}
+		
+		function confirm(){
+			var amount = $("#calcamount").val();
+			var dayamount = $("#amount").val();
+			var remark = $("#remark").val();
+			houseprice(amount, dayamount, remark, 'confirm');
+		}
+		
+		function cancel(){
+			var amount = $("#calcamount").val();
+			var dayamount = $("#amount").val();
+			var remark = $("#remark").val();
+			houseprice(amount, dayamount, remark, 'cancel');
+		}
+		
+		function houseprice(amount, dayamount, remark, memberupdate){
+			$.ajax({
+		         url: path + "/resethouseorderprice.do",
+				 type: "post",
+				 data : {
+				 	orderid : '${orderid}',
+				 	amount : amount,
+				 	dayamount: dayamount,
+				 	remark : remark,
+				 	memberupdate: memberupdate
+				 },
+				 success: function(json) {
+				 	if(json.result == 1){
+			 			showMsg(json.message);
+			 			setTimeout("refresh()", 2000);
+				 	}else {
+				 		showMsg(json.message);
+				 	}
+				 	
+				 },
+				 error: function(json) {}
+			});
+		}
+		
+		function checknonmember(){
+			$.ajax({
+		         url: path + "/checknonmember.do",
+				 type: "post",
+				 data : {
+				 	orderid : '${orderid}',
+				 	amount : amount,
+				 	dayamount: dayamount,
+				 	remark : remark
+				 },
+				 success: function(json) {
+				 	if(json.result == 1){
+				 		showMsg(json.message);
+				 	}else {
+				 		showMsg(json.message);
+				 	}
+				 },
+				 error: function(json) {}
+			});
+		}
+		
+		function refresh(){
+			$(window.parent.parent.parent.parent.document).find(".header_toggle_ul .active").click();
+	 		window.parent.parent.JDialog.close();
+	 		
+		}	
+	</script>
+  </body>
+</html>

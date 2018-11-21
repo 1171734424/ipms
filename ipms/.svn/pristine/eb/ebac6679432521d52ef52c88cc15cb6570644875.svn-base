@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M905" name="品宣管理" show="true" icon="statistics" subSystem="UPMS">
+		       <page pageId="R90501" name="品宣类别" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<conditions>PROBRANDTYPEID</conditions>
+					<functions>FRESH</functions>
+					<funcCondRate>60,40</funcCondRate>
+					<target>ProBrandType</target>
+					<strategy>default</strategy>
+				  	<query type="sql">
+						<sql>
+							findProBrandType
+				    	</sql>
+					</query>
+					<columns>
+						<column columnId="TYPEID" name="类别编号" primaryKey="true" hidden="true" sequence="SEQ_PROBRANDTYPE_ID"/>
+						<column columnId="TYPENAME" name="类别名称" width="100" editable="true" validateRule="NOTNULL,LENGTH:30"/>
+						<column columnId="STATUS" name="状态" width="100" editType="select" editValue="1:有效;0:已删除"  editable="true" validateRule="NOTNULL,LENGTH:2"/>
+						<column columnId="REMARK" name="备注" width="100" editable="true" validateRule="NOTNULL,LENGTH:100"/>
+					</columns>
+				</page>
+				<page pageId="R90502" name="品宣维护"  editing="form" loadOnRender="true" editFunc="editorAddProbrand" showMenu="true" role="*">
+					<conditions>PROBRANDNAME,PROBRANDSTATUSID</conditions>
+					<functions>FRESH,EDIT</functions>
+					<funcCondRate>60,40</funcCondRate>
+					<delFunc>delProbrand</delFunc>
+					<target>ProBrand</target>
+					<strategy>default</strategy>
+				  	<query type="sql">
+						<sql>
+							queryProBrand
+				    	</sql>
+					</query>
+					<columns>
+						<column columnId="CONTENTID" name="品宣ID" primaryKey="true" hidden="true" seqPrefix="$DATENEW" sequence="SEQ_PROBRAND_ID"/>
+						<column columnId="TITLE" name="故事主题" width="100" editable="true" validateRule="NOTNULL,LENGTH:30"/>
+						<column columnId="TYPES" name="品宣类别" editable="true"/>
+						<column columnId="CONTENT" name="详情" width="100" editable="true" validateRule="NOTNULL,LENGTH:1000"/>
+						<column columnId="ADMINICODE" name="城市/景点" width="100" editable="true" validateRule="LENGTH:12"/>
+						<column columnId="GOODSID" name="商品" width="100" editable="true" validateRule="LENGTH:8"/>
+						<column columnId="HOUSEID" name="民宿" width="100" editable="true" validateRule="LENGTH:6"/>
+					</columns>
+				</page>
+				<page pageId="R90503" name="民宿舆情管理" editing="form" loadOnRender="true" showMenu="true" editFunc="commentAddOrEditOrder" delFunc="delOrderComment" role="*">
+					<conditions>HOUSENAME</conditions>
+					<functions>FRESH,EDIT</functions>
+					<funcCondRate>60,40</funcCondRate>
+					<target>Comment</target>
+					<strategy>default</strategy>
+				  	<query type="sql">
+						<sql>
+							getProBrandComment
+				    	</sql>
+					</query>
+					<columns>
+					<column columnId="COMMENT_ID" name="评论ID" primaryKey="true" hidden="true" />
+						<column columnId="REPLY" name="回复" funcName="回复" width="50" editType="button" editable="true" callFunc="replyComment" align="center" downloadable="false"/>
+						<column columnId="HOUSENAME" name="民宿名称"  hidden="false" editable="false" />
+						<column columnId="SERVICESCORE" name="卫生评分" width="50" editable="true" validateRule="NOTNULL,LENGTH:100"/>
+						<column columnId="SERVICECOMMENT" name="卫生评论" width="100" editable="true" validateRule="NOTNULL,LENGTH:100"/>
+						<column columnId="FACILITYSCORE" name="设施评分" width="50" editable="true" validateRule="NOTNULL,LENGTH:100"/>
+						<column columnId="FACILITYCOMMENT" name="设施评论" width="100" editable="true" validateRule="NOTNULL,LENGTH:100"/>
+						<column columnId="SECURITYSCORE" name="安全感评分" width="50" editable="true" validateRule="NOTNULL,LENGTH:100"/>
+						<column columnId="SECURITYCOMMENT" name="安全感评论" width="100" editable="true" validateRule="NOTNULL,LENGTH:100"/>
+						<column columnId="RECORD_USER" name="评论人" width="100" editable="true" validateRule="NOTNULL,LENGTH:30"/>
+						<column columnId="COMMENT_CONTENT" name="评论详细" width="150" editable="true" validateRule="NOTNULL,LENGTH:100"/>
+						<!-- <column columnId="RECORDTIME" name="时间" width="100" editable="true" validateRule="NOTNULL,LENGTH:1000"/> 
+						<column columnId="STATUS1" name="状态" width="100" editable="true" validateRule="NOTNULL,LENGTH:1000"/> -->
+					</columns>
+				</page>
+				<!-- <page pageId="R90504" name="舆情标签管理" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<conditions>SHORTCUTNAME,SHORTCUTSTATUS</conditions>
+					<functions>FRESH,EDIT</functions>
+					<funcCondRate>60,40</funcCondRate>
+					<target>Shortcut</target>
+					<strategy>default</strategy>
+				  	<query type="sql">
+						<sql>
+							findShortcut
+				    	</sql>
+					</query>
+					<columns>
+						<column columnId="SHORTCUTID" name="标签编号" primaryKey="true" hidden="true" sequence="SEQ_NEW_SHORTCUT"/>
+						<column columnId="SHORTCUTNAME" name="标签内容" width="100" editable="true" validateRule="NOTNULL,LENGTH:20"/>
+						<column columnId="STATUS" name="状态" width="100" editType="select" editValue="1:有效;0:已删除"  editable="true" validateRule="NOTNULL,LENGTH:1"/>
+						<column columnId="REMARK" name="备注" width="100" editable="true" validateRule="LENGTH:25"/>
+					</columns>
+				</page> -->
+			</model>
+		</models>
+	</config>
+</configs>

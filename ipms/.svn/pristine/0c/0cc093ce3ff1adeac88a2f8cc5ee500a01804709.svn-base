@@ -1,0 +1,616 @@
+package com.ideassoft.crm.controller;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.basic.service.MarketingBasicService;
+import com.ideassoft.bean.Branch;
+import com.ideassoft.bean.BranchKeywords;
+import com.ideassoft.bean.BranchPicture;
+import com.ideassoft.bean.CashBox;
+import com.ideassoft.bean.City;
+import com.ideassoft.bean.Goods;
+import com.ideassoft.bean.GoodsCategory;
+import com.ideassoft.bean.House;
+import com.ideassoft.bean.Location;
+import com.ideassoft.bean.Picture;
+import com.ideassoft.bean.SmsSendLog;
+import com.ideassoft.bean.SmsTemplate;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.SystemConstants;
+import com.ideassoft.core.notifier.service.impl.NotifyService;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.crm.service.ManageService;
+import com.ideassoft.crm.service.TransferServcie;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Controller
+public class ManageController {
+	
+	private static Logger log = Logger.getLogger(ManageController.class);
+	@Autowired
+	NotifyService notifyService;
+	@Autowired
+	ManageService manageService;
+
+	@Autowired
+	private MarketingBasicService marketingBasicService;
+	@RequestMapping("/branchDelete.do")
+	@ResponseBody
+	public String branchDelete(HttpServletRequest request) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String loginuserBranchId = loginuser.getStaff().getBranchId();
+		Branch loginuserbranch = (Branch) manageService.findOneByProperties(Branch.class, "branchId", loginuserBranchId);
+		String branchRank = loginuserbranch.getRank();
+		String doneResult = String.valueOf(SystemConstants.PortalResultCode.DONE);
+		if(branchRank.equals("1")){
+			return String.valueOf(SystemConstants.PortalResultCode.EXIST);
+		}else{
+			try {
+				String branchId = request.getParameter("branchId");
+				String branchIds[] = branchId.split(",");
+				for(int i = 0;i<branchIds.length;i++){
+					String delBranchId = branchIds[i];
+					Branch branch = (Branch)manageService.findOneByProperties(Branch.class, "branchId", delBranchId);
+					if (branch.getRank().equals("0")) {
+						return String.valueOf(SystemConstants.PortalResultCode.NULL);
+					}
+				}
+				
+				for(int i = 0;i<branchIds.length;i++){
+					String delBranchId = branchIds[i];
+					Branch branch = (Branch)manageService.findOneByProperties(Branch.class, "branchId", delBranchId);
+					branch.setStatus("0");
+					branch.setRecordTime(new Date());
+					manageService.update(branch);
+				}
+			} catch (Exception e) {
+				log.error("delete data occurs error! beanName[BRANCH], data[ + BRANCH], " + e.getMessage());
+				doneResult = String.valueOf(SystemConstants.PortalResultCode.FAILED);
+			}
+			return doneResult;
+			
+		}
+	}
+	
+
+	// 酒店更新
+	@SuppressWarnings("unused")
+	@RequestMapping("/updateBranch.do")
+	public void updateBranch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		SysParam param = (SysParam) manageService.findOneByProperties(SysParam.class, "paramType",
+				SystemConstants.ParamType.BRANCH_IP, "paramName", "1");
+		SysParam sysParam = (SysParam) manageService.findOneByProperties(SysParam.class, "paramType", "SYSTEMTYPE");
+		String systemType = sysParam.getContent();
+		int priority = 1;
+		String branchIdChoose = request.getParameter("branchId");
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String staffId = loginuser.getStaff().getStaffId();
+		String staffBranchId = loginuser.getStaff().getBranchId();
+		String branchName = request.getParameter("branchName");
+		String branchType = request.getParameter("branchType");
+		String branchRank = request.getParameter("branchRank");
+		String homePhone = request.getParameter("homePhone");
+		String postCode = request.getParameter("postCode");
+		String connectPerson = request.getParameter("connectPerson");
+		String phone = request.getParameter("phone");
+		String preLocation = request.getParameter("preLocation");
+		/*String aftLocation = request.getParameter("aftLocation");*/
+		String cityCode = request.getParameter("cityCode");
+		String district = request.getParameter("district");
+		String street = request.getParameter("street");
+		String circle = request.getParameter("circle");
+		String remarkInput = request.getParameter("remarkInput");
+		String latlng = request.getParameter("latlng");
+		String flag = request.getParameter("flag");
+		String longitude = request.getParameter("longitude");
+		String latitude = request.getParameter("latitude");
+		String ip = request.getParameter("ip");
+		String recommend = request.getParameter("recommend");
+		String branchURL = "http://"+ip+":8080/ipms";
+		String address = preLocation /*+ "-" + aftLocation*/;
+		String branchId = request.getParameter("branchId");
+
+		String lat[] = latlng.split(",");
+		if(longitude.equals("")||latitude.equals("")){
+			longitude = lat[1];
+			latitude = lat[0];
+		}
+		Location loc = new Location();
+		loc.setBranchId(branchId);
+		loc.setLatitude(latitude);
+		loc.setLongitude(longitude);
+		loc.setRecordTime(new Date());
+		loc.setRecordUser(staffId);
+		loc.setStatus(CommonConstants.STATUS.NORMAL);
+		manageService.update(loc);
+		
+	/*	if(CommonConstants.SystemType.Branch.equals(systemType.trim())){
+			List<Location> locationList = new ArrayList<Location>();
+			locationList.add(loc);
+			Map<String, Object> locationMap = new HashMap<String, Object>();
+			locationMap.put("Location", locationList);
+			TransferServcie.getInstance().transferData(priority, param.getContent(),
+					JSONUtil.fromObject(locationMap).toString());
+		}*/
+		if(CommonConstants.SystemType.Cloud.equals(systemType.trim())){
+			List<Location> locationList = new ArrayList<Location>();
+			locationList.add(loc);
+			Map<String, Object> locationMap = new HashMap<String, Object>();
+			locationMap.put("Location", locationList);
+			TransferServcie.getInstance().transferData(priority, branchURL,
+					JSONUtil.fromObject(locationMap).toString());
+		}
+
+		Branch branch = new Branch();
+		branch.setAddress(address);
+		branch.setBranchId(branchId);
+		branch.setBranchName(branchName);
+		branch.setBranchType(branchType);
+		branch.setCircle(circle);
+		branch.setCity(cityCode);
+		branch.setContacts(connectPerson);
+		branch.setDistrict(district);
+		branch.setMobile(phone);
+		branch.setPhone(homePhone);
+		branch.setPostcode(postCode);
+		branch.setRank(branchRank);
+		branch.setRecordTime(new Date());
+		branch.setRecordUser(staffId);
+		branch.setRemark(remarkInput);
+		branch.setStatus(CommonConstants.STATUS.NORMAL);
+		branch.setStreet(street);
+		branch.setFlag(flag);
+		branch.setBranchIp(ip);
+		branch.setIsRecommend(recommend);;
+		manageService.update(branch);
+		/*if(CommonConstants.SystemType.Branch.equals(systemType.trim())){
+			// priority = Integer.parseInt(member.getMemberRank());
+			List<Branch> branchList = new ArrayList<Branch>();
+			branchList.add(branch);
+			Map<String, Object> branchMap = new HashMap<String, Object>();
+			branchMap.put("Branch", branchList);
+			TransferServcie.getInstance().transferData(priority, param.getContent(),
+					JSONUtil.fromObject(branchMap).toString());
+		}*/
+		if(CommonConstants.SystemType.Cloud.equals(systemType.trim())){
+			List<Branch> branchList = new ArrayList<Branch>();
+			branchList.add(branch);
+			Map<String, Object> branchMap = new HashMap<String, Object>();
+			branchMap.put("Branch", branchList);
+			TransferServcie.getInstance().transferData(priority, branchURL,
+					JSONUtil.fromObject(branchMap).toString());
+		}
+		
+		
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+	}
+
+
+
+
+	@SuppressWarnings("unused")
+	@RequestMapping("/addBranchHeadPicData.do")
+	public void addBranchHeadPicData(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		SysParam param = (SysParam) manageService.findOneByProperties(SysParam.class, "paramType",
+				SystemConstants.ParamType.BRANCH_IP, "paramName", "1");
+		SysParam sysParam = (SysParam) manageService.findOneByProperties(SysParam.class, "paramType", "SYSTEMTYPE");
+		String systemType = sysParam.getContent();
+		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+		MultipartFile srcFile = multipartRequest.getFile("branchHeadPic");
+		String originalFilename = srcFile.getOriginalFilename();
+		String branchIdChoose = multipartRequest.getParameter("branchId");
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String staffId = loginuser.getStaff().getStaffId();
+		String branchId = loginuser.getStaff().getBranchId();
+		int priority = 1;
+		String fileName = null;
+		FileOutputStream fos = null;
+		InputStream is = null;
+		String headPicUrl = "";
+		BranchPicture branchPic = (BranchPicture) manageService.findOneByProperties(BranchPicture.class, "branchId",
+				branchIdChoose, "style", CommonConstants.BranchPicStyle.BRANCH_HEAD_PIC, "status",
+				CommonConstants.STATUS.NORMAL);
+		if (branchPic != null) {
+			branchPic.setStatus(CommonConstants.STATUS.WASTED);
+			manageService.update(branchPic);
+			
+			if(CommonConstants.SystemType.Branch.equals(systemType.trim())){
+				List<BranchPicture> headPictureList = new ArrayList<BranchPicture>();
+				headPictureList.add(branchPic);
+				Map<String, Object> headPictureMap = new HashMap<String, Object>();
+				headPictureMap.put("BranchPicture", headPictureList);
+				TransferServcie.getInstance().transferData(priority, param.getContent(),
+						JSONUtil.fromObject(headPictureMap).toString());
+			}
+			
+			String picId=branchPic.getPictureId();
+			Picture pic=(Picture) manageService.findOneByProperties(Picture.class, "pictureId",
+					picId);
+			if(pic != null){
+				pic.setStatus(CommonConstants.STATUS.WASTED);
+				pic.setRecordTime(new Date());
+				manageService.update(pic);
+				
+				/*if(CommonConstants.SystemType.Branch.equals(systemType.trim())){
+					List<Picture> headPictureWastedList = new ArrayList<Picture>();
+					headPictureWastedList.add(pic);
+					Map<String, Object> headPictureWastedMap = new HashMap<String, Object>();
+					headPictureWastedMap.put("Picture", headPictureWastedList);
+					TransferServcie.getInstance().transferData(priority, param.getContent(),
+							JSONUtil.fromObject(headPictureWastedMap).toString());
+				}*/
+			}
+			
+		}
+		if ("".equals(originalFilename.trim())) {
+
+		} else {
+			try {
+				String webPath = RequestUtil.getWebPath(request);
+				if (StringUtils.isEmpty(fileName)) {
+					fileName = srcFile.getOriginalFilename();
+					fileName = new Date().getTime()+fileName.substring(fileName.lastIndexOf("."));
+				}
+				File srcFolder = new File(webPath + File.separator + "upload");
+				if (!srcFolder.exists()) {
+					srcFolder.mkdirs();
+				}
+				headPicUrl = CommonConstants.Domain.DOMAINNAME + fileName;
+				File tarFile = new File(srcFolder.getAbsolutePath() + File.separator + fileName);
+				if (!tarFile.exists()) {
+					tarFile.createNewFile();
+				}
+				fos = new FileOutputStream(tarFile);
+				is = srcFile.getInputStream();
+				int ln = 0;
+				byte[] buf = new byte[1024];
+				while ((ln = is.read(buf)) != -1) {
+					fos.write(buf, 0, ln);
+				}
+				fos.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (fos != null) {
+					fos.close();
+				}
+				if (is != null) {
+					is.close();
+				}
+			}
+		}
+		
+//		文件同步
+		SysParam paramFile = (SysParam) manageService.findOneByProperties(SysParam.class, "paramType",
+				SystemConstants.ParamType.BRANCH_IP, "paramName", "FILE");
+
+		int priorityFile = 1;
+		// priority = Integer.parseInt(member.getMemberRank());
+		List<String> fileNameList = new ArrayList<String>();
+		fileNameList.add(fileName);
+		Map<String, Object> fileNameMap = new HashMap<String, Object>();
+		fileNameMap.put("FileName", fileNameList);
+		TransferServcie.getInstance().transferFile(priorityFile, paramFile.getContent(),
+				JSONUtil.fromObject(fileNameMap).toString());
+		
+		// 门店头图数据新增
+
+		
+		String seqName = "SEQ_PIC_ID";
+		String sequence = manageService.getCloudSequence(seqName);
+		SimpleDateFormat sdf = new SimpleDateFormat("yymmdd");
+		String picId = sdf.format(new Date()) + sequence;
+		String picStyle = CommonConstants.BranchPicStyle.BRANCH_HEAD_PIC;
+		String picTrueStyle = CommonConstants.PicStyle.BRANCH_HEAD_PIC;
+		String status = CommonConstants.STATUS.NORMAL;
+		BranchPicture bp = new BranchPicture();
+		bp.setBranchId(branchIdChoose);
+		bp.setPictureId(picId);
+		bp.setRecordTime(new Date());
+		bp.setRecordUser(staffId);
+		bp.setStatus(status);
+		bp.setStyle(picStyle);
+		manageService.save(bp);
+		
+		/*if(CommonConstants.SystemType.Branch.equals(systemType.trim())){
+			// priority = Integer.parseInt(member.getMemberRank());
+			List<BranchPicture> branchPictureList = new ArrayList<BranchPicture>();
+			branchPictureList.add(bp);
+			Map<String, Object> branchPictureMap = new HashMap<String, Object>();
+			branchPictureMap.put("BranchPicture", branchPictureList);
+			TransferServcie.getInstance().transferData(priority, param.getContent(),
+					JSONUtil.fromObject(branchPictureMap).toString());
+		}*/
+		
+		Picture picture = new Picture();
+		picture.setPictureId(picId);
+		picture.setPictureStyle(picTrueStyle);
+		picture.setRecordTime(new Date());
+		picture.setRecordUser(staffId);
+		picture.setStatus(status);
+		picture.setPictureUrl(headPicUrl);
+		manageService.save(picture);
+		
+		/*if(CommonConstants.SystemType.Branch.equals(systemType.trim())){
+			List<Picture> headPictureTrueList = new ArrayList<Picture>();
+			headPictureTrueList.add(picture);
+			Map<String, Object> headTruePictureMap = new HashMap<String, Object>();
+			headTruePictureMap.put("Picture", headPictureTrueList);
+			TransferServcie.getInstance().transferData(priority, param.getContent(),
+					JSONUtil.fromObject(headTruePictureMap).toString());
+		}*/
+
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+	}
+
+	@RequestMapping("/addInnerBranchPic.do")
+	public ModelAndView addInnerBranchPic(HttpServletRequest request) throws Exception {
+		ModelAndView mv = new ModelAndView("page/crm/branch/addBranchPic");
+		return mv;
+	}
+
+	@RequestMapping("/turnToSmsTemplateAddPage.do")
+	public ModelAndView turnToSmsTemplateAddPage(HttpServletRequest request) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		// 查找所有的门店传递到页面上去
+		List<?> branchList = this.marketingBasicService.queryAllOfBranch();
+		List<?> templateTypeList = this.manageService.queryAllOfTemplateType("SMS_TYPE");
+		mv.addObject("branchList", branchList);
+		mv.addObject("templateTypeList", templateTypeList);
+		mv.setViewName("page/crm/message/addSmsTemplates");
+		return mv;
+	}
+
+	@RequestMapping("/saveNewTemplate.do")
+	public void saveNewTemplate(HttpServletRequest request, HttpServletResponse response, SmsTemplate smsTemplate)
+			throws Exception {
+		String templateId = this.manageService.getSequence("SEQ_SMSTEMPLATES_ID", null);
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String recordUser = loginUser.getStaff().getStaffId();
+		smsTemplate.setRecordUser(recordUser);
+		smsTemplate.setTemplateId(templateId);
+		this.manageService.save(smsTemplate);
+		JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, null));
+	}
+
+	@RequestMapping("/turnToalterSmsTemplatePage.do")
+	public ModelAndView turnToalterSmsTemplatePage(HttpServletRequest request, String templateId) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/crm/message/alterSmsTemplate");
+		// 将数据库当前templateId的记录加载到页面
+		List<?> templateInfo = this.manageService.findByProperties(SmsTemplate.class, "templateId", templateId);
+		mv.addObject("templateInfo", templateInfo);
+		// 将页面下拉框内容加载
+		List<?> branchList = this.marketingBasicService.queryAllOfBranch();
+		List<?> templateTypeList = this.manageService.queryAllOfTemplateType("SMS_TYPE");
+		mv.addObject("branchList", branchList);
+		mv.addObject("templateTypeList", templateTypeList);
+		return mv;
+	}
+
+	@RequestMapping("/alterSmsTemplate.do")
+	public void alterSmsTemplate(HttpServletRequest request, HttpServletResponse response, SmsTemplate smsTemplate)
+			throws Exception {
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String recordUser = loginUser.getStaff().getStaffId();
+		smsTemplate.setRecordUser(recordUser);
+		smsTemplate.setRecordTime(new Date());
+		this.manageService.update(smsTemplate);
+		JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, null));
+	}
+
+	@RequestMapping("/turnToSmsShowDetailPage.do")
+	public ModelAndView turnToSmsShowDetailPage(HttpServletRequest request, String templateId) throws Exception {
+		List<?> branchList = this.marketingBasicService.queryAllOfBranch();
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/crm/message/querySmsInfoDetail");
+		mv.addObject("templateId", templateId);
+		mv.addObject("branchList", branchList);
+		return mv;
+	}
+
+	@RequestMapping("/querySmsInDetail.do")
+	public void querySmsInDetail(HttpServletRequest request, HttpServletResponse response, String templateId,
+			String queryRecipentNo, String querySendTimeStart, String querySendTimeEnd, String queryBranchId,
+			String queryStatus) throws Exception {
+		Pagination pagination;
+		Integer pageNum = Integer.parseInt(request.getParameter("page"));
+		Integer rows = Integer.parseInt(request.getParameter("rows"));
+		pagination = new Pagination(pageNum, rows);
+		List<?> result = this.manageService.querySmsInDetailByCon(templateId, queryRecipentNo, querySendTimeStart,
+				querySendTimeEnd, queryBranchId, queryStatus, pagination);
+		JSONUtil.responseJSON(response, JSONUtil.buildReportJSONByPagination(result, pagination));
+	}
+
+	@RequestMapping("/selectSmsContent.do")
+	public ModelAndView selectSmsContent(HttpServletRequest request, String dataId) throws Exception {
+		List<?> templateInfo = this.manageService.findByProperties(SmsSendLog.class, "dataId", dataId);
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/crm/message/querySmsContent");
+		mv.addObject("templateInfo", templateInfo);
+		return mv;
+	}
+
+	@RequestMapping("/testtest.do")
+	public ModelAndView testtest(HttpServletRequest request) throws Exception {
+
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/crm/message/testtest");
+		return mv;
+	}
+
+	@RequestMapping("/ggggg.do")
+	public void ggggg(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Map<String, String> data = new HashMap<String, String>();
+		data.put("{客户名}", "jiangshunmin");
+		data.put("{维修单号}", "dddddddd");
+
+		for (int i = 0; i <= 5; i++) {
+			notifyService.happenSendSms(null, null, null, "10000140", data, "18205253515", String.valueOf(i));
+		}
+		JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, null));
+	}
+	
+	
+
+	
+	
+	@RequestMapping("/addCityPic.do")
+	@SuppressWarnings("unchecked")
+	public ModelAndView addCityPic(HttpServletRequest request) throws Exception {
+		ModelAndView mv = new ModelAndView("page/basic/city/loadCityPic");
+		String citytype = request.getParameter("citytype");
+		String adminiCode = request.getParameter("adminiCode");
+		String ADMININAME = request.getParameter("ADMININAME");
+		
+		City cityInfo = (City) manageService.findOneByProperties(City.class, "status", "1", "adminiCode", adminiCode);
+		
+		List pictures = new ArrayList();
+		if (cityInfo.getPictures() != null) {
+			String[] picturesArray = cityInfo.getPictures().split(",");
+			for (int i = 0; i < picturesArray.length; i++) {
+				//Picture pic = (Picture) manageService.findOneByProperties(Picture.class, "status", "1", "adminiCode", adminiCode);
+				//pictures.add(picturesArray[i]);
+				String url = CommonConstants.Domain.DOMAINNAME + picturesArray[i];
+				pictures.add(url);
+				
+				
+			}
+		}
+		mv.addObject("ADMININAME", ADMININAME);
+		mv.addObject("citytype", citytype);
+		mv.addObject("operateType", "citypic");
+		mv.addObject("pic_str", cityInfo.getPictures());
+		mv.addObject("adminiCode", adminiCode);
+		mv.addObject("cityInfo", cityInfo);
+		mv.addObject("pictures", pictures);
+		return mv;
+	}
+	
+	
+	
+	
+	
+	
+	
+
+        	
+        	
+        	
+  
+	
+	@RequestMapping("/submitCityPictures.do")
+	@SuppressWarnings("unchecked")
+	public void submitCityPictures(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		String fileName = null;
+		FileOutputStream fos = null;
+		InputStream is = null;
+		String headPicUrl = "";
+		
+		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+		MultipartFile srcFile = multipartRequest.getFile("file");
+		
+		String adminiCode = multipartRequest.getParameter("adminiCode");
+		String index = multipartRequest.getParameter("index");
+		//Branch branch = (Branch) manageService.findById(Branch.class, branchIdChoose);
+		City cityInfo = (City) manageService.findOneByProperties(City.class, "adminiCode", adminiCode, "status", "1");
+		if (cityInfo.getPictures() != null && index.equals("0")) {
+			cityInfo.setPictures("");
+			manageService.update(cityInfo);
+			JSONUtil.responseJSON(response, new AjaxResult(1, "操作成功!"));
+		}
+		
+//		if (!StringUtil.isEmpty(branch.getBranchIp())) {
+//			SysParam paramFile = (SysParam) manageService.findOneByProperties(SysParam.class, "paramType",
+//					SystemConstants.ParamType.BRANCH_IP, "paramName", "FILE");
+//			int priorityFile = 1;
+//			List<String> fileNameList = new ArrayList<String>();
+//			fileNameList.add(fileName);
+//			Map<String, Object> fileNameMap = new HashMap<String, Object>();
+//			fileNameMap.put("FileName", fileNameList);
+//			TransferServcie.getInstance().transferFile(priorityFile, paramFile.getContent(),
+//					JSONUtil.fromObject(fileNameMap).toString());
+//		}
+		try {
+			String webPath = RequestUtil.getWebPath(request);
+			if (StringUtils.isEmpty(fileName)) {
+				fileName = srcFile.getOriginalFilename();
+				fileName = new Date().getTime()+fileName.substring(fileName.lastIndexOf("."));
+			}
+			File srcFolder = new File(webPath + File.separator + "upload");
+			if (!srcFolder.exists()) {
+				srcFolder.mkdirs();
+			}
+			headPicUrl = CommonConstants.Domain.DOMAINNAME + fileName;
+			File tarFile = new File(srcFolder.getAbsolutePath() + File.separator + fileName);
+			if (!tarFile.exists()) {
+				tarFile.createNewFile();
+			}
+			fos = new FileOutputStream(tarFile);
+			is = srcFile.getInputStream();
+			int ln = 0;
+			byte[] buf = new byte[1024];
+			while ((ln = is.read(buf)) != -1) {
+				fos.write(buf, 0, ln);
+			}
+			fos.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (fos != null) {
+				fos.close();
+			}
+			if (is != null) {
+				is.close();
+			}
+		}
+		//Date date = new Date(System.currentTimeMillis());
+		//SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+		//String pictureId = formatter.format(date);
+		if (cityInfo.getPictures() == null && index.equals("0")) {
+			cityInfo.setPictures(fileName);
+			manageService.update(cityInfo);
+		} else if (cityInfo.getPictures() != null) {
+			String cityFileName = cityInfo.getPictures();
+			cityFileName = cityFileName + "," + fileName;
+			cityInfo.setPictures(cityFileName);
+			manageService.update(cityInfo);
+		}
+
+		JSONUtil.responseJSON(response, new AjaxResult(1, "操作成功"));
+
+	}
+	
+	
+}

@@ -1,0 +1,603 @@
+var mobReg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/; //手机校验
+var idcardReg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/; //身份证号码为15位或者18位，15位时全为数字，18位前17位为数字，最后一位是校验位，可能为数字或字符X 
+var emailReg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
+var numberReg = /^[0-9]*[1-9][0-9]*$/; //校验正整数
+var moneyReg = /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/; //校验是金额
+var IpReg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/; //校验是Ip
+var LongitudeReg = /^[\-\+]?(0?\d{1,2}\.\d{1,10}|1[0-7]?\d{1}\.\d{1,10}|180\.0{1,10})$/; //校验经度
+var LatitudeReg = /^[\-\+]?([0-8]?\d{1}\.\d{1,10}|90\.0{1,10})$/; //校验纬度
+
+ function loadCheckStyle(e){
+	 //初始化页面的选中样式
+	 var currentId = "#title"+e;
+	 var liList = $("#wizard .bwizard-steps li[id != 'title"+e+"']");
+	 $(currentId).addClass("active").attr("aria-selected",true).find(".label").addClass("badge-inverse");
+	 liList.each(function(index) {
+		 $(this).removeClass("active").attr("aria-selected", false).find(".label").removeClass("badge-inverse");	 
+	 })
+	 //上一步和下一步按钮的样式，是否可点击
+	 if(e==1){
+		 $(".pager .previous").addClass("disabled").attr("aria-disabled",true);
+		 $(".previous a").removeAttr("onclick");
+		 $(".pager .next").removeClass("disabled").attr("aria-disabled",false);
+		 $(".next a").attr("onclick","toNext()"); 
+	 }else if($("#wizard .bwizard-steps li").size()==e){
+		 $(".pager .next").addClass("disabled").attr("aria-disabled",true);
+		 $(".next a").removeAttr("onclick");
+		 $(".pager .previous").removeClass("disabled").attr("aria-disabled",false);
+		 $(".previous a").attr("onclick","toPrevious()"); 
+	 }else{
+		 $(".pager .previous").removeClass("disabled").attr("aria-disabled",false);
+		 $(".pager .next").removeClass("disabled").attr("aria-disabled",false);
+		 $(".previous a").attr("onclick","toPrevious()"); 
+		 $(".next a").attr("onclick","toNext()"); 
+	 }
+ }
+
+ function toNext(){
+	
+	 if(newStepFlag != "first"){
+		 var currentId = $("#wizard .bwizard-steps li[class='active']").attr("id");
+		 var nextIdValue = parseInt(currentId.substr(currentId.length-1,1))+1;
+		 //var nextId = "#"+currentId.substr(0,5)+nextIdValue;
+	 
+		 var liListSize = $("#wizard .bwizard-steps li").size();
+		 //alert("currentId="+currentId+"nextId="+nextId+"liListSize="+liListSize);
+		 //目前只有一个方法，要动态加载，
+		 if(nextIdValue <= liListSize){
+			 loadNextSteps(nextIdValue);
+			 //点击完下一步之后将前面的标签都绑定上<a href="#step' + (j + 1) + '" class="hidden-phone" onclick=""/> 
+		 }
+	 
+	 }else{
+		 if(nextStepValue == 1){
+			 loadCheckStyle(1);
+				instruction();
+		 }else{
+			 loadFirstSteps(nextStepValue);
+		 }
+		   newStepFlag = "false";
+		 //var nextId = "#title"+nextIdValue;
+	 }
+	 
+ }
+ 
+ function toPrevious(){
+		 var currentId = $("#wizard .bwizard-steps li[class='active']").attr("id");
+		 var nextIdValue = parseInt(currentId.substr(currentId.length-1,1))-1;
+		 //var nextId = "#"+currentId.substr(0,5)+nextIdValue;
+	 var liListSize = $("#wizard .bwizard-steps li").size();
+	 //alert("currentId="+currentId+"nextId="+nextId+"liListSize="+liListSize);
+	 if(nextIdValue >= 1){
+		 loadPreviousSteps(nextIdValue);
+	 }
+	 
+ }
+ 
+ function instruction(){
+	$("#frame").attr('src',"instruction.do");
+ }
+ 
+ function loadNextSteps(e){
+	 if(e==2){
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToBranchPage.do";
+		 $("#frame").attr('src',currentUrl);
+	 }else if(e==3){
+		 if(!checkBranchInput())	 
+			 return false;
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToStaffPage.do?"+$($(window.frames["frame"].document).find("#myForm")).serialize();
+		 $("#frame").attr('src',currentUrl);
+	 }else if (e==4){
+		 if(!checkPostAndStaffInput() || inputCheckRepeat() == 'true')	 
+			 return false;
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToRightPage.do?"+$($(window.frames["frame"].document).find("#myForm")).serialize();
+		 $("#frame").attr('src',currentUrl);
+	 }else if (e==5){
+		 if(!rightCheck())	 
+			 return false;
+		 loadCheckStyle(e);
+		 $.ajax({
+				url : base_path + "/saveRightAndTurnToRoomTypeAdd.do",
+				type : "post",
+				dataType : "json",
+				data : {
+					'role' : JSON.stringify(role).replace("%22", '\"'),
+					'rights' : JSON.stringify(rights).replace("%22", '\"'),
+					'userrole' : JSON.stringify(userrole).replace("%22", '\"')
+				},
+				success : function(json) {
+					if (1 == json.result) {
+						var currentUrl ="saveRightAndTurnToRoomTypeAddView.do?role="+encodeURIComponent(JSON.stringify(role))+"&userrole=" + encodeURIComponent(JSON.stringify(userrole));
+						 $("#frame").attr('src',currentUrl);
+					}
+				},
+				error : function() {
+					showMsg("操作失败，请重新操作！");
+				}
+			    });
+		/* var currentUrl ="saveRightAndTurnToRoomTypeAdd.do?role="+encodeURIComponent(JSON.stringify(role))+"&rights="+encodeURIComponent(JSON.stringify(rights))+"&userrole=" + encodeURIComponent(JSON.stringify(userrole));
+		 $("#frame").attr('src',currentUrl);*/
+	 }else if (e==6){
+		 if(roomTypeInDatabaseCheck()=="false")	
+			 return false;
+		 if(roomPriceInDatabaseCheck()=="false")
+			 return false;
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToRoomsAdd.do?branchId="+encodeURIComponent($($(window.frames["frame"].document).find("#branchId")).val()) ;
+		 $("#frame").attr('src',currentUrl); 
+     }else if (e==7){
+    	 if(roomInDatabaseCheck()=="false")	
+			 return false;
+    	 loadCheckStyle(e);
+    	 //alert("branchType=" + encodeURIComponent($($(window.frames["frame"].document).find("#branchType")).val()))
+    	 var currentUrl ="turnToParameterAdd.do?branchType=" + encodeURIComponent($($(window.frames["frame"].document).find("#branchType")).val()) ;
+    	 /**if(themeValue == "1"){
+    		 var currentUrl ="turnToCashBoxAdd.do?branchId="+branchId;
+    	 }else if(themeValue == "2"){
+    		 var currentUrl ="turnToCleanAdd.do?branchId="+branchId;
+    	 }else {
+    		 var currentUrl ="saveCashBoxAndToEnd.do";
+    	 }**/
+		 $("#frame").attr('src',currentUrl);
+     } else if (e==8){
+    	 var branchSubType = encodeURIComponent($($(window.frames["frame"].document).find("#branchSubType")).val()) ;
+		 if(branchSubType == "1"){
+			 if(!cashBoxCheck())
+    			 return false;
+			 loadCheckStyle(e);
+			 var currentUrl ="saveCashBoxAndToEnd.do?"+$($(window.frames["frame"].document).find("#myForm")).serialize();
+    	 }else if(branchSubType == "2"){
+    		 if(!cleanCountCheck())
+    			 return false;
+    		 loadCheckStyle(e);
+    		 var currentUrl ="saveCleanAndToEnd.do?"+$($(window.frames["frame"].document).find("#myForm")).serialize();
+    	 }else {
+    		 loadCheckStyle(e);
+    		 var currentUrl ="saveCashBoxAndToEnd.do";
+    	 }
+		 $("#frame").attr('src',currentUrl);
+     }  
+ }
+ 
+ function loadPreviousSteps(e){
+	 if(e==1){
+		 loadCheckStyle(e);
+		 var currentUrl ="instruction.do";
+	 }else if (e==2){
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToBranchPage.do";
+	 }else if (e==3){
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToStaffPage.do?turnFlag=turnFlag";
+	 }else if (e==4){
+		 loadCheckStyle(e);
+		 var roleValue = $($(window.frames["frame"].document).find("#roleId")).val();
+		 if(!roleValue){
+			 roleValue = roleIdValue;
+		 }
+		 var currentUrl ="turnToRightPage.do?roleId="+roleValue+"&turnFlag=turnFlag";
+	 }else if (e==5){
+		 loadCheckStyle(e);
+		 //var currentUrl ="saveRightAndTurnToRoomTypeAdd.do?turnFlag=turnFlag";
+		 $.ajax({
+				url : base_path + "/saveRightAndTurnToRoomTypeAdd.do?turnFlag=turnFlag",
+				type : "post",
+				dataType : "json",
+				success : function(json) {
+					if (1 == json.result) {
+						var currentUrl ="saveRightAndTurnToRoomTypeAddView.do?role="+encodeURIComponent(JSON.stringify(role))+"&userrole=" + encodeURIComponent(JSON.stringify(userrole));
+						 $("#frame").attr('src',currentUrl);
+					}
+				},
+				error : function() {
+					showMsg("操作失败，请重新操作！");
+				}
+			    });
+     }else if (e==6){
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToRoomsAdd.do?branchId="+$($(window.frames["frame"].document).find("#branchId")).val();
+     } else if (e==7){
+		 loadCheckStyle(e);
+		 //alert("sssss"+ $($(window.frames["frame"].document).find("#branchSubType")).val())
+		 var currentUrl ="turnToParameterAdd.do?branchType=" + $($(window.frames["frame"].document).find("#branchSubType")).val(); 
+		/** if(themeValue == "1"){
+    		 var currentUrl ="turnToCashBoxAdd.do?branchId="+branchId;
+    	 }else if(themeValue == "2"){
+    		 var currentUrl ="turnToCleanAdd.do?branchId="+branchId;
+    	 }else {
+    		 var currentUrl ="saveCashBoxAndToEnd.do";
+    	 }**/
+     }
+	 $("#frame").attr('src',currentUrl); 
+ }
+ 
+ function loadFirstSteps(e){
+	 if(e==1){
+		 loadCheckStyle(e);
+		 var currentUrl ="instruction.do";
+	 }else if (e==2){
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToBranchPage.do";
+	 }else if (e==3){
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToStaffPage.do?turnFlag=turnFlag";
+	 }else if (e==4){
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToRightPage.do?roleId="+roleIdValue+"&turnFlag=turnFlag";
+	 }else if (e==5){
+		 loadCheckStyle(e);
+		 //var currentUrl ="saveRightAndTurnToRoomTypeAdd.do?turnFlag=turnFlag";
+		 $.ajax({
+				url : base_path + "/saveRightAndTurnToRoomTypeAdd.do?turnFlag=turnFlag",
+				type : "post",
+				dataType : "json",
+				success : function(json) {
+					if (1 == json.result) {
+						var currentUrl ="saveRightAndTurnToRoomTypeAddView.do?role="+encodeURIComponent(JSON.stringify(role))+"&userrole=" + encodeURIComponent(JSON.stringify(userrole));
+						 $("#frame").attr('src',currentUrl);
+					}
+				},
+				error : function() {
+					showMsg("操作失败，请重新操作！");
+				}
+			    });
+     }else if (e==6){
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToRoomsAdd.do?branchId="+branchId;
+     } else if (e==7){
+		 loadCheckStyle(e);
+		 var currentUrl ="turnToParameterAdd.do?branchType=" + themeValue;
+     } else if (e==8){
+    	// loadCheckStyle(e);
+		 //var currentUrl ="saveCashBoxAndToEnd.do&turnFlag=turnFlag"; 
+		 if(themeValue == "1"){	 
+			 loadCheckStyle(e);
+			 var currentUrl ="saveCashBoxAndToEnd.do?turnFlag=turnFlag";
+    	 }else if(themeValue == "2"){
+    		 loadCheckStyle(e);
+    		 var currentUrl ="saveCleanAndToEnd.do?turnFlag=turnFlag";
+    	 }else {
+    		 loadCheckStyle(e);
+    		 var currentUrl ="saveCashBoxAndToEnd.do";
+    	 }
+     }
+	 $("#frame").attr('src',currentUrl); 
+ }
+ 
+ ////进行PostAndStaff页面的input框体的前台校验
+ function checkPostAndStaffInput(){
+	 var jqueryObj = $(window.frames["frame"].document);
+	 if (isNull($(jqueryObj.find("#staffName")),"用户名") || isNull($(jqueryObj.find("#loginName")),"登录名") || isNull($(jqueryObj.find("#idcard")),"身份证")
+			|| isNull($(jqueryObj.find("#mobile")),"手机号") || isNull($(jqueryObj.find("#birthdays")),"生日") ||  isNull($(jqueryObj.find("#entryTimes")),"入职时间")
+			|| isNull($(jqueryObj.find("#gendor")),"性别") || isNull($(jqueryObj.find("#post")),"职位") ){
+			return false;
+		} else if (!checkLen($(jqueryObj.find("#staffName")),"用户名",10) || !checkLen($(jqueryObj.find("#loginName")),"登录名",10) || !checkLen($(jqueryObj.find("#idcard")),"身份证",18)
+				|| !checkLen($(jqueryObj.find("#mobile")),"手机号",11) ){
+				return false;
+		}else if ( !isIdcardInitial($(jqueryObj.find("#idcard")))){
+				return false;
+		}else if ( !isMobile($(jqueryObj.find("#mobile")).val())){
+				return false;
+		}else{
+			return true;
+		}	 
+ }
+ //权限表判断其是否将权限都选中
+ function concatRights() {
+	 var jqueryObj = $(window.frames["frame"].document);
+		var rightRelation;
+		var pages = $(jqueryObj.find(":checkbox[name=page]:checked")), functions, funcs;
+		
+		rights = new Array();
+		role = new Object();
+		if($(jqueryObj.find("#ROLEID")).val()) {
+			role["ROLEID"] = $(jqueryObj.find("#ROLEID")).val();
+		}
+		role["ROLENAME"] = $(jqueryObj.find("#ROLENAME")).val();
+		role["REMARK"] = $(jqueryObj.find("#REMARK")).val();
+		
+		if (pages.length > 0) {
+			$.each(pages, function(index) {
+			 	rightRelation = new Object();
+				funcs = "";
+				if(!$(pages[index]).attr("tabs") || $(pages[index]).attr("tabs") == "false") {
+					functions = $(pages[index]).parent().parent().find(":checkbox[name=function]:checked");
+					if (functions.length > 0) {
+						$.each(functions, function(i) {
+							funcs += $(functions[i]).val() + (i == functions.length - 1 ? "" : ",");
+						});
+					}
+				}
+				
+				/*if($("#ROLEID").val()) {
+					rightRelation["ROLEID"] = $("#ROLEID").val();
+				}*/
+				rightRelation["FUNCRIGHTID"] = $(pages[index]).val();
+				rightRelation["DATARIGHTS"] = funcs;
+				rights.push(rightRelation);
+			});
+		}
+		
+		userrole = new Object();
+		if($(jqueryObj.find("#dataId")).val()) {
+			userrole["DATAID"] = $(jqueryObj.find("#dataId")).val();
+		}
+		if($(jqueryObj.find("#userId")).val()) {
+			userrole["USERID"] = $(jqueryObj.find("#userId")).val();
+		}
+		if($(jqueryObj.find("#roleId")).val()) {
+			userrole["ROLEID"] = $(jqueryObj.find("#roleId")).val();
+		}
+	}
+ 
+ function rightCheck(){
+	 var jqueryObj = $(window.frames["frame"].document);
+	 concatRights();
+	 if (!$(jqueryObj.find("#ROLENAME")).val()) {
+			showMsg("请输入角色名称!");
+			return false;
+		}else if (rights.length == 0) {
+			showMsg("请选择角色权限!");
+			return false;
+		}else{
+			return true;
+		}
+	 
+ }
+ 
+ function showMsg(msg, fn) {
+		if (!fn) {
+			TipInfo.Msg.alert(msg);
+		} else {
+			TipInfo.Msg.confirm(msg, fn);
+		}
+	}
+ 
+ function cleanCountCheck(){
+	 var jqueryObj = $(window.frames["frame"].document);
+	 if (isNull($(jqueryObj.find("#content")),"半日保洁上限")){
+			return false;
+		} else if (!isNumber($(jqueryObj.find("#content")).val(),"保洁上限")){
+			return false;
+		}else{
+			return true;
+		}
+ }
+ 
+ function cashBoxCheck(){
+	 var jqueryObj = $(window.frames["frame"].document);
+	 if (isNull($(jqueryObj.find("#cashCount")),"备用金额")){
+			return false;
+		} else if (!isMoney($(jqueryObj.find("#cashCount")).val(),"备用金额")){
+			return false;
+		}else{
+			return true;
+		}
+ }
+ 
+ function checkBranchInput(){
+	 var jqueryObj = $(window.frames["frame"].document);
+	 if (isNull($(jqueryObj.find("#branchName")),"门店名称") || isNull($(jqueryObj.find("#rank")),"门店等级") || isNull($(jqueryObj.find("#branchType")),"门店类型")
+			|| isNull($(jqueryObj.find("#mobile")),"手机号") || isNull($(jqueryObj.find("#address")),"门店地址") ||  isNull($(jqueryObj.find("#phone")),"座机")
+			|| isNull($(jqueryObj.find("#postcode")),"邮编") || isNull($(jqueryObj.find("#contacts")),"联系人") || isNull($(jqueryObj.find("#city")),"城市")
+			|| isNull($(jqueryObj.find("#district")),"区域") || isNull($(jqueryObj.find("#customerPhone")),"客服电话") || isNull($(jqueryObj.find("#longitude")),"经度")
+			|| isNull($(jqueryObj.find("#latitude")),"纬度") ){
+			return false;
+		} else if (!checkLen($(jqueryObj.find("#branchName")),"门店名称",10) || !checkLen($(jqueryObj.find("#mobile")),"手机号",11) 
+				|| !checkLen($(jqueryObj.find("#address")),"门店地址",20) || !checkLen($(jqueryObj.find("#postcode")),"邮编",6)
+				|| !checkLen($(jqueryObj.find("#mobile")),"手机号",11)|| !checkLen($(jqueryObj.find("#contacts")),"联系人",10) ){
+				return false;
+		}else if ( !isNumber($(jqueryObj.find("#postcode")).val(),"邮编")){
+				return false;
+		}else if ( !isMobile($(jqueryObj.find("#mobile")).val())){
+				return false;
+		}else if ( $(jqueryObj.find("#branchIp")).val() && ! isIp($(jqueryObj.find("#branchIp")))){
+				return false;
+		}else if ( ! isLongitude($(jqueryObj.find("#longitude")))){
+				return false;
+		}else if ( ! isLatitude($(jqueryObj.find("#latitude")))){
+				return false;
+		}else{
+			return true;
+		}	 
+ }
+ 
+ function checkLen(content, title, max, min){
+		var length = content.val().length;
+		var msg =""; 
+		if(title) msg = title + msg;
+		if(min){
+			if(length <= max && length >= min){
+				return true;
+			}else {
+				msg = msg + "长度在于" + min + "-" + max + "之间!";
+				showMsg(msg);
+				return false;
+			}
+		}else{
+			if(length <= max){
+				return true;
+			}else{
+				msg = msg + "长度应小于" + max + "!";
+				showMsg(msg);
+				return false;
+			}
+		}
+	}
+ 
+ function isIp(content){
+	 var IpValue = content.val();
+	 if(IpReg.test(IpValue)) {
+		 return true;
+	 } else {
+		 if(IpValue) {
+			 var msg = "Ip地址不合法!";
+			 showMsg(msg);
+		 }
+		 return false;
+	 }
+ }
+ 
+ function isLongitude(content){
+	 var IpValue = content.val();
+	 if(LongitudeReg.test(IpValue)) {
+		 return true;
+	 } else {
+		 if(IpValue) {
+			 var msg = "经度填写不合法!";
+			 showMsg(msg);
+		 }
+		 return false;
+	 }
+ }
+ 
+ function isLatitude(content){
+	 var IpValue = content.val();
+	 if(LatitudeReg.test(IpValue)) {
+		 return true;
+	 } else {
+		 if(IpValue) {
+			 var msg = "纬度填写不合法!";
+			 showMsg(msg);
+		 }
+		 return false;
+	 }
+ }
+ 
+ 
+ function isIdcardInitial(content){
+	 var idcard = content.val();
+		if(idcardReg.test(idcard)){
+			return true;
+		}else{
+			if(idcard){
+				var msg = "身份证不合法!";
+			showMsg(msg);
+		}
+		return false;
+	}
+}
+ 
+ 
+ function roomTypeInDatabaseCheck(){
+	 var isSaveFlag;
+	 var jqueryObj = $(window.frames["frame"].document);
+	 var branchId = $(jqueryObj.find("#branchId")).val();
+	 $.ajax({
+			url: base_path + "/roomTypeInDatabaseCheck.do",
+			type: "post",
+			dataType: "json",
+			data: { branchId : branchId },
+			async: false,
+			success: function(json) {
+				if(json.result == 1){
+					isSaveFlag = 'true';
+				}else{
+					isSaveFlag = 'false';
+					showMsg("请保存房间类型!");
+				}	
+			},
+			error: function(json) {
+				isSaveFlag = 'false';
+			}
+		});	
+	 return isSaveFlag;	 
+ }
+ 
+ function roomInDatabaseCheck(){
+	 var isSaveFlag;
+	 var jqueryObj = $(window.frames["frame"].document);
+	 var branchId = $(jqueryObj.find("#branchId")).val();
+	 $.ajax({
+			url: base_path + "/roomInDatabaseCheck.do",
+			type: "post",
+			dataType: "json",
+			async: false,
+			data: { branchId : branchId },
+			success: function(json) { 
+				if(json.result == 1){
+					isSaveFlag = 'true';
+				}else{
+					isSaveFlag = 'false';
+					showMsg("请保存房间!");
+				}	
+			},
+			error: function(json) {
+				isSaveFlag = 'false';
+			}
+		});	
+	 return isSaveFlag;
+	 
+ }
+ 
+ function roomPriceInDatabaseCheck(){
+	 var isSaveFlag;
+	 var jqueryObj = $(window.frames["frame"].document);
+	 var branchId = $(jqueryObj.find("#branchId")).val();
+	 $.ajax({
+			url: base_path + "/roomPriceInDBCheck.do",
+			type: "post",
+			dataType: "json",
+			async: false,
+			data: { branchId : branchId },
+			success: function(json) { 
+				if(json.result == 1){
+					isSaveFlag = 'true';
+				}else{
+					isSaveFlag = 'false';
+					showMsg("请先房价初始化!");
+				}	
+			},
+			error: function(json) {
+				isSaveFlag = 'false';
+			}
+		});	
+	 return isSaveFlag;
+	 
+ }
+ 
+////Staff页面的input框体的手机号，登录名，身份证查重
+ function inputCheckRepeat(){
+	 var isRepeat;
+	 var jqueryObj = $(window.frames["frame"].document);
+	 var staffId = $(jqueryObj.find("#staffId")).val();
+	 var mobile = $(jqueryObj.find("#mobile")).val();
+	 var idcard = $(jqueryObj.find("#idcard")).val();
+	 var loginName = $(jqueryObj.find("#loginName")).val();
+	 $.ajax({
+			url: base_path + "/checkPersonRepeat.do",
+			type: "post",
+			dataType: "json",
+			async: false,
+			data: { mobile : mobile,
+		 			idcard : idcard,
+		 			staffId : staffId,
+		 			loginName : loginName },
+			success: function(json) { 
+				if(json.result == 1){
+					isRepeat = 'true';
+					showMsg("已有该手机号，请重新输入!");
+				} else if (json.result == 2){
+					isRepeat = 'true';
+					showMsg("已有该登录名，请重新输入!");
+				} else if (json.result == 3){
+					isRepeat = 'true';
+					showMsg("已有该身份证号，请重新输入!");
+				} else if (json.result == 4){
+					isRepeat = 'false';
+				} else {
+					isRepeat = 'true';
+					showMsg("操作失败!");
+				}	
+			},
+			error: function(json) {
+				isRepeat = 'true';
+				showMsg("操作失败!");
+			}
+		});
+	 return isRepeat;
+
+ }

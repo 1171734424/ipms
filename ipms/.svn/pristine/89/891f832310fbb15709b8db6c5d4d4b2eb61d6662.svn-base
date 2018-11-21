@@ -1,0 +1,298 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="../../common/taglib.jsp"%>
+<%@ include file="../../common/css.jsp"%>
+<%@ include file="../../common/script.jsp"%>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>添加商品资料</title>
+<meta http-equiv="pragma" content="no-cache" />
+<meta http-equiv="cache-control" content="no-cache" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="keywords" content="keyword1,keyword2,keyword3" />
+<meta http-equiv="description" content="This is my page" />
+<style type="">
+.crm-table tr td:nth-child(2n-1) {
+	width: 15% !important;
+}
+</style>
+<link href="<%=request.getContextPath()%>/css/common/tipInfo.css"
+	rel="stylesheet" type="text/css" media="all" />
+<link rel="stylesheet" type="text/css"
+	href="<%=request.getContextPath()%>/css/common/datepicker.css" />
+<link rel="stylesheet"
+	href="<%=request.getContextPath()%>/css/pmsmanage/pmsmanage.css" />
+<link href="<%=request.getContextPath()%>/css/reset.css"
+	rel="stylesheet" media="all" />
+<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/script/ipms/js/layDate-v5.0.5/laydate/theme/default/laydate.css" />
+<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+<script src="<%=request.getContextPath()%>/script/apartment/js/layDate-v5.0.5/laydate/laydate.js" charset="utf-8"></script>
+<script> 
+	var base_path = '<%=request.getContextPath()%>';
+	</script>
+</head>
+<body class="room-body">
+	<form name="myFrom" id="myForm" class="ctdform">
+		<table class="ptable crm-table" border="0" cellspacing="0"
+			cellpadding="0">
+			<tbody>
+				<!--  <col width="13%">
+		     <col width="80%">
+		     <col width="2%">
+		     <col width="2%"> -->
+		     	<tr>
+					<td><input id="goodsId" name="goodsId" type="hidden" value="${goodsId }"/></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle notnull" align="center">商品名称</td>
+					<td align="left" class="pinputtd"><input type="text"
+						id="goodsName" class="ptdinput" maxlength="15" value="${goodsName }"/></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle notnull" align="center;">商品类型</td>
+					<td align="left" class="pinputtd"><input
+						id="categoryId_select_CUSTOM_VALUE" name="categoryId_select_CUSTOM_VALUE"
+						class="ptdinput" type="hidden" value="${gc.categoryId }" /> <input
+						id="categoryId_select" name="categoryId_select" class="ptdinput"
+						type="text" value="${categoryId }" readonly="true" /></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle notnull" align="center;">门店</td>
+					<td align="left" class="pinputtd"><input
+						id="branch_select_CUSTOM_VALUE" name="branch_select_CUSTOM_VALUE"
+						class="ptdinput" type="hidden" value="${gc.branchId }" /> <input
+						id="branch_select" name="branch_select" class="ptdinput"
+						type="text" value="${branchId }" disabled="disabled" /></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle notnull" align="center;">供应商</td>
+					<td align="left" class="pinputtd"><input
+						id="supplierId_select_CUSTOM_VALUE" name="supplierId_select_CUSTOM_VALUE"
+						class="ptdinput" type="hidden" value="${gc.supplierId }" /> <input
+						id="supplierId_select" name="supplierId_select" class="ptdinput"
+						type="text" value="${supplierId }" readonly="true" /></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle notnull" align="center">售价</td>
+					<td align="left" class="pinputtd"><input type="text"
+						id="price" class="ptdinput" value="${price }"/></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle notnull" align="center">规格</td>
+					<td align="left" class="pinputtd"><input type="text"
+						id="specifications" class="ptdinput" maxlength="4" value="${specifications }"/></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle notnull" align="center">单位</td>
+					<td align="left" class="pinputtd"><input type="text"
+						id="unit" class="ptdinput" maxlength="4" value="${unit }"/></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle notnull" align="center;">售卖类型</td>
+					<td align="left" class="pinputtd"><input
+						id="saleType_select_CUSTOM_VALUE" name="saleType_select_CUSTOM_VALUE"
+						class="ptdinput" type="hidden" value="${gc.saleType }" /> <input
+						id="saleType_select" name="saleType_select" class="ptdinput"
+						type="text" value="${saleType }" readonly="true" /></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle notnull" align="center;">状态</td>
+					<td align="left" class="pinputtd"><input
+						id="status_select_CUSTOM_VALUE" name="status_select_CUSTOM_VALUE"
+						class="ptdinput" type="hidden" value="${gc.status }" /> <input
+						id="status_select" name="status_select" class="ptdinput"
+						type="text" value="${status }" readonly="true" /></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle" align="center;">生产日期</td>
+					<td align="left" class="pinputtd"><input type="text"
+						id="productionDate" class="ptdinput" maxlength="100" value="${productionDate }"/></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle" align="center;">积分兑换</td>
+					<td align="left" class="pinputtd"><input type="text"
+						id="integral" class="ptdinput" value="${integral }" onKeyUp="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="6"/></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+				<tr>
+					<td class="ctdtitle" align="center;">备注</td>
+					<td align="left" class="pinputtd"><input type="text"
+						id="rpremark" class="ptdinput" maxlength="100" value="${gc.remark }"/></td>
+					<td class="ctdtitle"></td>
+					<td class="ctdtitle"></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+	<hr class="ctdhr" />
+	<div class="contractbutton parents-content">
+		<div class="pdepartsubmit crm-confirmbt" onclick="goodsMangerAdd()">提交</div>
+		<div class="pdepartcancle crm-cancelbt"
+			onclick="window.parent.JDialog.close()">取消</div>
+	</div>
+</body>
+<script type="text/javascript">
+	var moneyReg = /(^[1-9]([0-9]+)?(\.[0-9]{1,2})?$)|(^(0){1}$)|(^[0-9]\.[0-9]([0-9])?$)/; //校验是金额
+	// 导入时间插件
+	laydate.render({
+		  elem: '#productionDate'
+		  ,format: 'yyyy/MM/dd'
+	});
+
+	// 初始化加载页面
+	$(document).ready(function() {
+		
+		// 初始化加载商品类型弹出框选择
+		$("#categoryId_select").bind("click",function(){
+		 	JDialog.open("商品类型", base_path + "/selectCategoryIdType.do?",450,350);
+		 	 
+		});
+		
+		// 初始化加载门店弹出框选择
+		$("#branch_select").bind("click",function(){
+		 	JDialog.open("门店", base_path + "/selectGoodsBranch.do?",450,350);
+		 	 
+		});
+		
+		// 初始化加载供应商弹出框选择
+		$("#supplierId_select").bind("click",function(){
+		 	JDialog.open("供应商", base_path + "/selectSupplierId.do?",450,350);
+		 	 
+		});
+		
+		// 初始化加载售卖类型弹出框选择
+		$("#saleType_select").bind("click",function(){
+		 	JDialog.open("售卖类型", base_path + "/selectSaleType.do?",450,350);
+		 	 
+		});
+		
+		// 初始化加载状态弹出框选择
+		$("#status_select").bind("click",function(){
+		 	JDialog.open("状态", base_path + "/selectStatus.do?",450,350);
+		 	 
+		});
+	});
+	
+	/*
+	 * 提交方法 
+	 */
+	function goodsMangerAdd() {
+		// 获取所有参数
+		var goodsName = $("#goodsName").val();
+		var categoryId = $("#categoryId_select_CUSTOM_VALUE").val();
+		var branchId = $("#branch_select_CUSTOM_VALUE").val();
+		var supplierId = $("#supplierId_select_CUSTOM_VALUE").val();
+		var price = $("#price").val();
+		var specifications = $("#specifications").val();
+		var unit = $("#unit").val();
+		var saleType = $("#saleType_select_CUSTOM_VALUE").val();
+		var status = $("#status_select_CUSTOM_VALUE").val();
+		var integral = $("#integral").val();
+		var productionDate = $("#productionDate").val();
+		var remark = $("#rpremark").val();
+		var goodsId = $("#goodsId").val();
+		// 验证所有数据
+		if (goodsName.length < 2) {
+			showMsg("商品名称字符长度不能小于2个字符！");
+			return false;
+		}
+		if (categoryId.length < 0) {
+			showMsg("商品类型不能为空！");
+			return false;
+		}
+		if (branchId.length < 0) {
+			showMsg("门店不能为空!");
+			return false;
+		}
+		if (supplierId.length < 0) {
+			showMsg("供应商不能为空!");
+			return false;
+		}
+		if (price.length < 0){
+			showMsg("商品金额为必填项!");
+			return false;
+		} else if (!moneyReg.test(price)){
+			showMsg("商品金额格式有误，参照：0.00,可为正金额！");
+			return false;
+		}
+		if (specifications.length < 0) {
+			showMsg("规格不能为空!");
+			return false;
+		}
+		if (unit.length < 0) {
+			showMsg("单位不能为空!");
+			return false;
+		}
+		if (saleType.length < 0) {
+			showMsg("售卖类型不能为空!");
+			return false;
+		}
+		if (status.length < 0) {
+			showMsg("状态不能为空!");
+			return false;
+		}
+		$.ajax({
+			url : base_path + "/saveEditCrmGoodsManage.do",
+			type : "post",
+			dataType : "json",
+			data : {
+				'goodsName' : goodsName,
+				'categoryId' : categoryId,
+				'branchId' : branchId,
+				'supplierId' : supplierId,
+				'price' : price,
+				'specifications' : specifications,
+				'unit' : unit,
+				'saleType' : saleType,
+				'status' : status,
+				'integral' : integral,
+				'productionDate' : productionDate,
+				'goodsId' : goodsId,
+				'remark' : remark
+			},
+			success : function(json) {
+				if (1 == json.result) {
+					showMsg("修改成功！");
+					window.setTimeout("window.parent.location.reload(true)", 2000);
+					window.setTimeout("window.parent.JDialog.close();",2000);
+				} else {
+					showMsg("修改失败！");
+					window.setTimeout("window.parent.location.reload(true)",2000);
+					window.setTimeout("window.parent.JDialog.close();",2000);
+				}
+			}
+		});
+	}
+	// 提示框
+	function showMsg(msg, fn) {
+		if (!fn) {
+			TipInfo.Msg.alert(msg);
+		} else {
+			TipInfo.Msg.confirm(msg, fn);
+		}
+	}
+</script>
+</html>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M904" name="基础资料" show="true" icon="parameter" subSystem="UPMS">
+				<page pageId="R90401" name="参数管理" editing="form" loadOnRender="true" showMenu="true" role="4">
+					<tabs>R9040101,R9040102</tabs>
+				</page>
+				<page pageId="R9040101" name="民宿参数" tab="true" containerId="R90401" editing="form" loadOnRender="true" showMenu="true" role="4">
+					<url>houseparameter</url>
+				</page>
+				<page pageId="R9040102" name="公寓参数" tab="true" containerId="R90401" editing="form" loadOnRender="true" showMenu="true" role="4">
+					<url>apartmentparameter</url>
+				</page>
+				
+				<page pageId="R90402" name="城市管理" editing="form" editFunc="editCityNew" loadOnRender="true" showMenu="true" role="1">
+					<conditions>ADMINICODE,ADMININAME,ORDERNUMBER,CITYRANK,CITYSTATUS,CITYREMARK</conditions>
+					<functions>FRESH,EDIT</functions>
+					<funcCondRate>59,40</funcCondRate>
+					<target>City</target>
+					<strategy>default</strategy>
+					<delFunc>delCity</delFunc>
+					<!-- <formSubmitUrl>editCity</formSubmitUrl> -->
+					<query type="sql">
+						<sql>cityQuery</sql>
+					</query>
+				 	<columns>
+				 		<column columnId="PICTURES" name="图片" funcName="增加图片" width="150" editType="button" editable="true" callFunc="addCityPic" align="center" downloadable="false"/>
+				 		<!-- <column columnId="CITYPICTURE" name="图标" editable="true" downloadable="false" editType="cityPicture" showImage="true"/> -->
+					    <column columnId="ADMINICODE" name="编码" editable="true" validateRule="NOTNULL,LENGTH:12,UNIQUE" />
+						<column columnId="ADMININAME" name="名称" editable="true" validateRule="NOTNULL,LENGTH:200"/>
+						<column columnId="CITYRANK" name="级别" editable="true" editValue="1:市;2:区;3:街道;4:商业圈;5:学校;6:景点;7:地铁线路;8:地铁站" editType="select" />
+						<column columnId="RECORDUSER" name="录入人" hidden="true" editable="false"/>
+						<column columnId="RECORDTIME" name="录入时间" editable="false"/>
+						<column columnId="ORDERNUMBER" name="推荐排序" editable="true" validateRule="LENGTH:4,UNIQUE"/>
+						<column columnId="CITYSTATUS" name="状态" editable="true" editValue="1:有效;0:已删除" editType="select" downloadable="false"/>
+						<column columnId="CITYREMARK" name="热门城市" editable="true" editValue="1:是;0:否" editType="select" downloadable="false"/>
+					</columns>
+				</page>
+				
+				<page pageId="R90403" name="订单来源管理" editing="form" loadOnRender="true" showMenu="true" role="1">
+			 		<!-- <conditions>ORDERSOURCENAME,ORDERSOURCESTATUS</conditions> -->
+			 		<conditions>ORDERSOURCENAME</conditions>
+					<functions>FRESH</functions>
+					<funcCondRate>59,40</funcCondRate>
+					<target>DataSource</target>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>queryOrderSource</sql>
+					</query>
+				 	<columns>
+						<column columnId="DATAID" name="类别编号" primaryKey="true" hidden="true" sequence="SEQ_DATARESOURCE_ID"/>
+						<column columnId="MEMBERID" name="编号" width="100" hidden="false" editable="true" validateRule="NOTNULL,NUMBER,LENGTH:8"/>
+						<column columnId="NAME" name="数据源名" width="100" editable="true" validateRule="NOTNULL,LENGTH:16"/>
+						<column columnId="STATUS" name="状态" width="100" hidden="true" editType="select" editValue="1:有效;0:已删除"  editable="true" validateRule="NOTNULL,LENGTH:2"/>
+						<column columnId="REMARK" name="备注" align="left" width="100" editable="true" validateRule="LENGTH:100"/>
+					</columns>
+			  	</page>
+				
+				<page pageId="R90404" name="广告图片管理" editing="form" loadOnRender="true" showMenu="true" role="4">
+			 		<url>adviertisementPicture</url>
+			  	</page>
+			  	
+			  	<page pageId="R90405" name="服务协议管理" editing="form" loadOnRender="true" showMenu="true" role="4">
+			 		<url>servicePolicy</url>
+			  	</page>	
+		  		
+		  		
+		  		<page pageId="R90406" name="促销短信管理" editing="form" loadOnRender="true" showMenu="false" role="4">
+					<conditions>PROMOTIONTIME,PROSTATUS</conditions><!-- 查询条件 -->
+					<functions>FRESH,EDIT</functions><!-- 页面功能 -->
+					<funcCondRate>59,40</funcCondRate><!-- 功能栏条件栏显示比例 -->
+					<target>Promotion</target><!-- 页面数据保存时对应的javabean -->
+					<strategy>default</strategy><!-- 此处仅作sqlinfo配置 -->
+					<query type="sql">
+						<sql>queryPromotion</sql>
+					</query>
+				 	<columns>
+				 	<column columnId="CZ2" name="发送短信" width="100" 
+								editType="button" funcName="发送信息" callFunc="sendmessage" buttonCls="b_tbutton" downloadable="false"/>
+				 		<column columnId="PROMOTIONID" name="促销编号" hidden="true" primaryKey="true" seqPrefix="$DATE" sequence="SEQ_PROMOTION_ID"/>
+						<column columnId="STARTTIME" name="开始时间" editable="true" editType="date" 
+								validateRule="NOTNULL"/>
+						<column columnId="ENDTIME" name="结束时间" editable="true" editType="date" 
+								validateRule="NOTNULL"/>
+					    <column columnId="CONTENTDESC" name="促销内容" editable="true" validateRule="NOTNULL"/>
+						<column columnId="RECORDUSER" name="录入人" hidden="true" editable="false"/>
+<!-- 						<column columnId="RECORDTIME" name="录入时间" editable="false" hidden="true" editType="datetime"/>
+ -->						<column columnId="STATUS" name="状态" editable="true" editValue="1:有效;0:已删除" editType="select" downloadable="false"/>
+					    <column columnId="REMARK" name="备注" align="left" editable="true" editType="textarea" validateRule="LENGTH:200"/>
+					</columns>
+				</page>
+		  		
+				<page pageId="R90407" name="入住须知管理" editing="form" loadOnRender="true" addFunc = "addTips" showMenu="false" role="4" readOnly = "true">
+					<conditions></conditions>
+					<functions>ADD,FRESH</functions>
+					<target>SysParam</target>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>queryTips</sql>
+					</query>
+					<columns>
+						<column columnId="ORDERNO" name="编号" width="100" hidden="false" editable="true" />
+						<column columnId="CONTENT" name="名称"  width="100" hidden="false" editable="true"/>
+					</columns>
+				</page>
+				<!--
+				
+				<page pageId="R90409" name="押金" role="*">
+					<url>cashPledge</url>
+				</page>
+			--></model>
+		</models>
+	</config>
+</configs>

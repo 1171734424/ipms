@@ -1,0 +1,174 @@
+package com.ideassoft.bean;
+
+import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import com.ideassoft.core.annotation.interfaces.ColumnDefaultValue;
+
+/**
+ * Controllog entity. @author MyEclipse Persistence Tools
+ */
+@Entity
+@Table(name = "TL_E_CONTROLLOG", schema = "UCR_PMS")
+public class ControlLog implements java.io.Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8075925601506163974L;
+	// Fields
+
+	private String logId;
+	private String serialNo;
+	private String branchId;
+	private String floorId;
+	private String roomId;
+	private String orderId;
+	private String operCommand;
+	private String status;
+	private Date recordTime;
+	private String recordUser;
+	private String remark;
+
+	// Constructors
+
+	/** default constructor */
+	public ControlLog() {
+	}
+
+	/** minimal constructor */
+	public ControlLog(String logId, String branchId, String floorId,
+			String orderId, String status, String recordUser) {
+		this.logId = logId;
+		this.branchId = branchId;
+		this.floorId = floorId;
+		this.orderId = orderId;
+		this.status = status;
+		this.recordUser = recordUser;
+	}
+
+	/** full constructor */
+	public ControlLog(String logId, String serialNo,String branchId, String floorId,
+			String roomId, String orderId, String operCommand, String status,
+			Date recordTime, String recordUser, String remark) {
+		this.logId = logId;
+		this.serialNo = serialNo;
+		this.branchId = branchId;
+		this.floorId = floorId;
+		this.roomId = roomId;
+		this.orderId = orderId;
+		this.operCommand = operCommand;
+		this.status = status;
+		this.recordTime = recordTime;
+		this.recordUser = recordUser;
+		this.remark = remark;
+	}
+
+	// Property accessors
+	@Id
+	@Column(name = "LOG_ID", unique = true, nullable = false, length = 18)
+	public String getLogId() {
+		return this.logId;
+	}
+
+	public void setLogId(String logId) {
+		this.logId = logId;
+	}
+	
+	@Column(name = "SERIAL_NO", nullable = false, length = 20)
+	public String getSerialNo(){
+		return this.serialNo;
+	}
+	
+	public void setSerialNo(String serialNo){
+		this.serialNo = serialNo;
+	}
+	@Column(name = "BRANCH_ID", nullable = false, length = 6)
+	public String getBranchId() {
+		return this.branchId;
+	}
+
+	public void setBranchId(String branchId) {
+		this.branchId = branchId;
+	}
+
+	@Column(name = "FLOOR_ID", nullable = false, length = 6)
+	public String getFloorId() {
+		return this.floorId;
+	}
+
+	public void setFloorId(String floorId) {
+		this.floorId = floorId;
+	}
+
+	@Column(name = "ROOM_ID", length = 6)
+	public String getRoomId() {
+		return this.roomId;
+	}
+
+	public void setRoomId(String roomId) {
+		this.roomId = roomId;
+	}
+
+	@Column(name = "ORDER_ID", nullable = false, length = 17)
+	public String getOrderId() {
+		return this.orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
+	@Column(name = "OPER_COMMAND", length = 2)
+	public String getOperCommand() {
+		return this.operCommand;
+	}
+
+	public void setOperCommand(String operCommand) {
+		this.operCommand = operCommand;
+	}
+
+	@Column(name = "STATUS", nullable = false, length = 2)
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "RECORD_TIME", insertable = false, updatable = true)
+	@ColumnDefaultValue(value = "sysdate", insertable = false)
+	public Date getRecordTime() {
+		return this.recordTime;
+	}
+
+	public void setRecordTime(Date recordTime) {
+		this.recordTime = recordTime;
+	}
+
+	@Column(name = "RECORD_USER", nullable = false, length = 8)
+	public String getRecordUser() {
+		return this.recordUser;
+	}
+
+	public void setRecordUser(String recordUser) {
+		this.recordUser = recordUser;
+	}
+
+	@Column(name = "REMARK", length = 200)
+	public String getRemark() {
+		return this.remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+}

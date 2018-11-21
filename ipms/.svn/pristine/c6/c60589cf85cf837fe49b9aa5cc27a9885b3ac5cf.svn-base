@@ -1,0 +1,186 @@
+@charset "utf-8";
+
+.apinfobg{
+	background-color: #fafafa;
+}
+.table {
+	width: 98.1%;
+	margin: 1% 2%;
+	border: none;
+	height: 16%;
+}
+
+.table_input {
+    width: 73%;
+    height: 30px;
+    font-size: 14px;
+    vertical-align: middle;
+    border: solid 1px #63B8FF;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    background-color: #FAFAFA;
+    margin: 5px 0;
+    
+}
+
+.table_textarea {
+	width: 91.2%;
+    height: 68px;
+    font-size: 14px;
+    vertical-align: middle;
+    margin:20px 4px 4px 0px;
+}
+
+.appinfo_c{
+	height:21%;
+	overflow: hidden;
+}
+
+.clearicon{
+	appearance:none;
+    -moz-appearance:none;
+    -webkit-appearance:none;
+}
+
+.appinfo_check{
+	height:47%;
+	overflow: hidden;
+}
+
+.appinfo_repair{
+	background-color: #FAFAFA;
+    height: 56%;
+	overflow: hidden;
+}
+
+.appinfo_scroll{
+	height: 24%;
+	overflow: scroll;
+}
+.appinfo_scroll textarea{
+	border:1px solid #ddd;
+	border-radius:2px;
+}
+.appinfo_c .table tr td{
+	padding-bottom:1%;
+}
+.appinfo_c label,.appinfo_scroll label,.address label{
+	font-size:14px;
+    display: inline;
+    vertical-align: middle;
+}
+.auditMessageP{
+	height: 80px;
+	 border: 1px solid #DDDDDD; 
+	 width: 80%; 
+	 margin-left: 10%; 
+	 margin-bottom: 2%;
+}
+.address table,.tableInfoTitleLog table{
+	border:none;
+}
+
+.address textarea{
+    height: 18%;
+    border: 1px solid #ddd;
+    width: 88.6%;
+    border-radius: 2px;
+    margin-top: 2px;
+}
+
+.address label{
+
+    display: inline-block;
+    margin-left: 2%;
+    vertical-align: top;
+}
+
+.button_submit{
+	border: 1px solid #ddd;
+    background: #f1f1f1;
+    color: white;
+    background-color: #535474;
+    float: left;
+    margin-left: 10px;
+    padding: 0 25px;
+    height: 37px;
+    line-height: 37px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.button_refluse{
+	border: 1px solid #ddd;
+    background: #f1f1f1;
+    color: white;
+    background-color: #FC8A15;
+    float: left;
+    margin-left: 10px;
+    padding: 0 25px;
+    height: 37px;
+    line-height: 37px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.address table tr td{
+    padding: 3% 0 11px 42%
+}
+
+.tableInfoTitleLog .button{
+	float:right;
+	margin-right: 4px;
+}
+
+/*维修申请双击页面*/
+.repair_dblremark {
+	height:56px !important;
+	line-height:50px !important;
+	margin: 4px ;
+	width:92.4%;
+}
+.repair_dblaudit{
+	height:56px !important;
+	line-height:50px !important;
+	margin: 4px ;
+	width:92.4%;
+}
+.repair_dbremark{
+	margin-top:-8px;
+}
+
+/*设置双击页面input框边框*/
+	
+.dbl_repair_input{
+	margin:4px !important;
+	width:69% !important;
+}
+.apply_input .contract_input{
+	width:68% !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

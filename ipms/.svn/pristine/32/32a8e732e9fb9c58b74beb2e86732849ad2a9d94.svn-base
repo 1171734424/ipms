@@ -1,0 +1,39 @@
+/*控制盒子的mrgin&&padding*/
+.room_margin{
+	background: #fff;
+    height: 100%;
+}
+.header_search{
+	height:54px;
+	line-height:54px;	
+	padding-left:20px;
+	font-size:1rem;
+}
+.header_search label{
+	font-size:1rem;	
+}
+.forward{
+	padding: 5px 10px;
+    border-radius: 4px;
+    text-align: center;
+    margin-left: 5px;
+    border: none;
+    cursor: pointer;
+    background:#535474;
+    color:#fff;
+}
+.quota{
+	height:170px;
+	position:absolute;
+	margin-top:100px;
+}
+.header_search .date_txt{
+	width:150px;
+	height:30px;
+	margin-left:10px;
+    padding-left: 5px;
+}
+/*日期插件重新定位*/
+.header_search .laydate_box{
+	 top: 44px !important;
+}

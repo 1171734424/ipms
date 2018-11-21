@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M906" name="商品管理" show="true" icon="parameter" subSystem="UPMS">
+				<page pageId="R90601" name="商品大类" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<conditions>SUPERCATEGORY</conditions>
+					<functions>FRESH,EDIT</functions>
+					<target>SysParam</target>
+					<formSubmitUrl>addGoodsType</formSubmitUrl>
+					<delFunc>delGoodsType</delFunc>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>findSysGoodsType</sql>
+					</query>
+					<columns>
+						<column columnId="PARAMID" name="商品编号" hidden="true" primaryKey="true"/>
+						<column columnId="CONTENT" name="编号" editable="true" validateRule="NOTNULL,NUMBER,LENGTH:3,GOODSTYPE" readonly="true"/>
+						<column columnId="PARAMNAME" name="名称" editable="true" validateRule="NOTNULL,LENGTH:20,UNIQUE"/>
+					</columns>
+				</page>
+				<page pageId="R90602" name="商品分类" editing="form" loadOnRender="true" editFunc="editGoodsTypeRow" showMenu="true" role="*">
+					<conditions>PRICEBRANCHNAME,CATEGORYNAME,SUPERCATEGORY,CHARGEROOM,CATEGORYSTATUS</conditions>
+					<functions>FRESH,EDIT,EXCEL</functions>
+					<funcCondRate>59,40</funcCondRate>
+					<target>GoodsCategory</target>
+					<strategy>default</strategy>
+					<delFunc>delCategory</delFunc>
+					<query type="sql">
+						<sql>goodscategory</sql>
+					</query>
+					<dataFormats>
+						<sql name="EXCEL">
+							goodscategoryexcel
+						</sql>
+					</dataFormats>
+					<columns>
+						<column columnId="PICTURES" name="图标" funcName="增加图标" width="150" editType="button" editable="true" callFunc="addGoodsPicMark" align="center" downloadable="false"/>
+						<column columnId="CATEGORYID" name="数据编号" primaryKey="true" hidden="true" sequence="SEQ_NEW_GOODSCATEGORY" validateRule="NOTNULL" downloadable="false"/>
+						<column columnId="CATEGORYNAME" name="商品种类" editable="true" />
+						<column columnId="BRANCHID" name="归属门店" initValue="BRANCHNAME" editable="true"  editType="dialog-radio" dialogTarget="Branch" dialogColumns="branchId,branchName" dialogConditions="status = '1'" validateRule="NOTNULL" />
+						<column columnId="CHARGEROOM" name="是否自营" editable="true" editValue="1:自营;0:非自营" editType="select" validateRule="NOTNULL,LENGTH:8" />
+						<column columnId="SUPERCATEGORY" name="商品大类" editable="true" editType="dialog-radio" dialogTarget="SysParam" dialogColumns="content,paramName" dialogConditions="PARAM_TYPE = 'SUPERCATEGORY' and STATUS = '1'" validateRule="NOTNULL,LENGTH:8" />
+						<column columnId="STATUS" name="状态" editable="true" editValue="1:有效;0:已删除" editType="select" downloadable="false"/>
+						<column columnId="REMARK" name="备注" editable="true" editType="textarea" validateRule="LENGTH:200"/>
+					</columns>
+				</page>
+				
+				<page pageId="R90603" name="商品资料" editing="form" loadOnRender="true" showMenu="true" editFunc="editGoodsManage" role="*">
+					<conditions>GOODSNAME,GOODCATEGORYID_CUSTOM_VALUE,PRICEBRANCHNAME,STATUS,SALETYPE_CUSTOM_VALUE</conditions>
+					<functions>FRESH,EDIT,EXCEL,IMPORT</functions>
+					<funcCondRate>59,40</funcCondRate>
+					<strategy>default</strategy>
+					<delFunc>delGoods</delFunc>
+					<!--<requiredData>SALETYPE</requiredData>
+					--><target>Goods</target>
+					<query type="sql">
+						<sql>goodsdata</sql>
+					</query>
+					<dataFormats>
+					    <!--<sql name="SALETYPE">
+							select content value, param_name label from tp_c_sysparam where param_type = 'SALETYPE'
+						</sql>
+						-->
+						<sql name="EXCEL">
+							goodsdataexcel
+						</sql>
+					</dataFormats>
+					<columns>
+						<column columnId="PICTURES" name="图片" funcName="增加图片" width="150" editType="button" editable="true" callFunc="addGoodsPic" align="center" downloadable="false"/>
+						<column columnId="GOODSID" name="商品编号" hidden="true"  primaryKey="true" sequence="SEQ_NEW_GOODS" validateRule="NOTNULL,LENGTH:8"></column>
+						<column columnId="GOODSNAME" name="商品名" editable="true" validateRule="NOTNULL,LENGTH:30" />
+						<column columnId="CATEGORYID" name="商品类型" editable="true" editType="dialog-radio" dialogTarget="GoodsCategory" dialogColumns="categoryId,categoryName" dialogConditions="status = '1' " validateRule="NOTNULL"/>
+						<!-- <column columnId="BRANCHID" name="门店" editable="true" initValue="BRANCHNAME" editType="dialog-radio" dialogTarget="Branch" dialogColumns="branchId,branchName" dialogConditions="status = '1' 
+								and (branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))" validateRule="NOTNULL"/> -->
+						<column columnId="BRANCHID" name="门店" editable="true" initValue="BRANCHNAME" editType="dialog" dialogTarget="Branch" dialogColumns="branchId,branchName" dialogConditions="status = '1'" validateRule="NOTNULL"/>
+						<column columnId="SUPPLIERID" name="供应商" editable="true" editType="dialog-radio" dialogTarget="Supplier" dialogColumns="supplierId,supplierName" validateRule="NOTNULL"/>
+						<column columnId="PRICE" name="售价" editable="true" editType="number" validateRule="NOTNULL,LENGTH:10" />
+						<column columnId="SPECIFICATIONS" name="规格" editable="true" validateRule="NOTNULL,LENGTH:4" />
+						<column columnId="UNIT" name="单位" editable="true" validateRule="NOTNULL,LENGTH:4" />
+						<column columnId="SALETYPE" name="售卖类型" editable="true" editType="dialog-radio" dialogTarget="SysParam" dialogColumns="content,paramName" dialogConditions="PARAM_TYPE = 'SALETYPE' " validateRule="NOTNULL"/>
+						<column columnId="RECORDUSER" name="录入人" editable="false" editType="dialog-radio" dialogTarget="Staff" dialogColumns="staffId,staffName" dialogConditions="status != '0'" validateRule="NOTNULL,LENGTH:8" hidden="true" />
+						<column columnId="INTEGRAL" name="兑换积分" editable="true" validateRule="LENGTH:6" />
+						<column columnId="PRODUCTIONDATE" name="生产日期" hidden="true" editable="true" editType="date" downloadable="false"/>
+						<column columnId="RECORDTIME" name="录入时间"  hidden="false" editable="false" editType="date" />
+						<column columnId="STATUS" name="状态"  editable="true" editType="dialog-radio" dialogTarget="SysParam" dialogColumns="content,paramName" dialogConditions="PARAM_TYPE = 'GOODSSTATUS' and STATUS = '1'" validateRule="NOTNULL" downloadable="false"/>
+						<column columnId="REMARK" name="备注" editable="true" editType="textarea" validateRule="LENGTH:100" />
+					</columns>
+				</page>
+			</model>
+		</models>
+	</config>
+</configs>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

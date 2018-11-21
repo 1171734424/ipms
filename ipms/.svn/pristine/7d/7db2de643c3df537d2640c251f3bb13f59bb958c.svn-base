@@ -1,0 +1,171 @@
+@charset "utf-8";
+
+.rpaudittitle_table {
+	width: 98.1%;
+    margin: 1% 2.1%;
+    border: none;
+    height: 8%;
+}
+		
+.table_input {
+	width: 63%;
+    height: 30px;
+    font-size: 14px;
+    vertical-align: middle;
+    border-left: none;
+    border-top: none;
+    border-right: none;
+    border-bottom: solid 1px #63B8FF;
+    background-color:#fafafa;
+    
+}
+
+.rptable_input {
+	width: 63%;
+    height: 30px;
+    font-size: 14px;
+    vertical-align: middle;
+    
+}
+.appinfo_c{
+	height:65%;
+	overflow: hidden;
+}
+.appinfo_scroll{
+	height: 51%;
+	overflow: scroll;
+}
+.appinfo_scroll textarea{
+	border:1px solid #ddd;
+	border-radius:2px;
+}
+.appinfo_c .table tr td{
+	padding-bottom:1%;
+}
+.appinfo_c label,.appinfo_scroll label,.address label{
+	font-size:14px;
+    display: inline;
+    vertical-align: middle;
+}
+.auditMessageP{
+	height: 80px;
+	 border: 1px solid #DDDDDD; 
+	 width: 80%; 
+	 margin-left: 10%; 
+	 margin-bottom: 2%;
+}
+.address table,.tableInfoTitleLog table{
+	border:none;
+}
+.address textarea{
+    height: 25%;
+    border: 1px solid #ddd;
+    width: 89%;
+    border-radius: 2px;
+    margin-left: 0px;
+    margin-top: -4px;
+}
+.address label{
+    width: 60px;
+    display: inline-block;
+    margin-left:2.3%;
+    vertical-align: top;
+}
+.address .button,.tableInfoTitleLog .button{
+	border:1px solid #ddd;
+	background:#f1f1f1;
+	color:#333;
+	float: left;
+    margin-left: 10px;
+}
+.address table tr td{
+   padding: 1% 0 0 41%;
+}
+
+.tableInfoTitleLog .button{
+	float:right;
+	margin-right: 4px;
+}
+
+.button_submit{
+	border: 1px solid #ddd;
+    background: #f1f1f1;
+    color: white;
+    background-color: #535474;
+    float: left;
+    margin-left: 10px;
+    padding: 0 25px;
+    height: 37px;
+    line-height: 37px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.button_refluse{
+	border: 1px solid #ddd;
+    background: #f1f1f1;
+    color: white;
+    background-color: #FC8A15;
+    float: left;
+    margin-left: 10px;
+    padding: 0 25px;
+    height: 37px;
+    line-height: 37px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.rpauditdata_table{
+   height: 57%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 96%;
+    margin: 1% 2.2%;
+    }
+    
+.rpauditdata_td {
+    border: 1px solid #d3dbde;
+    text-align: center;
+    font-size: 0.75rem;
+    padding: 3px;
+}
+
+ .filter_input{
+    width:81.5%;
+}
+
+ .rpainfo_hiddden{
+    display:none;
+}
+
+ .apinfobg{
+	background-color: #fafafa;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,308 @@
+@charset "utf-8";
+body,
+ul,
+li,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+form,
+fieldset,
+table,
+td,
+img,
+div,
+dl,
+dt,
+dd,
+input {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	font-style: normal;
+	text-decoration: none;
+	border-collapse: collapse;/*为表格设置合并边框模型：*/
+	border-spacing: 0;
+}
+/*去除边框的占位--重要*/
+* {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+#jd_iframe{
+	border-bottom-left-radius:4px;
+	border-bottom-right-radius:4px;
+}
+label {
+	display: inline-block;
+	max-width: 100%;
+	margin-bottom: 5px;
+	font-size:0.85rem;
+}
+body {
+	font-family: "微软雅黑";
+	font-size: 14px;
+	margin: 0;
+	padding: 0;
+	background: #fff;
+	overflow-x: hidden;
+}
+a{blr:expression(this.onFocus=this.blur())}
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+nav,
+section,
+summary {
+	display: block;
+}
+body {
+	font-size: 16px;
+}
+img {
+	border: none;
+}
+li {
+	list-style: none;
+}
+
+
+input,
+select,
+textarea,
+button {
+	font-family: "微软雅黑";
+	outline: none;
+	border: none;
+	background: none;
+}
+
+a {
+	text-decoration: none;
+}
+/*input内置*/
+::-webkit-input-placeholder {
+	/* WebKit browsers */
+	color: #555555;
+	font-size: 14px;
+}
+
+::-moz-input-placeholder {
+	/* Mozilla Firefox 19+ */
+	color: #555555;
+	font-size: 14px;
+}
+
+::-ms-input-placeholder {
+	/* Internet Explorer 10+ */
+	color: #555555;
+	font-size: 14px;
+}
+
+/*设置滚动条样式*/
+::-webkit-scrollbar  
+{  
+    width: 5px;  
+    height: 5px;  
+    background-color: #ccc;  
+}  
+  
+/*定义滚动条轨道 内阴影+圆角*/  
+::-webkit-scrollbar-track  
+{  
+    border-radius: 10px;  
+    background-color: #fff;  
+}  
+  
+/*定义滑块 内阴影+圆角*/  
+::-webkit-scrollbar-thumb  
+{  
+    border-radius: 10px;  
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);  
+    background-color: #ccc;  
+}  
+/*清浮动，将clearfix引入到要清楚浮动的父级元素*/
+.clearfix:after {
+	content: "";
+	display: block;
+	clear: both;
+}
+.clearfix {
+	zoom: 1;
+}
+/*左浮动*/
+.fl {
+	float: left;
+}
+/*右浮动*/
+.fr {
+	float: right;
+}
+/**/
+a:hover,
+a:active {
+	outline: 0;
+}
+
+a[href],
+input[type='submit'],
+input[type='image'],
+label[for],
+select,
+button,
+.pointer {
+	cursor: pointer;/*鼠标放上去为箭头效果*/
+}
+
+/*input表单样式，引进去就可以了*/
+input,select,textarea{
+	border-radius:3px;
+	-moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+	color:#323232;
+	background-color: #fff;
+	border: 1px solid #DDDDDD;
+	line-height: 1.2;
+	font-size:0.85rem;
+	-webkit-box-shadow: none!important;
+	box-shadow: none!important;
+	-webkit-transition-duration: .1s;
+	transition-duration: .1s;
+}
+/*设置表单宽高*/
+.text_search{
+    padding:8px 5px;
+    width: 175px;
+    margin-left: 10px;/**根据需要设置**/
+}
+.text_edit {
+	padding: 8px 5px;
+    width: 89%;
+    margin:4px;
+    margin-left: 10px;/**根据需要设置**/
+}
+/*label标签样式展示*/
+.label_name {
+    float: left;
+    width: 70px;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+input[type="text"]:disabled, select[disabled=disabled] ,textarea[disabled=disabled],input[readonly=readonly],textarea[readonly=readonly]{
+    background: #f0f0f0;
+}
+/*表格展示*/	
+table{
+    width: 100%;
+    -khtml-border-radius:4px;
+    -moz-border-radius: 4px;
+    -ms-border-radius:4px;
+    -o-border-radius:4px;
+    -webkit-border-radius:4px;
+    border-radius:4px;
+    table-layout:fixed;
+    word-break:break-all;
+}
+/*td样式*/
+table td {
+    vertical-align: middle;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+/**公共按钮样式,设置按钮class="具体的类" 将此样式放进去即可**/
+button,.button{ 
+	height: 34px;
+	line-height: 34px;
+	text-align: center;
+	width: 80px;
+	border:none;
+	background-color: #5A5D9D;
+	color: #fff;
+	cursor: pointer;
+	border-radius:4px;
+	font-size:14px;
+}
+#campaignDetail {
+    height: 335px;
+    overflow-y: auto;
+    margin: 7px 1%;
+    overflow-x: hidden;
+}
+input[type="text"]:disabled, select[disabled=disabled] ,textarea[disabled=disabled]{
+    background: #EAEDF1;
+}
+.camtable tr td:nth-child(odd){
+	text-align:right;
+	width: 11%;	
+}
+textarea{
+	resize:none;
+}
+
+/*crm里面 提交 取消 按钮样式公共类*/
+.crm-confirmbt,.crm-cancelbt{
+	height: 34px;
+    line-height: 34px;
+    text-align: center;
+    width: 80px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: normal;
+    margin: 0 10px;
+    display: inline-block;
+    font-size: 14px;
+}
+.crm-confirmbt{
+	background-color: #5A5D9D;
+}
+.crm-cancelbt{
+	background-color: #FC8A15;
+}
+/*crm里面提交取消按钮样式公共类*/
+.crm-table{
+	margin-top:10px;
+}
+.crm-table tr td:nth-child(2n-1){
+	text-align:right;
+    width: 11%;
+}
+.crm-table input, .crm-table select, .crm-table textarea{
+	margin:5px;
+	height:35px;
+	border-radius:4px;
+	padding-left:4px;
+	border: 1px solid #dddddd;
+	background-color: #fff;
+}
+.parents-content{
+	width: 100%;
+    text-align: center;
+    margin: 3% auto;
+}
+
+
+label.floatstyle{
+	float: right;
+}
+
+
+
+
+
+
+
+
+
+

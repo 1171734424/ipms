@@ -1,0 +1,365 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<% request.setAttribute("basePath", request.getContextPath()); %>
+<%
+request.setAttribute("pagetype", request.getAttribute("pagetype"));
+request.setAttribute("audittype", request.getAttribute("audittype"));
+request.setAttribute("operid", request.getAttribute("operid"));
+request.setAttribute("staff", request.getAttribute("staff"));
+request.setAttribute("staffname", request.getAttribute("staffname"));
+request.setAttribute("applytime", request.getAttribute("applytime"));
+request.setAttribute("applybranch", request.getAttribute("applybranch"));
+request.setAttribute("branchname", request.getAttribute("branchname"));
+request.setAttribute("theme", request.getAttribute("theme"));
+request.setAttribute("themename", request.getAttribute("themename"));
+request.setAttribute("applytype", request.getAttribute("applytype"));
+request.setAttribute("validstart", request.getAttribute("validstart"));
+request.setAttribute("validend", request.getAttribute("validend"));
+request.setAttribute("validday", request.getAttribute("validday"));
+request.setAttribute("filterday", request.getAttribute("filterday"));
+request.setAttribute("remark", request.getAttribute("remark"));
+request.setAttribute("applykind", request.getAttribute("applykind"));
+request.setAttribute("rpauditdata", request.getAttribute("rpauditdata"));
+request.setAttribute("applytypename", request.getAttribute("applytypename"));
+request.setAttribute("applykindname", request.getAttribute("applykindname"));
+request.setAttribute("rpauditrtdata", request.getAttribute("rpauditrtdata"));
+request.setAttribute("rpidInitialize", request.getAttribute("rpidInitialize"));
+%>
+<%@ include file="../../common/taglib.jsp"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+		<title>详细信息</title>
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="expires" content="0">
+		<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+		<meta http-equiv="description" content="This is my page">
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/dialog.css" />
+		<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+		<link href="<%=request.getContextPath()%>/css/reset.css" rel="stylesheet" type="text/css" media="all" />
+		<link href="<%=request.getContextPath()%>/css/pmsmanage/rpaudit.css" rel="stylesheet" type="text/css" media="all" />
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/common/jquery.mloading.css"/>
+	</head>
+	<body class="apinfobg">
+	   <input id="pagetype" type="hidden" class="" value="${pagetype}" readonly />
+	   <input id="audittype" type="hidden" class="" value="${audittype}" readonly />
+	   <input id="rpauditrtdata" type="hidden" class="" value="${rpauditrtdata}" readonly />
+	   <input id="rpidInitialize" type="hidden" class="" value="${rpidInitialize}" readonly />
+	   <input id="rpauditdata" type="hidden" class="" value="${rpauditdata}" readonly />
+	   <input id="validday" type="hidden" class="" value="${validday}" readonly />
+	   <input id="validstart" type="hidden" class="" value="${validstart}" readonly />
+	   <input id="validend" type="hidden" class="" value="${validend}" readonly />
+	    <input id="applytime" type="hidden" class="" value="${applytime}" readonly />
+		<div style="height: 99%; overflow: auto;">
+			<form action="" name="myFrom" id="myForm">
+				<div class="appinfo_c">
+					<table class="rpaudittitle_table">
+						<col width="25%" />
+						<col width="25%" />
+						<col width="25%" />
+						<col width="25%" />
+						<tr>
+						  <td>
+								<label>
+									申请场景:
+								</label>
+								<input id="theme" type="text" class="table_input"
+									value="${themename}" readonly />
+							</td>
+						
+							<td>
+								<label>
+									申请单号:
+								</label>
+								<input id="operid" type="text" class="table_input"
+									value="${operid}" readonly />
+							</td>
+							
+							<td>
+								<label>
+									申请时间:
+								</label>
+								<input id="applytimeinput" type="text" class="table_input"
+									value="" readonly />
+							</td>
+							<td>
+								<label>
+									申请人员:
+								</label>
+								<input id="applystaff" type="hidden" class="table_input"
+									value="${staff}" readonly />
+								<input id="staffname" type="text" class="table_input"
+									value="${staffname}" readonly />
+							</td>
+							
+					   </tr>
+						
+						<tr>
+						<td >
+								<label>
+									申请门店:
+								</label>
+								<input id="branchid" type="hidden" class="table_input"
+									value="${applybranch}" readonly />
+								<input id="branchname" type="text" class="table_input"
+									value="${branchname}" readonly />
+							</td>	
+						<td>
+								<label>
+									房价类型:
+								</label>
+								<input id="" type="hidden" class="table_input"
+									value="${applytype}" readonly />
+								<input id="" type="text" class="table_input"
+									value="${applytypename}" readonly />
+							</td>
+							<td >
+								<label>
+									房价状态:
+								</label>
+								
+								<input id="applykind" type="hidden" class="table_input"
+									value="${applykind}" readonly />
+									<input id="" type="text" class="table_input"
+									value="${applykindname}" readonly />
+							</td>
+							<td >
+								<label>
+									申请备注:
+								</label>
+								
+								<input id="" type="text" class="table_input"
+									value="${remark}" readonly />
+							</td>
+								
+						</tr>
+						<tr id="statusshow" class="rpainfo_hiddden">
+						<td>
+								<label>
+									开始时间:
+								</label>
+								<input id="validstartinput" type="text" class="table_input"
+									value="" readonly />
+							</td>
+							<td >
+								<label>
+									结束时间:
+								</label>
+								
+								<input id="validendinput" type="text" class="table_input"
+									value="" readonly />
+							</td>
+							<td colspan="2">
+								<label>
+									过滤周期:
+								</label>
+								<input id="" type="text" class="table_input filter_input"
+									value="${filterday}" readonly />
+							</td>
+							
+							
+								
+						</tr>
+						<tr>
+						
+						<td >
+								<label>
+									生效周期:
+								</label>
+								
+								<input id="" type="text" class="table_input"
+									value="${validday}" readonly />
+									<!--<div id="normalday">
+								<input id="normal_day" name="" type="checkbox" />
+						        <label class="label_name_order">平日</label>
+						        <label>(</label>
+						        <input id="sun_day" name="normal" value="0" type="checkbox" />
+						        <label class="label_name_order">周日</label>
+						        <input id="mon_day" name="normal" value="1" type="checkbox" />
+						        <label class="label_name_order">周一</label>
+						        <input id="tue_day" name="normal" value="2" type="checkbox" />
+						        <label class="label_name_order">周二</label>
+						        <input id="wed_day" name="normal" value="3" type="checkbox" />
+						        <label class="label_name_order">周三</label>
+						        <input id="thur_day" name="normal" value="4" type="checkbox" />
+						        <label class="label_name_order">周四</label>
+						        <label>)</label>
+						    </div>
+						    <div id="weekendday">
+								<input id="weekend_day" name="" type="checkbox" />
+						        <label class="label_name_order">周末</label>
+						         <label>(</label>
+						        <input id="fri_day" name="weekend" value="5" type="checkbox" />
+						        <label class="label_name_order">周五</label>
+						        <input id="satur_day" name="weekend" value="6" type="checkbox" />
+						        <label class="label_name_order">周六</label>
+						        <label>)</label>
+						    </div>						
+							--></td>	
+								
+						</tr>
+					</table>
+					<div class="rpauditdata_table">
+					 <table id="rp_apply_data"class="rpapply_table" id="">
+					    <col width="8%" />
+						<col width="8%" />
+						<col width="8%" />
+						<col width="8%" />
+						<col width="8%" />
+						<col width="8%" />
+						<col width="8%" />
+						<col width="8%" />
+					    <thead id="">
+						<tr>
+							<th class="rpapply_th">房间类型</th>
+							<th class="rpapply_th">企业价</th>
+							<th class="rpapply_th">门市价</th>
+							<th class="rpapply_th">普卡价</th>
+							<th class="rpapply_th">银卡价</th>
+							<th class="rpapply_th">金卡价</th>
+							<th class="rpapply_th">铂金价</th>
+							<th class="rpapply_th">黑钻价</th>		
+						
+						</tr>
+					     </thead>
+						     <c:forEach var="rdr" items="${rpauditrtdata}">						    
+						         <tr>
+								<td align="center" class="rpauditdata_td rpainfo_hiddden">${rdr.roomtype}</td>
+								<td align="center" class="rpauditdata_td">${rdr.roomname}</td>
+                                 <c:forEach var="ri" items="${rpidInitialize}">	
+							    <td align="center" id="${ri.paramname}_${rdr.roomtype}" name="${rdr.roomtype}" class="rpauditdata_td"></td>
+								</c:forEach>	
+								</tr>
+							
+							</c:forEach>	
+						 </table>
+						</div>
+						</div>
+				<div id="tableInfoTitle" class="address">
+					<label>审核意见:</label>
+					<textarea id="auditMessage" class="auditMessage"></textarea>
+					<table class="SubmitTable" border="0" cellspacing="0" cellpadding="0">
+						<tbody>
+							<tr>
+								<td >
+									<div class="div_button button_submit" role="button"
+										onclick="auditSubmitOK();">
+										<a id="sData">通过</a>&nbsp;
+									</div>
+									<!--<div class="div_button button" role="button"
+										onclick="auditSubmitback();">
+										<a id="sData">打回</a>&nbsp;
+									</div>
+									--><div class="div_button button_refluse" role="button"
+										onclick="auditSubmitFail();">
+										<a id="sData">驳回</a>&nbsp;
+									</div>
+										<!--<div class="div_button button" role="button"
+										onclick="window.parent.JDialog.close();">
+										<a id="sData">关闭</a>
+									</div>
+								--></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<!--<div id="tableInfoTitleLog" class="tableInfoTitleLog">
+					<table class="SubmitTable" border="0" cellspacing="0"
+						cellpadding="0">
+						<tbody>
+							<tr>
+								<td align="center">
+									<div class="div_button button"
+										onclick="window.parent.JDialog.close();">
+										<a id="sData">关闭</a>
+									</div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			--></form>
+		</div>
+		<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/jquery.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+		<script src="<%=request.getContextPath()%>/script/crm/audit/auditInfoDetail.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/jquery.mloading.js"></script>
+		<script>
+	 	var base_path = '<%=request.getContextPath()%>';
+	 	$(document).ready(function() {
+			var pagetype = $("#pagetype").val();
+			if(pagetype=="auditlog"){
+				$("#tableInfoTitle").hide();
+			}else if(pagetype=="audit"){
+				$("#tableInfoTitleLog").hide();
+			}
+			if($("#applykind").val()=="2"){
+			  $("#statusshow").show();
+			}
+		    var validday = $("#validday").val();
+		    var validstart = $("#validstart").val();
+		    var validend = $("#validend").val();
+		    var applytime = $("#applytime").val();
+		    var validstartone = validstart.replace(/-/g,"/");
+		    var validstarttwo = validstartone.substring(0,validstartone.length-2);
+            $("#validstartinput").val(validstarttwo);
+            var validendone = validend.replace(/-/g,"/");
+		    var validendtwo = validendone.substring(0,validendone.length-2)
+            $("#validendinput").val(validendtwo);
+            var applytimeone = applytime.replace(/-/g,"/");
+		    var applytimetwo = applytimeone.substring(0,applytimeone.length-2)
+            $("#applytimeinput").val(applytimetwo);
+			var rpauditrtdata =  $("#rpauditrtdata").val();
+			var rpidInitialize =  $("#rpidInitialize").val();
+			var rpauditdata =  $("#rpauditdata").val();
+			var first_rpauditrtdata = rpauditrtdata.replace(/=/g,":'");
+			var second_rpauditrtdata = first_rpauditrtdata.replace(/,/g,"',");
+			var third_rpauditrtdata = second_rpauditrtdata.replace(/}/g,"'}");
+		    var fouth_rpauditrtdata = third_rpauditrtdata.replace(/}',/g,"},");
+			var array_rpauditrtdata = eval(fouth_rpauditrtdata);
+			for(var i = 0, l = array_rpauditrtdata.length; i < l; i++){ 
+				var rptype= array_rpauditrtdata[i].ROOMTYPE;
+				var rpidname_array = document.getElementsByName(rptype);
+				var discount =  $("#rpidInitialize").val();
+				var first_discount = discount.replace(/=/g,":'");
+				var second_discount = first_discount.replace(/,/g,"',");
+				var third_discount = second_discount.replace(/}/g,"'}");
+				var fouth_discount = third_discount.replace(/}',/g,"},");
+				var array_discount = eval(fouth_discount);
+				var rpaudit =  $("#rpauditdata").val();
+				var first_rpaudit = rpaudit.replace(/=/g,":'");
+				var second_rpaudit = first_rpaudit.replace(/,/g,"',");
+				var third_rpaudit = second_rpaudit.replace(/}/g,"'}");
+				var fouth_rpaudit = third_rpaudit.replace(/}',/g,"},");
+				var array_rpaudit = eval(fouth_rpaudit);
+				    for(var j=0; j<array_rpaudit.length; j++ ){
+				         if(array_rpaudit[j].ROOMTYPE==rptype){
+				              for(var k=0; k<rpidname_array.length; k++ ){
+				              var rpidnameid = rpidname_array[k].id;
+						      var s = array_rpaudit[j].CONTENT;
+						      var d = array_rpaudit[j].CONTENT+"_"+array_rpaudit[j].ROOMTYPE 
+						      if(rpidnameid==d){
+						      var w = "#"+array_rpaudit[j].CONTENT+"_"+rptype
+						      var v = array_rpaudit[j].ROOMPRICE
+						      $(w).text(v);
+						      }
+				         
+				         }
+				         
+				      }
+				        
+				        
+				  
+				  }
+			
+				}
+	     
+});
+
+
+  
+	   
+	 </script>
+	</body>
+</html>

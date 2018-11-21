@@ -1,0 +1,385 @@
+package com.ideassoft.crm.service;
+
+import java.util.List;
+import java.util.Map;
+
+import org.hsqldb.lib.StringUtil;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import com.ideassoft.bean.Branch;
+import com.ideassoft.bean.BranchKeywords;
+import com.ideassoft.bean.CashBox;
+import com.ideassoft.bean.Clean;
+import com.ideassoft.bean.Location;
+import com.ideassoft.bean.Room;
+import com.ideassoft.bean.RoomPrice;
+import com.ideassoft.bean.RoomStatus;
+import com.ideassoft.bean.RoomType;
+import com.ideassoft.bean.ShiftTime;
+import com.ideassoft.bean.Staff;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.bean.UserRole;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.dao.GenericDAOImpl;
+import com.ideassoft.util.JSONUtil;
+
+@Service
+public class InitialService extends GenericDAOImpl {
+
+	public Integer findAllPostCount() {
+		String sql = "select * from TP_C_POST where status = '1'";
+		return findSQLRecordsCount(sql);
+	}
+
+	public List<?> findAllPostNew() {
+		//状态为2，是预设的职位
+		String sql = "select * from TP_C_POST where POST_ID = '0008'";
+		List<?> result = findBySQL(sql);
+		return result != null && !result.isEmpty() ? result : null;
+	}
+	
+	public List<?> findAllPost() {
+		String sql = "select * from TP_C_POST where status = '1'";
+		List<?> result = findBySQL(sql);
+		return result != null && !result.isEmpty() ? result : null;
+	}
+
+	public List<?> findStaffData(String branchId, String recordUser) {
+		String sql = "select t.*,t.staff_id,t.staff_name,t.login_Name,t.password,t.branch_id,t.post,t.idcard,t.gendor,to_char(t.birthday,'yyyy-MM-dd') birthday,t.mobile,t.email,to_char(t.entry_time,'yyyy-MM-dd') entryTime,t.depart_id,p.post_name from TB_C_STAFF t,TP_C_POST p where t.post = p.post_id and t.status = '1' and t.branch_Id ='"
+				+ branchId + "' and t.record_user = '" + recordUser + "'";
+		List<?> result = findBySQL(sql);
+		if(result != null && result.size() >= 1)
+			result.subList(1, result.size()).clear();
+		return result != null && result.size() >= 1 ? result : null;
+	}
+
+	public List<Room> findAllRoom(String branchId) {
+		List<Room> result = findByProperties(Room.class, "roomKey.branchId", branchId, new Object[] { "status", "1" });
+		return (result != null && result.size() > 0) ?  result : null;
+	}
+	
+	public List<?> findAllRoomByTwo(String branchId, String roomType) {
+		List<?> result = findByProperties(Room.class, "roomKey.branchId", branchId, new Object[] { "status", "1" ,"roomType",roomType});
+		return (result != null && result.size() > 0) ?  result : null;
+	}
+
+	public List<?> findCashBoxData(String branchId) {
+		String sql = "select t.data_id dataId,t.branch_id,t.cash_box,t.cash_count cashCount,t.cash_status,t.record_user,t.record_time,t.status,t.remark,b.branch_name branchName from TB_C_CASHBOX t,"
+			+" TB_C_BRANCH b where t.branch_id = b.branch_id and t.status = '1' and t.branch_Id ='"+ branchId + "'";
+		List<?> result = findBySQL(sql);
+		return result != null ?  result : null;
+	}
+
+	public String findBranchNameByBranchId(String branchId) {
+		String returnVal = "";
+		Object result = findOneByProperties(Branch.class, "branchId", branchId);
+		if(result != null){
+			returnVal = ((Branch)result).getBranchName();
+		}
+		return returnVal;
+	}
+
+	public List<?> findCleanCountFromSysParam(String branchId) {
+		String sql = "select t.param_id paramId,t.param_type ,t.param_name,t.param_desc paramDesc, t.content oldcontent,t.order_no,t.status, b.branch_name branchName ,g.price cleanMoney, g.goods_id goodId "+
+	                " from TP_C_SYSPARAM t, TB_C_BRANCH b,TB_C_GOODS g where t.param_desc = b.branch_id and g.branch_id = b.branch_id and t.status = '1' and t.param_desc ='"+ branchId + "'";
+		List<?> result = findBySQL(sql);
+		return result != null ?  result : null;
+	}
+
+	public Staff findFirstStaff(String staffId) {
+		List<?> result = findByProperties(Staff.class, "recordUser", staffId);
+		return (result != null && result.size() >= 1) ? (Staff)result.get(0) : null;
+	}
+
+	public SysParam queryRrecordsInSysParam(String paramType, String paramValue, String paramType2, String paramValue2) {
+		SysParam result = (SysParam)findOneByProperties(SysParam.class, paramType, paramValue, paramType2, paramValue2);
+		return result != null ?  result : null;
+	}
+	
+	public SysParam queryRrecordsInSysParamNew(String paramType, String paramValue, String newcol, String branchId) {
+		SysParam result = (SysParam)findOneByProperties(SysParam.class, paramType, paramValue, newcol, branchId);
+		return result != null ?  result : null;
+	}
+
+	public List<?> queryBranchList(String branchId) {
+		String sql = "select * from TB_C_BRANCH where status = '1' and branch_id='"+ branchId + "'";
+		List<?> result = findBySQL(sql);
+		return (result != null && result.size() > 0)? result : null;
+	}
+
+	public Branch queryLoginUserBType(String branchId) {
+		Branch result = (Branch)findOneByProperties(Branch.class, "branchId", branchId, "status", "1");
+		return result != null ? result : null;
+	}
+	
+	public void updateInitialState() {
+		String sql = "update TP_C_SYSPARAM set content = '1' where param_type = 'INITIALSYSTEM'" ;
+		executeUpdateSQL(sql);
+	}
+	
+	public SysParam queryInitialState() {
+		SysParam result = (SysParam)findOneByProperties(SysParam.class, "content", "1", "paramType", "INITIALSYSTEM");
+		return result != null ?  result : null;
+	}
+
+	public boolean checkRoomTypeInDB(String branchId) {
+		List<?> result = findByProperties(RoomType.class, "roomTypeKey.branchId", branchId, "status","1");
+		return (result != null && result.size() > 0) ? true : false;
+	}
+	
+	public boolean checkRoomTypeInDB(String branchId,String titleList) {
+		List<?> result = findByProperties(RoomType.class, "roomTypeKey.branchId", branchId, "status","1");
+		if (result != null) {
+			return result.size() != Double.parseDouble(titleList) ? false : true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean checkRoomInDB(String branchId) {
+		List<?> result = findByProperties(Room.class, "roomKey.branchId", branchId, "status","1");
+		return (result != null && result.size() > 0) ? true : false;
+	}
+	
+	public boolean checkRoomInDB(String branchId, String titleList) {
+		List<?> result = findByProperties(Room.class, "roomKey.branchId", branchId, "status","1");
+		if (result != null) {
+			return result.size() == Integer.parseInt(titleList) ? true : false;
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean checkRoomStatusInDB(String branchId, String roomType) {
+		List<?> result = findByProperties(RoomStatus.class, "branchId", branchId, "status", "1", "roomType", roomType);
+		return (result != null && result.size() > 0) ? true : false;
+	}
+	
+	public List<?> getRpInitializeByBranchId(String branchId) throws Exception {
+		List<?> result = findByProperties(RoomPrice.class, "roomPriceId.branchId", branchId, "roomPriceId.status","1");
+		return result;
+	}
+
+	public Boolean queryCurrentRoomTypeIsInitial(String branchId,String roomtype, String rpKind) {
+		List<?> rpsetup = findBySQL("rpsetup", true);
+		String sql = "select * from TB_P_ROOMPRICE where status = '1' and branch_id='"+ branchId + "' and room_type ='" +roomtype+ "' and rp_kind ='" + rpKind +"'";
+		List<?> result = findBySQL(sql);
+		return (result != null && result.size() == rpsetup.size()) ? true : false;
+	}
+	
+	public List<RoomPrice> errorRoomTypeIsInitial(String branchId,String roomtype, String rpKind) {
+		//String sql = "select * from TB_P_ROOMPRICE where status = 1 and branch_id='"+ branchId + "' and room_type ='" +roomtype+ "' and rp_kind ='" + rpKind +"'";
+		//List<?> result = findBySQL(sql);
+		List<RoomPrice> result = findByProperties(RoomPrice.class, "roomPriceId.status", "1", "roomPriceId.branchId", branchId, "roomPriceId.roomType", roomtype, "roomPriceId.rpKind", rpKind);
+		return (result != null && result.size() > 0) ? result : null;
+	}
+	
+	public Boolean queryShiftTimeInDB(String branchId) {
+		String sql = "select * from TB_P_SHIFTTIME where status = '1' and branch_id='"+ branchId + "'";
+		List<?> result = findBySQL(sql);
+		return (result != null && result.size() == 3) ? true : false;
+	}
+	
+	public List<ShiftTime> errorShiftTimeInDB(String branchId) {
+		//String sql = "select * from TB_P_SHIFTTIME where status = 1 and branch_id='"+ branchId + "'";
+		//List<ShiftTime> result = (List<ShiftTime>)findBySQL(sql);
+		List<ShiftTime> result = findByProperties(ShiftTime.class, "status", "1", "branchId", branchId);
+		return (result != null && result.size() > 0) ? result : null;
+	}
+
+	public List<?> queryCustomerPhone(String branchId) {
+		List<?> result = findByProperties(SysParam.class, "paramType", "SERVICETEL", "paramName", branchId, "orderNo", "1");
+		return (result != null && result.size() > 0) ? result : null;
+	}
+	
+	public SysParam queryOneCustomerPhone(String branchId) {
+		SysParam result = (SysParam)findOneByProperties(SysParam.class, "paramType", "SERVICETEL", "paramName", branchId, "orderNo", "1");
+		return result != null ? result : null;
+	}
+
+	public UserRole queryUserRoleBySDA(String userId,String staffId) {
+		UserRole result = (UserRole)findOneByProperties(UserRole.class, "userId",userId, "recordUser", staffId, "status", "1");
+		return result != null ? result : null;
+	}
+	
+	public Staff queryStaffBySDA(String staffId) {
+		Staff result = (Staff)findOneByProperties(Staff.class, "recordUser", staffId, "status", "1");
+		return result != null ? result : null;
+	}
+	
+	public Branch queryBranchBySDA(String staffId) {
+		Branch result = (Branch)findOneByProperties(Branch.class, "recordUser", staffId, "status", "1");
+		return result != null ? result : null;
+	}
+
+	public SysParam queryOneCleanCount(String branchId) {
+		SysParam result = (SysParam)findOneByProperties(SysParam.class, "paramType", "CLEANAMOUNT", "paramDesc", branchId);
+		return result != null ? result : null;
+	}
+
+	public CashBox queryCashBoxAccount(String branchId, String staffId) {
+		CashBox result = (CashBox)findOneByProperties(CashBox.class, "branchId", branchId, "recordUser", staffId);
+		return result != null ? result : null;
+	}
+	
+	public Boolean queryCurrentRoomTypeCount(String theme, String branchId,String roomtype) {
+		List<?> rpsetup = findBySQL("rpsetup", true);
+		String sql = "select * from TB_P_ROOMPRICE where status = '1' and branch_id='"+ branchId + "' and room_type ='" +roomtype+ "'";
+		List<?> result = findBySQL(sql);
+		return (result != null && result.size() == (  theme.equalsIgnoreCase("1") ? (rpsetup.size() * 2 ):rpsetup.size())) ? true : false;
+	}
+	
+	public void updateRoomStateByRoomType(String roomType, String branchId) {
+		String sql = "update TB_P_ROOM set status = 'F' where branch_id='"+ branchId + "' and room_type ='" +roomType+ "'";
+		executeUpdateSQL(sql);
+	}
+
+	public void updateRoomStatusTable(String roomType, String branchId) {
+		String sql = "update TB_P_ROOMSTATUS set count = 0 where branch_id='"+ branchId + "' and room_type ='" +roomType+ "'";
+		executeUpdateSQL(sql);	
+	}
+
+	public void subRoomStatusNum(String roomType, String branchId) {
+		String sql = "update TB_P_ROOMSTATUS set count = count - 1 ,sellnum = sellnum - 1 where branch_id='"+ branchId + "' and room_type ='" +roomType+ "'";
+		executeUpdateSQL(sql);	
+	}
+
+	public void updateInitialLoginUser(String loginId) {
+		String sql = "update TB_C_STAFF set status = '0' where login_name ='"+loginId+"' ";
+		executeUpdateSQL(sql);
+	}
+
+	public boolean checkRoomTypeCountIsEqualsRoom(String branchId) {
+		String sql = "select * from TP_P_ROOMTYPE where status = '1' and branch_id='"+ branchId + "'";
+		List<?> result = findBySQL(sql);
+		String sql2 = "select distinct(room_type) from TB_P_ROOM where status = '1' and branch_id='"+ branchId + "'";
+		List<?> result2 = findBySQL(sql2);
+		return result.size() == result2.size() ? true : false;
+	}
+
+	public List<?> queryBranchLocation(String branchId) {
+		List<?> result = findByProperties(Location.class, "branchId", branchId, "status", "1");
+		return (result != null && result.size() > 0) ? result : null;
+	}
+
+	public void updateLocation(String branchId,String latitude ,String longitude) {
+		String sql = "update TB_P_LOCATION set latitude = '" + latitude + "' ,longitude = '" + longitude + "'where branch_id='"+ branchId + "'";
+		executeUpdateSQL(sql);	
+	}
+
+
+	public Branch queryCenterBranchInfo() {
+		Branch result = (Branch)findOneByProperties(Branch.class, "rank", "0", "status", "1");
+		return result != null ? result : null;
+	}
+
+//查询当前系统是布置在云端还是本地端啊
+	@Cacheable(value = "longCache", key = "'isC1oud'")
+	public boolean checkSystemExistCloud(){
+		SysParam result = (SysParam)findOneByProperties(SysParam.class, "paramType", "SYSTEMTYPE", "status", "1");
+		if(result != null){
+			if(result.getContent().equals(CommonConstants.SystemLevel.CouldMarketCenter)){
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}	
+	}
+//数据的保存上传或下载 	
+	public void dataUpDown(int priority, String branchIp, String dataTransName, Map<String, Object> mapList){
+		String branchIpValue = "";
+		 
+		if(checkSystemExistCloud()){
+			if(branchIp == null || StringUtil.isEmpty(branchIp)){
+				return;
+			}
+			
+			branchIpValue = "http://"+branchIp+":8080/ipms";
+		} else {
+			if(branchIp == null || StringUtil.isEmpty(branchIp)){
+				return;
+			}
+			branchIpValue = CommonConstants.MarketCenterIpValue.centerIpValue;
+		}
+		
+		TransferServcie.getInstance().transferData(priority, branchIpValue, JSONUtil.fromObject(mapList).toString());
+	
+		
+	}
+	
+	
+//获取序列是在云端还是在本地	
+	public String getCloudOrLocalSequence(String sequenceName){
+		String sequence = "";
+		if(checkSystemExistCloud()){
+			sequence = getSequence(sequenceName, null);
+		} else {
+			sequence = getCloudSequence(sequenceName, null);
+		}
+		return sequence;
+	}
+
+	public List<?> queryAllRoomType(String branchId) {
+		List<?> result = findByProperties(RoomType.class, "roomTypeKey.branchId", branchId);
+		return (result != null && result.size() > 0) ? result : null;
+	}
+
+	public List<?> queryAllRoom(String branchId) {
+		List<?> result = findByProperties(Room.class, "roomKey.branchId", branchId);
+		return (result != null && result.size() > 0) ? result : null;
+	}
+
+	public List<?> queryCurrentLoginUser(String staffId) {
+		List<?> result = findByProperties(Staff.class, "staffId", staffId);
+		return (result != null && result.size() > 0) ? result : null;
+	}
+
+	public List<?> queryCleanListData(String branchId) {
+		List<?> result = findByProperties(Clean.class, "branchId", branchId);
+		return (result != null && result.size() > 0) ? result : null;
+	}
+
+	public List<?> queryAllRoomStatusData(String branchId) {
+		List<?> result = findByProperties(RoomStatus.class, "branchId", branchId);
+		return (result != null && result.size() > 0) ? result : null;
+	}
+
+	public Staff findinitialUser(String staffId) {
+		//假设当前账户2：托管，3：非托管
+		String hql = " from Staff where loginName = ?  and (status = '2' or status = '3')";
+		List<?> result = findByHQL(hql, new String[] { staffId});
+		return result != null && !result.isEmpty() ? (Staff) result.get(0) : null;
+	}
+
+	public List<?> queryAllRoomPrice(String branchId) {
+		List<?> result = findByProperties(RoomPrice.class, "roomPriceId.branchId", branchId);
+		return (result != null && result.size() > 0) ? result : null;
+	}
+
+	public List<?> queryBranchKeyWords(String branchId) {
+		List<?> result = findByProperties(BranchKeywords.class, "branchId", branchId);
+		return (result != null && result.size() > 0) ? result : null;
+	}
+
+	public void updateKeyWords(String branchId, String branchName) {
+		String sql = "update TB_C_BRANCHKEYWORDS set KEYWORDS = '" + branchName.trim() + "' where branch_id='"+ branchId + "'";
+		executeUpdateSQL(sql);	
+	}
+	
+	public List<?> checkStaffRepeat(String beanProperty, String PropertyValue){
+		String sql = "select * from TB_C_STAFF where " + beanProperty + " ='" + PropertyValue + "' and status in(1,2,3)";
+		List<?> result = findBySQL(sql);
+		return result != null ? result : null;
+	}
+	
+	public List<?> checkStaffRepeatHql (String beanProperty, String PropertyValue){
+		String hql = "from Staff where " + beanProperty + " ='" + PropertyValue + "' and status in(1,2,3)";
+		List<?> result = findByHQL(hql);
+		return result != null ? result : null;
+	}
+	
+
+}

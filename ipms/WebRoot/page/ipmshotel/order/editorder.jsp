@@ -1,0 +1,173 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="../../common/script.jsp"%>
+<!DOCTYPE HTML>
+<html>
+	<head>
+	    <title>修改订单</title>
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="expires" content="0">    
+		<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+		<meta http-equiv="description" content="This is my page">
+		<link rel="stylesheet" id="style" type="text/css"
+			href="<%=request.getContextPath()%>/css/ipms/css/order/order_details.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/jquery-dialog.css" />	
+		<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>	
+		<link rel="stylesheet" id="style" type="text/css"
+			href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/select/jquery.mCustomScrollbar.min.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/select/select.css" />
+		<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/fonticon.css"/>
+		<script src="<%=request.getContextPath()%>/script/common/jquery-ui.min.js"></script>
+		<script>var base_path = "<%=request.getContextPath()%>";</script>
+	</head>
+	<body>
+		<form action ="" name="myForm" id="myForm">
+			<section class="detail_six">
+				<div class="high_header">
+					<div class="margintop">
+						<ul class="clearfix">
+					    	<li><label class="label_name">订单号</label><input name="orderId" type="text" value="<%=request.getParameter("orderId")%>" id="orderId" class="text_edit" readonly="readonly"></li>
+					      	<li><label class="label_name">预订人</label><input name="orderUser" type="text" value="" id="orderuser" class="text_edit" disabled></li>
+					      	<li><label class="label_name">预订人手机</label> <input name="mphone" type="text" value="" id="mphone" class="text_edit" disabled></li>
+					      	<li>
+							    <label class="label_name">房间类型</label>
+							    <select class="select_edit mySelect" id="roomType" name="roomType">
+							    </select>
+							    <input name="roomPrice" type="text" id="roomPrice" class="text_number" readonly="readonly"/>
+					      	</li>
+					      	<li class="cols_li">
+				      		  	<label class="label_name">担保类型</label>
+				      			<select class="select_edit" name="guarantee" id="guarantee">
+							      	<option value="1">无</option>
+							    	<option value="2">有</option>
+					        	</select>
+					      	</li> 
+					      	<li class="holdtime" style="width:auto;">
+					     	 	<label class="label_name" id="timelimit" name="timelimit">保留时效</label>
+					     	 	<span class="mytimes">
+									<input id="limited" name="limited" type="radio" value="20:00"/>20:00
+									<input id="limited" name="limited" type="radio" value="22:00"/>22:00
+									<input id="limited" name="limited" type="radio" value="0:00"/>0:00
+									<input id="limited" name="limited" type="radio" value="2:00"/>2:00
+								</span>
+					    	</li>
+					    	<li class="li_mark"><label class="label_name">备注</label> <textarea name="remark" id="remark" col="100" rols="10"></textarea></li>
+					    	<li><span role="button" class="button confirm" onclick="submitorder();">确定</span></li>
+		       			</ul>
+		    		</div>
+				</div>					
+			</section>
+		</form>
+		<script type="text/javascript" src="<%=request.getContextPath()%>/script/ipms/js/workbillroom/util.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+		<script type="text/javascript">
+		var path = "<%=request.getContextPath() %>";
+		
+		$(document).ready(function() {
+			change();
+			$.ajax({
+			         url: path + "/hotelloadsearchroomtype.do",
+					 type: "post",
+					 data : {},
+					 success: function(json) {
+					 	var data = "<option value=''>房间类型</option>";
+					 	$.each(json,function(index){
+					 		data = data + "<option value='" +json[index]["ROOMTYPE"] + "'>" +json[index]["ROOMNAME"] + "</option>"
+					 	});
+					 	$("#roomType").html(data);
+						$(".mySelect").select({
+							width: "175px"
+						});
+					 },
+					 error: function(json) {}
+			});
+			
+			$.ajax({
+		         url: path + "/loadOrderData.do",
+				 type: "post",
+				 dataType: "json",
+				 data : { orderId : $("#orderId").val() },
+				 success: function(json) {
+					 var value = $("#roomType").val(json[0]["RMTYPE"]);
+					 var opts = document.getElementById("roomType");  
+					 for(var i=0;i<opts.options.length;i++){  
+				        if(value == opts.options[i].value){  
+				          opts.options[i].selected = 'selected'; 
+				          break;
+			          }  
+		        	}   
+		        	
+				 	$("#arrivaltime").val(json[0]["ARRIVALTIME"]);
+				 	$("#leavetime").val(json[0]["LEAVETIME"]);
+				 	$("#orderuser").val(json[0]["ORDERUSER"]);
+				 	$("#mphone").val(json[0]["MPHONE"]);
+				 	$("#source").val(json[0]["SOURCE"]);
+				 	$("#memberrank").val(json[0]["MEMBERRANK"]);
+				 	$("#activity").val(json[0]["ACTIVITY"]);
+				 	$("#guarantee").val(json[0]["GUARANTEE"]);
+				 	var values = document.getElementById("guarantee");
+				 	if (json[0]["GUARANTEE"] == '无担保') {
+				 		values.options[0].selected = 'selected'; 
+				 	} else {
+				 		values.options[1].selected = 'selected'; 
+				 	}
+				 	var limited = $("input[type='radio']");
+				 	$.each(limited,function(i){
+				 		if($(limited[i]).val()==json[0]["LIMITED"]){
+				 			$("[name='limited']:eq("+ i +")").attr("checked",true);
+				 		}
+				 	})
+				 	$("#roomPrice").val(json[0]["PRICE"]);
+				 	//$("#orderid").val(json[0]["ORDERID"]);
+				 	$("#remark").val(json[0]["REMARK"]);
+					 },
+					 error: function(json) {
+					 }
+				});
+			})
+		
+			function submitorder() {
+				if ($("#roomType").find("option:selected").text() != window.parent.$("#roomtype").val() ) {
+					window.JDialog.open("修改订单", path + "/page/ipmshotel/order/secquery.jsp?orderId=" + $("#orderId").val(), 330, 100);
+				} else {
+			  		$.ajax({
+				         url: path + "/editorderinfo.do",
+						 type: "post",
+						 data : $("#myForm").serialize(),
+						 success: function(json) {
+							 showMsg(json.message);
+							 window.setTimeout("window.parent.parent.location.reload(true)",1800);
+						 },
+						 error: function(json) {
+						 	showMsg("操作失败！");
+						 }
+					});
+					
+				}
+			}
+			function change(){
+			 $("#roomType").change(function(){
+				if (!$("#roomType").val()) {
+					showMsg("请先选择房型!");
+					return false;
+				}
+				$.ajax({
+					url: path + "/getRoomPrice.do",
+					type: "post",
+					dataType: "json",
+					data: { roomtype : $("#roomType").val(), orderId : $("#orderId").val() },
+					success: function(json) {
+						console.log(json.totalPrices);
+						$("#roomPrice").val(json.data);
+					},
+					error: function(json) {
+						showMsg("操作失败！");
+					}
+				});
+			})
+			}
+		</script>
+  	</body>
+</html>

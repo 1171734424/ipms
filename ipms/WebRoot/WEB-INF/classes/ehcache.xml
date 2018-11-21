@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="ehcache.xsd" name="ehcache_pms"
+         updateCheck="false" monitoring="autodetect" dynamicConfig="true">
+
+    <diskStore path="java.io.tmpdir"/>
+
+    <defaultCache maxElementsInMemory="1000" eternal="true" overflowToDisk="true" />  
+    
+	<cache name="persistenceCache" maxElementsInMemory="500" maxEntriesLocalHeap="1000" 
+		diskPersistent ="true" diskExpiryThreadIntervalSeconds="20" eternal="true">
+     	<bootstrapCacheLoaderFactory class="net.sf.ehcache.store.DiskStoreBootstrapCacheLoaderFactory" 
+        	properties="bootstrapAsynchronously=true"/> 
+    </cache>
+    
+    <!-- 缓存时间 5 分钟  -->
+    <cache name="realtimeCache" overflowToDisk="false" maxEntriesLocalHeap="10000" timeToIdleSeconds="300" 
+    	timeToLiveSeconds="300" eternal="false"/>
+    
+    <!-- 缓存时间15分钟   -->
+    <cache name="shortCache" diskSpoolBufferSizeMB="500" maxEntriesLocalHeap="10000" timeToIdleSeconds="900"
+    	timeToLiveSeconds="900" diskExpiryThreadIntervalSeconds="600" eternal="false"/>
+    
+    <!-- 缓存时间1小时  -->
+    <cache name="mediumCache" maxEntriesLocalHeap="5000" timeToIdleSeconds="1800" timeToLiveSeconds="3600"
+		diskExpiryThreadIntervalSeconds="1200" eternal="false"/>
+    
+    <!-- 缓存时间4-5小时  -->
+    <cache name="longCache" maxEntriesLocalHeap="1000" timeToIdleSeconds="7200" timeToLiveSeconds="14400"
+		diskExpiryThreadIntervalSeconds="1800" eternal="false"/>
+		
+</ehcache>

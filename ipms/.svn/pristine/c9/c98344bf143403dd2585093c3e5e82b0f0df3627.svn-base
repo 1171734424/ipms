@@ -1,0 +1,71 @@
+package com.ideassoft.util;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.gson.JsonObject;
+import com.ideassoft.core.constants.CommonConstants;
+
+public class CardUtil {
+	
+	//添加身份证授权
+	public static Integer doorAddCardData(HttpServletRequest request,HttpServletResponse response) {
+		try {
+			Integer re = Integer.parseInt(CommonConstants.doorInterfaceResult.FAILED);
+			//将参数传一下，拼接一下
+			JsonObject jsonObject=new JsonObject();
+			jsonObject.addProperty("sign", 18);
+			jsonObject.addProperty("ownerId","18952016312");
+			jsonObject.addProperty("operatorId", "jsdr");
+			jsonObject.addProperty("gatewayCode", "LGW0011805000160");
+			jsonObject.addProperty("lockCode", "LCN0011805000119");
+			jsonObject.addProperty("serviceNumb", "");
+			jsonObject.addProperty("name", "蒋顺敏");
+			jsonObject.addProperty("cardNumb", "320981199309263224");
+			jsonObject.addProperty("dnCode", "");
+			jsonObject.addProperty("startTime", "20180822000000");
+			jsonObject.addProperty("endTime", "20180922000000");
+			jsonObject.addProperty("timetag", "");
+					
+			String res = HttpUtil.postData(jsonObject.toString(), CommonConstants.ZyDoorIp.IP);
+			Map<String,String> map = new HashMap<String,String>();
+			JSONUtil.buildParamFromJSON(map,res);
+			String result = map.get("result").toString();
+			
+			return Integer.parseInt(result);
+		}catch (Exception e) {
+			e.printStackTrace();
+			return CommonConstants.PortalResultCode.FAILED;
+		}
+	}
+	
+	
+	//取消身份证授权
+	public static Integer doorDelCardData(HttpServletRequest request,HttpServletResponse response) {
+		try {
+		Integer re = Integer.parseInt(CommonConstants.doorInterfaceResult.FAILED);
+		//将参数传一下，拼接一下
+		JsonObject jsonObject=new JsonObject();
+		jsonObject.addProperty("sign", 19);
+		jsonObject.addProperty("ownerId","18952016312");
+		jsonObject.addProperty("operatorId", "jsdr");
+		jsonObject.addProperty("lockCode", "LCN0011805000119");
+		jsonObject.addProperty("serviceNumb", "");
+		jsonObject.addProperty("cardNumb", "320981199309263224");
+		jsonObject.addProperty("timetag", "");
+		
+		String res = HttpUtil.postData(jsonObject.toString(), CommonConstants.ZyDoorIp.IP);
+		Map<String,String> map = new HashMap<String,String>();
+		JSONUtil.buildParamFromJSON(map,res);
+		String result = map.get("result").toString();
+				
+		return Integer.parseInt(result);
+		}catch (Exception e) {
+			e.printStackTrace();
+			return CommonConstants.PortalResultCode.FAILED;
+		}
+	}
+}

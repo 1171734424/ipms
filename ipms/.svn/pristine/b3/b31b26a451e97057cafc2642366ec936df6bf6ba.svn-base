@@ -1,0 +1,190 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="../../common/script.jsp"%>
+<%@ include file="../../common/taglib.jsp"%>
+<!DOCTYPE HTML>
+<html>
+  <head>
+    
+    <title>续住</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/roomlist/customer.css" />
+	<link rel="stylesheet" id="style" href="<%=request.getContextPath()%>/css/ipms/css/roomlist/roomlist_check.css"/>
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/fonticon.css"/>
+	<link href="<%=request.getContextPath()%>/css/initialcss/daterangepikerbootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/daterangepicker.css"/>
+	<link rel="stylesheet" id="style"  href="<%=request.getContextPath()%>/css/fontawesome/css/font-awesome.min.css" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/pageloading.css"/>
+  </head>
+  <style>
+  	.label_name{
+  		width: 150px;
+  	}
+  </style>
+  <body>
+   <div class="get_color">
+		<form id="getcontinue_bill" class="getcontinue_bill">
+			<section class="detail_one">
+				<ul class="clearfix">
+					<li><label class="label_name">当前离店</label><input id="cuurent_checkouttime" type="text" name="cuurent_checkouttime" value = "${ checkoutTime }" class="text_edit" readonly/></li>
+					<li>
+						<label class="label_name">续住日期</label> <input id="getcontinuetime" name="getcontinuetime" style="cursor: auto;background: #ffffff;" type="text" value="" class="text_edit wdate"  readonly>
+						<!-- <span class="spantime sone" style="" onclick="plustime('A')">中午</span>
+						<span class="spantime stwo" onclick="plustime('P')">下午</span> -->
+					</li>
+					<li>
+						<label class="label_name">支付方式</label>
+						<select name="projectid" id="projectid" class="text_edit select_project" style="padding: 0px; margin: 3px 0 0 4px;" onchange="selectpaytype(this)">
+							<option value="">--请选支付方式--</option>
+							<option value="2002">现金收取</option>
+							<option value="2003">银行卡</option>
+						</select>
+						
+						<!--<input id="project" name="project" type="text" value="" class="text_edit margin_text" onclick="oncontinue()" onchange="hideontime()">
+						 <div id="ontime" class="ontime oncontinue fadeIn"></div> -->
+					</li>
+					<li><label class="label_name">金额</label> <input id="amount" name="amount" type="number" value="" class="text_edit" ></li>
+					<li><label class="label_name">凭证号</label> <input id="voucher" name="voucher" type="text" value="" class="text_edit" ></li>
+					<li>
+						<input type="button" id="submitbill" value="取消" onclick="closeWin()" class="button_margin cancel"/>
+						<input type="button" id="submitbill" value="确认" onclick="submitgetcontinuebill()" class="button_margin confirm"/>
+					</li>
+				</ul>
+			</section>
+		 	<input type="hidden" name="checkId" value="${ checkid }">
+		</form>
+	</div>
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+  	<script type="text/javascript" src="<%=request.getContextPath()%>/script/ipms/js/workbillroom/util.js"></script>
+	<script src="<%=request.getContextPath()%>/script/initialData/bootstrap.min.js"></script>
+	<script src="<%=request.getContextPath()%>/script/ipms/js/moment.js" charset="utf-8"></script>
+	<script src="<%=request.getContextPath()%>/script/ipms/js/daterangepicker.js" charset="utf-8"></script>
+	<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/pageloading.js"></script>
+  	<script type="text/javascript">
+	  	/*laydate({
+	    	elem: '#getcontinuetime',
+	    	type: 'time'
+		});*/
+  		var path = '<%=request.getContextPath()%>';
+  		$(function(){
+  			var checkoutdate = moment('${ checkoutTime }'.split(" ")[0] + " 12:00").add(1, 'days');
+  			var checkouttime = '${ checkoutTime }'.split(" ");
+  			$('#getcontinuetime').daterangepicker({
+  					"singleDatePicker": true,
+					"timePicker": true,
+					"timePickerIncrement": 1,
+				    "locale": {
+				        "format": "YYYY/MM/DD HH:00",
+				        "firstDay": 1
+				    },
+					"minDate": checkouttime[0] + " 12:00", //moment("20120901", "YYYYMMDD")//.add('hours', 1)
+					"startDate": checkoutdate.format("YYYY/MM/DD HH:MI")
+				}, function(start, end, label) {
+					checkoutdate == start;
+					console.log(start)
+					console.log(end)
+					console.log(label)
+				});
+  			//$(".wdate").datetimepicker({ datetimeFormat: "yy/mm/dd HH:mm:ss" })
+  		});
+  		
+  		
+  		function selectpaytype(e){
+			if($(e).val() == "2003"){
+				$(".newdatail_six ul li:nth-child(8)").show();
+			}else{
+				$(".newdatail_six ul li:nth-child(8)").hide();
+			}
+		}
+		
+  		function closeWin() {
+		  window.parent.JDialog.close();
+		}
+		function plust(){
+		}
+		
+		function plustime(e){
+			var checkoutval = $("#getcontinuetime").val();
+			if(!checkoutval){
+				checkoutval = dealLocalDate(new Date()).split(" ")[0];
+			}
+			if(e == 'A'){
+				$("#getcontinuetime").val(checkoutval.split(" ")[0] + " 12:00");
+			}else if(e == 'P'){
+				$("#getcontinuetime").val(checkoutval.split(" ")[0] + " 18:00");
+			}
+		}
+
+  		function submitgetcontinuebill(){
+  			
+			if(isNull($("#getcontinuetime"))){
+				return false;
+			}
+			PageLoading.beginPageLoading("续住中......");
+			$.ajax({
+		         url: path + "/submitgetcontinuebill.do",
+				 type: "post",
+				 data : $("#getcontinue_bill").serialize(),
+				 success: function(json) {
+					 	if(json.message){
+					 		setTimeout(function(){
+					 			 showMsg(json.message);
+					 		},2000);
+					 	}
+						
+						 
+						 setTimeout("refreshpage()", 4000000);
+				 },	
+				 error: function(json) {
+				 	PageLoading.endPageLoading();
+				 }
+			});
+  		}
+  		
+  		$(".margin_text").on("click",function(){
+			$(".ontime").show();
+			$(document).on("click", function () {//对document绑定一个影藏Div方法
+				$("#ontime").hide();
+			});
+			event.stopPropagation();
+		})
+		
+		$(".spantime").bind("click",function(){
+			$(this).addClass("active");
+			$(this).siblings().removeClass("active");
+		})
+  		/*续住-->项目*/
+  		function oncontinue(){
+			document.getElementById("ontime").innerHTML='<iframe src="' + path +'/page/ipmshotel/common_addbill/commbill.jsp" width="100%" height="100%" frameborder=no  scrolling="no"></iframe>'
+		}
+		
+		function hideontime(){
+			$("#ontime").css("display","none");
+		}
+		
+		function refreshpage(){
+			 $(window.parent.document).find(".tab_one").click();
+			 window.parent.JDialog.close();
+		}
+		
+		$(function(){
+		
+			$('body').on('click','.infobtn .infobtnfocus',function(){
+			
+				refreshpage()
+				
+			})
+			
+		})
+		
+		
+  	</script>
+  </body>
+</html>

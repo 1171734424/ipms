@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M915" name="设备管理" show="true" icon="audit" subSystem="EMS">
+				<page pageId="R91501" name="设备种类" editing="form" loadOnRender="true" showMenu="false" role="*">
+					<functions>FRESH,EDIT,EQUIPSYNCHRO,DOOREQUIPSYNCHRO</functions>
+					<conditions>ECATEGORYNAME,SUPERKIND_CUSTOM_VALUE,EKINDSTATUS</conditions>
+					<target>EquipmentCategory</target>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>EquipKindQuery</sql>
+					</query>
+					<columns>
+						<column columnId="CATEGORYID" name="类别编号" hidden="true" complexKey="EquipmentCategoryKey" width="120"  align="center" sequence="SEQ_EQUIPCATEGORY_ID"/>
+						<column columnId="BRANCHID" name="归属门店"  complexKey="EquipmentCategoryKey" width="120" editable="true" editType="dialog-radio" align="center"
+							dialogTarget="Branch" dialogColumns="branchId,branchName" dialogConditions="status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))" initValue="BRANCHNAME" validateRule="NOTNULL"/>
+						<column columnId="CATEGORYNAME" name="类别名称" width="120" editable="true" align="center"/>
+						<column columnId="SUPERKIND" name="父类类型 " width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="SysParam" dialogColumns="content,paramName" dialogConditions=" paramType = 'EQUIPSUPERKIND' " validateRule="NOTNULL"/>
+						<column columnId="ISACQUISITONN" name="是否数据采集" width="120" editable="true" align="center"  editValue="-1:请选择;1:是;0:否" editType="select" downloadable="false" validateRule="NOTNULL"/>
+						<column columnId="STATUS" name="状态" hidden="true" editable="false" editValue="1:有效;0:已删除" editType="select" downloadable="false"/>
+						<column columnId="REMARK" name="备注" width="120" editable="true" align="center" editType="textarea"  validateRule="LENGTH:200"/>
+					</columns>
+				</page>
+				<page pageId="R91502" name="设备建档" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<tabs>R9150201,R9150202</tabs>
+				</page>
+				<page pageId="R9150201" name="酒店公寓" editing="form" loadOnRender="true" tab="true" containerId="R91502" role="*">
+					<funcCondRate>25,75</funcCondRate>
+					<functions>FRESH,EDIT</functions>
+					<conditions>ESERIALNO,SUPERKIND_CUSTOM_VALUE,EFLOOR,EROOM,ECONCENTRATOR_CUSTOM_VALUE,EQUIPIPNUM,EROUTE_CUSTOM_VALUE,EMAINTPERSON,ESTATUS,EISOPEN</conditions>
+					<target>Equipment</target>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>EquipQuery</sql>
+					</query>
+					<requiredData>EDITFLOOR</requiredData>
+					<dataFormats>
+						<sql name="EDITFLOOR">
+							selectFloorForEquip
+						</sql>
+					</dataFormats>
+					<columns>
+						<column columnId="CZ1" name="操作" width="130" editType="button" align="center"
+								funcName="维修详情" callFunc="repairDetial" buttonCls="button_first" downloadable="false"/>
+						<column columnId="CZ1" name="操作" width="130" editType="button" align="center"
+								funcName="绑定网关" callFunc="boundGateway" buttonCls="button_second" downloadable="false"/>
+						<column columnId="DATAID" name="数据编号" width="120" align="center" primaryKey="true" hidden="true" sequence="SEQ_EQUIPMENT_ID"  seqPrefix="$BRANCHID"/>						
+						<column columnId="SERIALNO" name="序列号	" width="120" editable="true" align="center" validateRule="NOTNULL,UNIQUE" readOnly="true"/>
+						<column columnId="BRANCHID" name="归属门店" width="120" editable="true" align="center" editType="dialog-radio" 
+							dialogTarget="Branch" dialogColumns="branchId,branchName" dialogConditions="status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))" initValue="BRANCHNAME" validateRule="NOTNULL"/>
+						<column columnId="SUPERKIND" name="父类类型 " width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="SysParam" dialogColumns="content,paramName" dialogConditions=" paramType = 'EQUIPSUPERKIND' " validateRule="NOTNULL"/>
+						<column columnId="EQUIPCATEGORY" name="设备类别编号" width="120" editable="true" align="center" editType="dialog-radio" 
+							dialogTarget="EquipmentCategory" dialogColumns="equipmentCategoryKey.categoryId,categoryName" dialogConditions="status = '1' and ( equipmentCategoryKey.branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								equipmentCategoryKey.branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))" dataEvent="superKind:SUPERKIND;" validateRule="NOTNULL"/>
+						<column columnId="FLOORID" name="所属楼层" width="120" editable="true" editType="select" align="center"  validateRule="NOTNULL"  initialSelectData="EDITFLOOR"/>
+						<column columnId="ROOMID" name="所属房间	" width="120" editable="true" align="center" editType="dialog-radio" 
+							dialogTarget="Room" dialogColumns="roomKey.roomId,roomKey.roomId" dialogConditions="roomKey.branchId =$BRANCHID and  status = '1' " eventRule="FLOORID" />
+						<column columnId="EQUIPDESC" name="设备描述" width="120" editable="true" align="center"/>
+						<column columnId="EQUIPFILE" name="相关文件" width="120" editable="true" align="center" editType="file" hidden="true"/>
+						<column columnId="VALIDSTART" name="质保起始时间" width="120" editable="true" align="center" editType="date"/>
+						<column columnId="VALIDEND" name="质保结束时间" width="120" editable="true" align="center" editType="date"/>
+						<column columnId="SUPPLIERID" name="供应商" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Supplier" dialogColumns="supplierId,supplierName" dialogConditions=" status = '1' " hidden="true"/>
+						<column columnId="CONCENTRATORID" name="采集器" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Equipment" dialogColumns="dataId,serialNo" dialogConditions=" superKind ='2' and status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))"/>
+						<column columnId="EQUIPIP" name="设备IP" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_LOCATION" name="网关地址" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_NAME" name="网关名称" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_CODE" name="网关条形码" width="120" editable="true" align="center"/>
+						<column columnId="LOCK_NAME" name="门锁名称" width="120" editable="true" align="center"/>
+						<column columnId="LOCK_LOCATION" name="门锁" width="120" editable="true" align="center"/>
+						<column columnId="LOCK_COMMENT" name="门锁内容" width="120" editable="true" align="center"/>
+						<column columnId="LOCK_POWER" name="门锁电量" width="120" editable="true" align="center"/>
+						<column columnId="ROUTE" name="连接路由" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Equipment" dialogColumns="dataId,serialNo" dialogConditions=" superKind ='1' and status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))"/>
+						<column columnId="MAINTPERSON" name="维修人员" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Staff" dialogColumns="staffId,staffName" dialogConditions=" status = '1' " validateRule="NOTNULL"/>
+						<column columnId="ISOPEN" name="开关" editable="true" editValue="-1:请选择;1:开;0:关" editType="select" />
+						<column columnId="STATUS" name="状态" editable="false" editValue="0:已删除;1:工作正常;2:工作异常;3:无连接;4:维修" editType="select" downloadable="false"/>
+						<column columnId="REMARK" name="对接方式" width="120" editable="true" align="center" editType="textarea"  validateRule="LENGTH:200" hidden="true"/>
+					</columns>
+				</page>
+				<page pageId="R9150202" name="民宿" editing="form" loadOnRender="true" tab="true" containerId="R91502" role="4">
+					<funcCondRate>20,80</funcCondRate>
+					<functions>FRESH,EDIT</functions>
+					<conditions>ESERIALNO,SUPERKIND_CUSTOM_VALUE,EFLOOR,EROOM,ECONCENTRATOR_CUSTOM_VALUE,EQUIPIPNUM,EROUTE_CUSTOM_VALUE,EMAINTPERSON,ESTATUS,EISOPEN</conditions>
+					<target>Equipment</target>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>equipmentHouseQuery</sql>
+					</query>
+					<columns>
+						<column columnId="CZ1" name="操作" width="130" editType="button" align="center"
+								funcName="维修详情" callFunc="repairDetial" buttonCls="button_first" downloadable="false"/>
+						<column columnId="DATAID" name="数据编号" width="120" align="center" primaryKey="true" hidden="true" sequence="SEQ_EQUIPMENT_ID"  seqPrefix="$BRANCHID"/>						
+						<column columnId="SERIALNO" name="序列号	" width="120" editable="true" align="center" validateRule="NOTNULL,UNIQUE" readOnly="true"/>
+						<column columnId="BRANCHID" name="归属门店" width="120" editable="true" align="center" editType="dialog-radio" 
+							dialogTarget="House" dialogColumns="houseId,houseType" dialogConditions="status != '0' and houseId in(select h.houseId from House h,HouseAccount hc where h.staffId = hc.houseAccountName and hc.staffId = $STAFFID)" validateRule="NOTNULL"/>
+						<column columnId="SUPERKIND" name="父类类型 " width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="SysParam" dialogColumns="content,paramName" dialogConditions=" paramType = 'EQUIPSUPERKIND' " validateRule="NOTNULL"/>
+						<column columnId="FLOORID" name="所属楼层" width="120" editable="true" align="center" validateRule="NOTNULL"/>
+						<column columnId="ROOMID" name="所属房间" width="120" editable="true" align="center" />
+						<column columnId="EQUIPDESC" name="设备描述" width="120" editable="true" align="center"/>
+						<column columnId="EQUIPFILE" name="相关文件" width="120" editable="true" align="center" editType="file" hidden="true"/>
+						<column columnId="VALIDSTART" name="质保起始时间" width="120" editable="true" align="center" editType="date"/>
+						<column columnId="VALIDEND" name="质保结束时间" width="120" editable="true" align="center" editType="date"/>
+						<column columnId="SUPPLIERID" name="供应商" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Supplier" dialogColumns="supplierId,supplierName" dialogConditions=" status = '1' " hidden="true"/>
+						<column columnId="CONCENTRATORID" name="采集器" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Equipment" dialogColumns="dataId,serialNo" dialogConditions=" superKind ='2' and status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))"/>
+						<column columnId="EQUIPIP" name="设备IP" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_LOCATION" name="网关地址" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_NAME" name="网关名称" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_CODE" name="网关条形码" width="120" editable="true" align="center"/>
+						<column columnId="LOCK_NAME" name="门锁名称" width="120" editable="true" align="center"/>
+						<column columnId="LOCK_LOCATION" name="门锁" width="120" editable="true" align="center"/>
+						<column columnId="LOCK_COMMENT" name="门锁内容" width="120" editable="true" align="center"/>
+						<column columnId="LOCK_POWER" name="门锁电量" width="120" editable="true" align="center"/>
+						<column columnId="ROUTE" name="连接路由" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Equipment" dialogColumns="dataId,serialNo" dialogConditions=" superKind ='1' and status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))"/>
+						<column columnId="MAINTPERSON" name="维修人员" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Staff" dialogColumns="staffId,staffName" dialogConditions=" status = '1' " validateRule="NOTNULL"/>
+						<column columnId="ISOPEN" name="开关" editable="true" editValue="-1:请选择;1:开;0:关" editType="select"/>
+						<column columnId="STATUS" name="状态" editable="false" editValue="0:已删除;1:工作正常;2:工作异常;3:无连接;4:维修" editType="select" downloadable="false"/>
+						<column columnId="REMARK" name="对接方式" width="120" editable="true" align="center" editType="textarea"  validateRule="LENGTH:200" hidden="true"/>
+					</columns>
+				</page>
+				<page pageId="R91503" name="设备控制" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<tabs>R9150301,R9150302</tabs>
+				</page>
+				<page pageId="R9150301" name="门锁控制" tab="true" containerId="R91503" editing="form" loadOnRender="true" role="*">
+					<conditions>ESERIALNO,EFLOOR,EROOM,EMAINTPERSON,ESTATUS,EISOPEN</conditions>
+					<functions>FRESH</functions>
+					<target>Equipment</target>
+					<query type="sql">
+						<sql>
+						<!--eDoorQuery-->
+						select pp.data_id     dataId,
+					       pp.serial_no       serialNo,
+					       pp.branch_id       branchIdNum,
+					       pp.branchId        branchId,
+					       pp.equip_category  equipCategory,
+					       pp.floor_id        floorId,
+					       pp.room_id         roomId,
+					       pp.concentrator_id concentratorId,
+					       pp.equip_ip        equipIp,
+					       pp.route           route,
+					       pp.maint_person    maintPerson,
+					       pp.is_open         isOpen,
+					       pp.status          status,
+					       pp.roomstatus      roomstatus,
+					       pp.checkUser_name  checkUser,
+					       pp.mobile          checkUserPhone
+					  from (select rr.*,
+					               tt.*,
+					               transTitles(rr.branch_id,
+					                           'tb_c_branch',
+					                           'branch_id',
+					                           'branch_name') branchId
+					          from (select t.*, r.status roomStatus
+					                  from tb_e_equipment t, tb_p_room r, tb_c_branch b
+					                 where t.branch_id = r.branch_id(+)
+					                   and t.room_id = r.room_id(+)
+					                   and t.super_kind = '5'
+					                   and t.branch_id = b.branch_id
+					                   and b.branch_type = '1') rr
+					          left join (select s.branch_id branchIds,
+					                           s.room_id roomIds,
+					                           f.checkuser_id,
+					                           f.checkuser_name,
+					                           f.mobile
+					                      from tb_p_check s, tb_c_checkuser f
+					                     where s.check_id = f.check_id
+					                       and f.checkuser_type = '1'
+					                       and f.checkin_type = '2'
+                                 			and s.status = '1'
+					                       ) tt
+					            on (rr.branch_id = tt.branchIds(+) and
+					               rr.room_id = tt.roomIds(+))
+					           and rr.branch_id like decode($BRANCHID,
+					                                        (select c.branch_id
+					                                           from tb_c_branch c
+					                                          where c.rank = '0'),
+					                                        '%',
+					                                        $BRANCHID)
+					        union all
+					        select rr.*,
+					               tt.*,
+					               transTitles(rr.branch_id,
+					                           'tb_c_branch',
+					                           'branch_id',
+					                           'branch_name') branchId
+					          from (select t.*, r.status roomStatus
+					                  from tb_e_equipment t, tb_p_room r, tb_c_branch b
+					                 where t.branch_id = r.branch_id(+)
+					                   and t.room_id = r.room_id(+)
+					                   and t.super_kind = '5'
+					                   and t.branch_id = b.branch_id
+					                   and b.branch_type = '2') rr
+					          left join (select u.branch_id branchIds,
+					                           u.room_id roomIds,
+					                           f.checkuser_id,
+					                           f.checkuser_name,
+					                           f.mobile
+					                      from tb_p_contrart u, tb_c_checkuser f
+					                     where u.contrart_id = f.check_id
+					                       and f.checkin_type = '2'
+                                 			and f.checkUser_type = '1'
+                                 			and u.status = '4') tt
+					            on (rr.branch_id = tt.branchIds(+) and
+					               rr.room_id = tt.roomIds(+))
+					           and rr.branch_id like decode($BRANCHID,
+					                                        (select c.branch_id
+					                                           from tb_c_branch c
+					                                          where c.rank = '0'),
+					                                        '%',
+					                                        $BRANCHID)
+					        union all
+					        select rr.*,
+					               tt.*,
+					               transTitles(rr.branch_id,
+					                           'tb_p_house',
+					                           'house_id',
+					                           'housename') branchId
+					          from (select t.*,
+					                       h.status      roomStatus
+					                  from tb_e_equipment t, Tb_p_House h
+					                 where t.super_kind = '5'
+					                   and h.house_id = t.branch_id and 
+					                  
+					                   (t.branch_id in (select h2.house_id
+                                                                    from Tb_p_House h2,
+                                                                         TB_C_HOUSEACCOUNT ht
+                                                                   where h2.staff_id =
+                                                                         ht.houseaccount_name
+                                                                     and ht.staff_id =
+                                                                         $STAFFID
+                                                                     and h2.status != '0')
+					                   
+					                   )) rr
+					          left join (select s.branch_id branchIds,
+					                           s.room_id roomIds,
+					                           f.checkuser_id,
+					                           f.checkuser_name,
+					                           f.mobile
+					                      from tb_p_check s, tb_c_checkuser f
+					                     where s.check_id = f.check_id
+					                       and f.checkin_type = '1'
+                                 and f.checkUser_type = '1'
+                                 and s.status = '1') tt
+					            on (rr.branch_id = tt.branchIds(+))
+					            ) pp
+					 where  (nvl(transTitlestwo(pp.maint_person,
+					                      'tb_c_staff',
+					                      'staff_id',
+					                      'staff_name',
+					                      'branch_id',
+					                      $BRANCHID),' ') like '%' || :EMAINTPERSON || '%'
+					       or transTitlestwo(pp.maint_person,
+					                      'tb_c_staff',
+					                      'staff_id',
+					                      'staff_name',
+					                      'branch_id',
+					                      $BRANCHID) like '%' || :EMAINTPERSON || '%'                     
+					              )        
+					   and pp.status like '%' || :ESTATUS || '%'
+					   and (pp.is_open like '%' || :EISOPEN || '%' or
+					       nvl(pp.is_open, ' ') like '%' || :EISOPEN || '%')
+					   and pp.serial_no like '%' || :ESERIALNO || '%'
+					   and (pp.floor_id like '%' || :EFLOOR || '%' or
+					       nvl(pp.floor_id, ' ') like '%' || :EFLOOR || '%')
+					   and (pp.room_id like '%' || :EROOM || '%' or
+					       nvl(pp.room_id, ' ') like '%' || :EROOM || '%')
+					       and pp.branch_id like '%' || decode($BRANCHID,'100001','%',$BRANCHID) || '%'
+					 order by pp.record_time desc
+						
+						</sql>
+					</query>
+					<columns>
+						<column columnId="CZ1" name="操作" width="100" editType="button" align="center"
+								funcName="开门" callFunc="openDoor" buttonCls="button_first" downloadable="false"/>
+						<column columnId="CZ1" name="操作" width="100" editType="button" align="center"
+								funcName="增减用户" callFunc="inAndDecreaseUser " buttonCls="button_second" downloadable="false"/>
+						<column columnId="DATAID" name="数据编号" width="120" align="center" primaryKey="true" hidden="true" sequence="SEQ_EQUIPMENT_ID"  seqPrefix="$BRANCHID"/>						
+						<column columnId="SERIALNO" name="序列号	" width="120" editable="true" align="center" validateRule="NOTNULL,UNIQUE" readOnly="true"/>
+						<column columnId="BRANCHIDNUM" name="门店编号"  editable="true"  hidden="true"/>
+						<column columnId="BRANCHID" name="归属门店" width="120" editable="true" align="center" validateRule="NOTNULL"/>
+						
+						<column columnId="FLOORID" name="所属楼层" width="120" editable="true" align="center"  validateRule="NOTNULL" />
+						<column columnId="ROOMID" name="所属房间	" width="120" editable="true" align="center" editType="dialog-radio" 
+							dialogTarget="Room" dialogColumns="roomKey.roomId,roomKey.roomId" dialogConditions="roomKey.branchId =$BRANCHID "  />
+						<column columnId="ROOMSTATUS" name="房间状态" width="120" editable="true" editValue="" editType="select" align="center"/>
+						<column columnId="CHECKUSER" name="主客人" width="120" editable="true" align="center"/>
+						<column columnId="CHECKUSERPHONE" name="手机号" width="120" editable="true" align="center" />
+						<column columnId="CONCENTRATORID" name="采集器" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Equipment" dialogColumns="dataId,serialNo" dialogConditions=" superKind ='2' and status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))"/>
+						<column columnId="EQUIPIP" name="设备IP" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_LOCATION" name="网关地址" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_NAME" name="网关名称" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_CODE" name="网关条形码" width="120" editable="true" align="center"/>
+						<column columnId="ROUTE" name="连接路由" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Equipment" dialogColumns="dataId,serialNo" dialogConditions=" superKind ='1' and status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))"/>
+						<column columnId="MAINTPERSON" name="维修人员" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Staff" dialogColumns="staffId,staffName" dialogConditions=" status = '1' " validateRule="NOTNULL"/>
+						<column columnId="ISOPEN" name="开关" editable="true" editValue="-1:请选择;1:开;0:关" editType="select"/>
+						<column columnId="STATUS" name="状态" editable="false" editValue="0:已删除;1:工作正常;2:工作异常;3:无连接;4:维修" editType="select" downloadable="false"/>
+					</columns>
+				</page>
+				<page pageId="R9150302" name="电控制" tab="true" containerId="R91503" editing="form" loadOnRender="true" role="*">
+					<conditions>ESERIALNO,EFLOOR,EROOM,EMAINTPERSON,ESTATUS,EISOPEN</conditions>
+					<functions>FRESH</functions>
+					<target>Equipment</target>
+					<query type="sql">
+						<sql>
+							<!--electricQuery-->
+					select pp.data_id         dataId,
+					       pp.serial_no       serialNo,
+					       pp.branch_id       branchIdNum,
+					       pp.branchId        branchId,
+					       pp.equip_category  equipCategory,
+					       pp.floor_id        floorId,
+					       pp.room_id         roomId,
+					       pp.concentrator_id concentratorId,
+					       pp.equip_ip        equipIp,
+					       pp.route           route,
+					       pp.maint_person    maintPerson,
+					       pp.is_open         isOpen,
+					       pp.status          status,
+					       pp.roomstatus      roomstatus,
+					       pp.checkUser_name  checkUser,
+					       pp.mobile          checkUserPhone
+					  from (select rr.*,
+					               tt.*,
+					               transTitles(rr.branch_id,
+					                           'tb_c_branch',
+					                           'branch_id',
+					                           'branch_name') branchId
+					          from (select t.*, 
+					          decode(r.status,
+								              '0',
+								              '已删除',
+								              '1',
+								              '空房',
+								              '2',
+								              '预定',
+								              '3',
+								              '已入住',
+								              'T',
+								              '停售',
+								              'Z',
+								              '脏房',
+								              'W',
+								              '维修', 'O',
+								              '其他', 'F',
+								              '无效', 'E',
+								              '员工宿舍', 'M',
+								              '样板房') roomStatus 
+					                  from tb_e_equipment t, tb_p_room r, tb_c_branch b
+					                 where t.branch_id = r.branch_id(+)
+					                   and t.room_id = r.room_id(+)
+					                   and t.super_kind = '3'
+					                   and t.branch_id = b.branch_id
+					                   and b.branch_type = '1') rr
+					          left join (select s.branch_id branchIds,
+					                           s.room_id roomIds,
+					                           f.checkuser_id,
+					                           f.checkuser_name,
+					                           f.mobile
+					                      from tb_p_check s, tb_c_checkuser f
+					                     where s.check_id = f.check_id
+					                       and f.checkuser_type = '1'
+					                       and f.checkin_type = '2') tt
+					            on (rr.branch_id = tt.branchIds(+) and
+					               rr.room_id = tt.roomIds(+))
+					           and rr.branch_id like decode($BRANCHID,
+					                                        (select c.branch_id
+					                                           from tb_c_branch c
+					                                          where c.rank = '0'),
+					                                        '%',
+					                                        $BRANCHID)
+					        union all
+					        select rr.*,
+					               tt.*,
+					               transTitles(rr.branch_id,
+					                           'tb_c_branch',
+					                           'branch_id',
+					                           'branch_name') branchId
+					          from (select t.*, 
+					          decode(r.status,
+								              '0',
+								              '已删除',
+								              '1',
+								              '空房',
+								              '2',
+								              '预定',
+								              '3',
+								              '已入住',
+								              'T',
+								              '停售',
+								              'Z',
+								              '脏房',
+								              'W',
+								              '维修', 'R',
+								              '其他') roomStatus 
+					                  from tb_e_equipment t, tb_p_room r, tb_c_branch b
+					                 where t.branch_id = r.branch_id(+)
+					                   and t.room_id = r.room_id(+)
+					                   and t.super_kind = '3'
+					                   and t.branch_id = b.branch_id
+					                   and b.branch_type = '2') rr
+					          left join (select u.branch_id branchIds,
+					                           u.room_id roomIds,
+					                           f.checkuser_id,
+					                           f.checkuser_name,
+					                           f.mobile
+					                      from tb_p_contrart u, tb_c_checkuser f
+					                     where u.contrart_id = f.check_id
+					                       and f.checkuser_type = '1'
+					                       and f.checkin_type = '2') tt
+					            on (rr.branch_id = tt.branchIds(+) and
+					               rr.room_id = tt.roomIds(+))
+					           and rr.branch_id like decode($BRANCHID,
+					                                        (select c.branch_id
+					                                           from tb_c_branch c
+					                                          where c.rank = '0'),
+					                                        '%',
+					                                        $BRANCHID)
+					        union all
+					        select rr.*,
+					               tt.*,
+					               transTitles(rr.branch_id,
+					                           'tb_p_house',
+					                           'house_id',
+					                           'housename') branchId
+					          from (select t.*,
+					                       h.status      roomStatus
+					                  from tb_e_equipment t, Tb_p_House h
+					                 where t.super_kind = '3'
+					                   and h.house_id = t.branch_id and (t.branch_id in (select h2.house_id
+                                                                    from Tb_p_House h2,
+                                                                         TB_C_HOUSEACCOUNT ht
+                                                                   where h2.staff_id =
+                                                                         ht.houseaccount_name
+                                                                     and ht.staff_id =
+                                                                         $STAFFID
+                                                                     and h2.status != '0')
+					                   
+					                   )) rr
+					          left join (select s.branch_id branchIds,
+					                           s.room_id roomIds,
+					                           f.checkuser_id,
+					                           f.checkuser_name,
+					                           f.mobile
+					                      from tb_p_check s, tb_c_checkuser f
+					                     where s.check_id = f.check_id
+					                       and f.checkin_type = '1'
+                                 and f.checkUser_type = '1'
+                                 and s.status = '1') tt
+					            on (rr.branch_id = tt.branchIds(+))
+					            ) pp
+					 where  (nvl(transTitlestwo(pp.maint_person,
+					                      'tb_c_staff',
+					                      'staff_id',
+					                      'staff_name',
+					                      'branch_id',
+					                      $BRANCHID),' ') like '%' || :EMAINTPERSON || '%'
+					       or transTitlestwo(pp.maint_person,
+					                      'tb_c_staff',
+					                      'staff_id',
+					                      'staff_name',
+					                      'branch_id',
+					                      $BRANCHID) like '%' || :EMAINTPERSON || '%'                     
+					              ) 
+					   and pp.status like '%' || :ESTATUS || '%'
+					   and (pp.is_open like '%' || :EISOPEN || '%' or
+					       nvl(pp.is_open, ' ') like '%' || :EISOPEN || '%')
+					   and pp.serial_no like '%' || :ESERIALNO || '%'
+					   and (pp.floor_id like '%' || :EFLOOR || '%' or
+					       nvl(pp.floor_id, ' ') like '%' || :EFLOOR || '%')
+					   and (pp.room_id like '%' || :EROOM || '%' or
+					       nvl(pp.room_id, ' ') like '%' || :EROOM || '%')
+					       and pp.branch_id like '%' || decode($BRANCHID,'100001','%',$BRANCHID) || '%'
+					 order by pp.record_time desc
+						</sql>
+					</query>
+					<columns>
+						<column columnId="CZ1" name="操作" width="100" editType="button" align="center"
+								funcName="开电" callFunc="openElectric" buttonCls="button_first" downloadable="false"/>
+						<column columnId="CZ1" name="操作" width="100" editType="button" align="center"
+								funcName="断电" callFunc="closeElectric" buttonCls="button_second" downloadable="false"/>
+						<column columnId="DATAID" name="数据编号" width="120" align="center" primaryKey="true" hidden="true" sequence="SEQ_EQUIPMENT_ID"  seqPrefix="$BRANCHID"/>						
+						<column columnId="SERIALNO" name="序列号	" width="120" editable="true" align="center" validateRule="NOTNULL,UNIQUE" readOnly="true"/>
+						<column columnId="BRANCHID" name="归属门店" width="120" editable="true" align="center" validateRule="NOTNULL"/>
+						<column columnId="BRANCHIDNUM" name="门店编号" hidden="true"  editable="true" />
+						<column columnId="FLOORID" name="所属楼层" width="120" editable="true" align="center"  validateRule="NOTNULL" />
+						<column columnId="ROOMID" name="所属房间	" width="120" editable="true" align="center"  />
+						<column columnId="ROOMSTATUS" name="房间状态" width="120" editable="true" align="center"/>
+						<column columnId="CHECKUSER" name="主客人" width="120" editable="true" align="center"/>
+						<column columnId="CHECKUSERPHONE" name="手机号" width="120" editable="true" align="center" />
+						<column columnId="CONCENTRATORID" name="采集器" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Equipment" dialogColumns="dataId,serialNo" dialogConditions=" superKind ='2' and status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))"/>
+						<column columnId="EQUIPIP" name="设备IP" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_LOCATION" name="网关地址" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_NAME" name="网关名称" width="120" editable="true" align="center"/>
+						<column columnId="GATEWAY_CODE" name="网关条形码" width="120" editable="true" align="center"/>
+						<column columnId="ROUTE" name="连接路由" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Equipment" dialogColumns="dataId,serialNo" dialogConditions=" superKind ='1' and status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))"/>
+						<column columnId="MAINTPERSON" name="维修人员" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="Staff" dialogColumns="staffId,staffName" dialogConditions=" status = '1' " validateRule="NOTNULL"/>
+						<column columnId="ISOPEN" name="开关" editable="true" editValue="-1:请选择;1:开;0:关" editType="select"/>
+						<column columnId="STATUS" name="状态" editable="false" editValue="0:已删除;1:工作正常;2:工作异常;3:无连接;4:维修" editType="select" downloadable="false"/>
+					</columns>
+				</page>
+				<page pageId="R91504" name="报修查看" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<funcCondRate>20,80</funcCondRate>
+					<functions>FRESH</functions>
+					<conditions>ESERIALNO,EEQIPMENT,EMAINTPERSON,ERSTATUS</conditions>
+					<target>RepairApply</target>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>eRepairQuery</sql> 
+					</query>
+					<columns>
+						<!--<column columnId="CZ1" name="操作" width="100" editType="button" align="center"
+									funcName="查看详情" callFunc="queryRepairRecord" buttonCls="button_first" downloadable="false"/>
+						--><column columnId="REPAIRAPPLYID" name="申请编号 " width="120" editable="true" align="center" hidden="true" primaryKey="true"/>
+						<column columnId="BRANCHID" name="门店编号" width="120" editable="true" align="center"/>
+						<column columnId="ROOMID" name="房号" width="120" editable="true" align="center"/>
+						<column columnId="EQUIPMENT" name="设备类型 " width="120" editable="true" align="center" editValue="7:水表;8:电表 ;9:门锁 ;10:采集器;11:路由器" editType="select"/>
+						<column columnId="SERIALNO" name="设备序列号" width="120" editable="true" align="center"/>
+						<column columnId="WARNINGID" name="告警编号" width="120" editable="true" align="center"/>	
+						<column columnId="CONTRACTID" name="订单编号" width="120" editable="true" align="center"/>
+						<column columnId="APPLICATIONDATE" name="申请日期" width="120" editable="true" align="center" editType="date"/>
+						<column columnId="MAINTPERSON" name="维修人" width="120" editable="true" align="center"/>
+						<column columnId="MOBILE" name="电话" width="120" editable="true" align="center"/>
+						<column columnId="STATUS" name="状态" editType="select" editValue="0:已删除;3:未修复;4:已修复;" width="120" editable="true" align="center"/>
+						<column columnId="RECORDTIME" name="报修日期" width="120" editable="true" align="center" editType="date"/>
+						<column columnId="REMARK" name="备注" width="120" editable="true" align="center"/>
+					</columns>
+				</page>
+				<page pageId="R91505" name="设备告警" editing="form" loadOnRender="true" showMenu="true" role="*">
+						<funcCondRate>20,80</funcCondRate>
+						<functions>FRESH</functions>
+						<conditions>ESERIALNO,EWARNLOGSTATUS</conditions>
+						<target>RepairApply</target>
+						<strategy>default</strategy>
+						<query type="sql">
+							<sql>eWarningQuery</sql>
+						</query>
+						<columns>
+							<column columnId="CZ1" name="操作" width="100" editType="button" align="center"
+										funcName="处理" callFunc="queryWarningLog" buttonCls="button_first" downloadable="false"/>
+							<column columnId="LOGID" name="日志编号" width="120" editable="true" align="center" hidden="true" primaryKey="true"/>
+							<column columnId="BRANCHID" name="归属门店" width="120" editable="true" align="center" />
+							<column columnId="ROOMID" name="所属房间" width="120" editable="true" align="center"/>
+							<column columnId="SERIALNO" name="设备序列号" width="120" editable="true" align="center"/>
+							<column columnId="WARNINGTYPE" name="告警类型" width="120" editable="true" align="center" editValue="1:门锁电量不足,2:门锁网关失联;3:与门锁平台失联" editType="select"/>
+							<column columnId="WARNINGDATE" name="告警时间" width="120" editable="true" align="center" editType="date"/>
+							<column columnId="STATUS" name="状态	" width="120" editable="true" align="center"  editValue="1:未阅读;2:已阅读;" editType="select"/>
+						</columns>
+				</page>
+			</model>
+		</models>
+	</config>
+</configs>

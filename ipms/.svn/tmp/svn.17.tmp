@@ -1,0 +1,335 @@
+package com.ideassoft.basic.controller;
+
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.basic.service.SysBasicService;
+import com.ideassoft.bean.AdvertisePic;
+import com.ideassoft.bean.Branch;
+import com.ideassoft.bean.Picture;
+import com.ideassoft.bean.Staff;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.bean.wrapper.FileMeta;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.exception.DAOException;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.RequestUtil;
+
+
+
+@Transactional
+@Controller
+public class SysBasicController {
+	@Autowired
+	private SysBasicService sysBasicService;
+	
+	
+	
+	
+	@RequestMapping("/update.do")
+	public void update(HttpServletRequest request,HttpServletResponse response,String paramname,String data){
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId()==null ?"": staff.getBranchId();
+		SysParam sys = null;
+		if("CLEANAMOUNT".equals(paramname)){
+			 sys = (SysParam) sysBasicService.findOneByProperties(SysParam.class, "paramType", "CLEANAMOUNT","paramDesc",branchid);
+		}else{
+			 sys = (SysParam) sysBasicService.findOneByProperties(SysParam.class, "paramType", paramname,"paramName","price","status","1");
+		}
+		sys.setContent(data);
+		try {
+			sysBasicService.update(sys);
+			JSONUtil.responseJSON(response, new AjaxResult(1, "修改成功"));
+		} catch (DAOException e) {
+			e.printStackTrace();
+			JSONUtil.responseJSON(response, new AjaxResult(2, "程序异常,请稍后再试"));
+
+		}
+	} 
+	
+	@RequestMapping("/updateApartmentParam.do")
+	public void updateApartmentParam(HttpServletRequest request,HttpServletResponse response,String paramname,String data){
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = staff.getBranchId()==null ?"": staff.getBranchId();
+		SysParam sys = null;
+			 sys = (SysParam) sysBasicService.findOneByProperties(SysParam.class, "paramId", paramname,"status","1");
+		sys.setContent(data);
+		try {
+			sysBasicService.update(sys);
+			JSONUtil.responseJSON(response, new AjaxResult(1, "修改成功"));
+		} catch (DAOException e) {
+			e.printStackTrace();
+			JSONUtil.responseJSON(response, new AjaxResult(2, "程序异常,请稍后再试"));
+
+		}
+	} 
+	
+	/**
+	 * 门店管理广告图片
+	 * @param response
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/adviertisementPicture.do")
+	public ModelAndView adviertisementPicture(HttpServletResponse response,HttpServletRequest request){
+		ModelAndView mv = new ModelAndView();
+		@SuppressWarnings("unchecked")
+		Map<String,String> map = null;
+		List<Map<String,String>> resultList = new ArrayList<Map<String,String>>();
+		List<Picture> adpictureList = sysBasicService.findByPropertiesWithSort(Picture.class, "pictureId","desc","pictureStyle", "AP", "status", "1");
+		if(adpictureList != null){
+			for(int i=0;i<adpictureList.size();i++){
+			    map = new HashMap<String, String>();
+				String picid =adpictureList.get(i).getPictureId();
+				
+				AdvertisePic advertisePic = (AdvertisePic)sysBasicService.findById(AdvertisePic.class,picid );
+				if(advertisePic!=null){
+				    map.put("picid", picid);
+	                map.put("style", advertisePic.getStyle());
+	                map.put("remark", advertisePic.getContent());
+	                resultList.add(map);
+				}
+               
+                
+				
+			}
+		}
+		
+		JSONArray jo = JSONUtil.fromObject(resultList);
+		
+		
+		
+		mv.addObject("adpictureList",adpictureList);
+		mv.addObject("jo",jo);
+		
+		mv.setViewName("/page/basic/parameter/addAdviertisementPicture");
+		return mv;
+	}
+	@RequestMapping("/delAdPics.do")
+	public void delAdPics (HttpServletRequest request, HttpServletResponse response, String pictureId){
+			String picid = pictureId;
+			Picture picture = (Picture)sysBasicService.findOneByProperties(Picture.class, "pictureId",pictureId);
+			AdvertisePic advertisePic = (AdvertisePic)sysBasicService.findById(AdvertisePic.class,picid );
+			if(picture != null && advertisePic != null){
+				try{
+				picture.setPictureId(pictureId);
+				picture.setStatus("0");
+				picture.setRecordTime(new Date());
+				advertisePic.setPictureId(pictureId);
+				advertisePic.setStatus("0");
+				advertisePic.setRecordTime(new Date());
+				sysBasicService.update(picture);
+				sysBasicService.update(advertisePic);
+				String webPath = RequestUtil.getWebPath(request);
+				String path = webPath.replace("\\","/") + "/upload/";
+				String name = picture.getPictureUrl().substring(picture.getPictureUrl().lastIndexOf("/") + 1);
+				java.io.File myFilePath = new java.io.File(path + name);
+			    myFilePath.delete();
+			    
+			    JSONUtil.responseJSON(response, new AjaxResult(1, null));
+				}catch(Exception e){
+					e.printStackTrace();
+					JSONUtil.responseJSON(response, new AjaxResult(0, null));
+				}
+			}
+			
+	
+	}
+	
+	
+	@RequestMapping("/showImageScale.do")
+	public ModelAndView showImageScale(String src) {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/dialog/showImage");
+		mv.addObject("src", src);
+		return mv;
+	}
+	@RequestMapping("/showImageScale2.do")
+	public ModelAndView showImageScale2(String src) {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/dialog/showImage");
+		int src2= src.indexOf("/ipms");
+		String src4 = src.substring(src2, src.length());
+		mv.addObject("src", src4);
+		return mv;
+	}	
+	
+	@RequestMapping("/submitAdvertisePics.do")
+	public void submitAdvertisePics(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		String fileName = null;
+		FileOutputStream fos = null;
+		InputStream is = null;
+		String headPicUrl = "";
+		
+		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+		MultipartFile srcFile = multipartRequest.getFile("file");
+		String pictype = multipartRequest.getParameter("pictype");
+		String remark = multipartRequest.getParameter("remark");
+	
+		if(remark == null || "".equals(remark)){
+			remark = " ";
+		}
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String staffId = loginuser.getStaff().getStaffId();
+	
+		try {
+			String webPath = RequestUtil.getWebPath(request);
+			if (StringUtils.isEmpty(fileName)) {
+				fileName = srcFile.getOriginalFilename();
+				fileName = new Date().getTime()+fileName.substring(fileName.lastIndexOf("."));
+			}
+			File srcFolder = new File(webPath + File.separator + "upload");
+			if (!srcFolder.exists()) {
+				srcFolder.mkdirs();
+			}
+			headPicUrl = CommonConstants.Domain.DOMAINNAME + fileName;
+			File tarFile = new File(srcFolder.getAbsolutePath() + File.separator + fileName);
+			if (!tarFile.exists()) {
+				tarFile.createNewFile();
+			}
+			fos = new FileOutputStream(tarFile);
+			is = srcFile.getInputStream();
+			int ln = 0;
+			byte[] buf = new byte[1024];
+			while ((ln = is.read(buf)) != -1) {
+				fos.write(buf, 0, ln);
+			}
+			fos.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (fos != null) {
+				fos.close();
+			}
+			if (is != null) {
+				is.close();
+			}
+		}
+		
+		// 数据新增
+		String seqName = "SEQ_PIC_ID";
+		//String sequence = pmsmanageService.getCloudSequence(seqName);
+		String sequence = sysBasicService.getSequence(seqName);
+		SimpleDateFormat sdf = new SimpleDateFormat("yymmdd");
+		String picId = sdf.format(new Date()) + sequence;
+		String picTrueStyle = CommonConstants.PicStyle.BRANCH_ADVERTISE_PIC;
+		String status = CommonConstants.STATUS.NORMAL;
+
+		
+		Picture picture = new Picture();
+		picture.setPictureId(picId);
+		picture.setPictureStyle(picTrueStyle);
+		picture.setRecordTime(new Date());
+		picture.setRecordUser(staffId);
+		picture.setStatus(status);
+		picture.setPictureUrl(headPicUrl);
+		sysBasicService.save(picture);
+		
+		AdvertisePic ap = new AdvertisePic();
+		ap.setPictureId(picId);
+		ap.setStyle(pictype);
+		ap.setTheme("*");
+		ap.setRecordTime(new Date());
+		ap.setRecordUser(staffId);
+		ap.setContent(remark);
+		ap.setStatus("1");
+		sysBasicService.save(ap);
+		
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+	}
+	
+	@RequestMapping("/servicePolicy.do")
+	public ModelAndView servicePolicy(HttpServletResponse response,HttpServletRequest request){
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("/page/basic/parameter/servicePolicy");
+		return mv;
+	}
+	
+	@RequestMapping("/fileupload.do")
+	public void fileupload(MultipartHttpServletRequest request, HttpServletResponse response){
+		Iterator<String> itr = request.getFileNames();
+		MultipartFile mpf = null;
+		List<FileMeta> listfile = new ArrayList<FileMeta>();
+		while (itr.hasNext()){
+			mpf = request.getFile(itr.next());
+			FileMeta filemeta = new FileMeta();
+			filemeta.setName("servicepolicy.docx");
+			filemeta.setSize(mpf.getSize() / 1024 + " KB");
+			filemeta.setDeleteUrl("deleteFile.do?filename=" + filemeta.getName());
+			filemeta.setDeleteType("DELETE");
+			filemeta.setUrl("checkFile.do?filename=" + filemeta.getName());
+			listfile.add(filemeta);
+			try{
+				String webPath = RequestUtil.getWebPath();
+				webPath = webPath + "//upload//servicepolicy";
+				File dir = new File(webPath);
+				if(!dir.exists()){
+					dir.mkdirs();
+				}
+				FileCopyUtils.copy(mpf.getBytes(), new FileOutputStream(webPath + "//" + filemeta.getName()));
+			}catch(IOException e){
+				
+			}
+		}
+		Map<String, List<FileMeta>> kj = new HashMap<String, List<FileMeta>>();
+		kj.put("files", listfile);
+		JSONUtil.responseJSON(response, kj);
+	}
+	
+	
+	@RequestMapping("/loadExistFile.do")
+	public void loadExistFile(HttpServletResponse response){
+		List<FileMeta> listfile = new ArrayList<FileMeta>();
+		String webPath = RequestUtil.getWebPath();
+		webPath = webPath + "//upload//servicepolicy";
+		File existfile = new File(webPath);
+		File[] existfiles = existfile.listFiles();
+		// 判断文件夹是否存在
+		if (existfiles != null && existfiles.length > 0) {
+			// 开始遍历读取磁盘中的文件
+			for (File file : existfiles) {
+				FileMeta filemeta = new FileMeta();
+				filemeta.setName(file.getName());
+				filemeta.setSize((file.length() / 1024) + " Kb");
+				filemeta.setDeleteUrl("deleteFile.do?filename=" + filemeta.getName());
+				filemeta.setDeleteType("DELETE");
+				filemeta.setUrl("checkFile.do?filename=" + filemeta.getName());
+			
+				listfile.add(filemeta);
+			}
+		}
+		Map<String, List> kj = new HashMap<String, List>();
+		kj.put("files", listfile);
+		JSONUtil.responseJSON(response,  JSONUtil.fromObject(kj));
+	}
+}

@@ -1,0 +1,489 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ include file="../../../common/taglib.jsp"%>
+<%@ include file="../../../common/script.jsp"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>订单详细页面</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/apartmentcheckin/apartmentcheckin.css" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/jquery-dialog.css" />	
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>	
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/contract/contract_details.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/fonticon.css"/>
+	<link rel="stylesheet" id="style"  href="<%=request.getContextPath()%>/css/fontawesome/css/font-awesome.min.css" />
+	<link rel="stylesheet" id="style"  href="<%=request.getContextPath()%>/css/ipms/room_statics/checkuser.css" />
+	<script>var base_path = "<%=request.getContextPath()%>";</script>
+  </head>
+  
+  <body>
+   	<div class="detail_wrap_margin detail_color contract_margin">
+			<div class="detail_title">
+				<span class="top_icon" onclick="window.parent.JDialog.close();"><i class="imooc im_top">&#xea0f;</i></span>
+				<span>合同<span class="order_span"><%=request.getParameter("contractid")%> ${ contractid }</span></span>
+				<span class="mystatus"></span>
+			</div>
+			<div class="order_margin">
+				<section class="detail_one">
+					<label class="label_title">合同信息</label>
+					<ul class="clearfix">
+						<li><label class="label_name">房号</label><input name="房号" type="text" id="roomid" class="check room_select"></li>
+						<li><label class="label_name">房间类型</label><input id="roomtype" name="房间类型" type="text" class="check"  id="roomtype" disabled/></li>
+						<li><label class="label_name">开始日期</label> <input id="arrivaltime" name="开始日期" type="text" class="check" disabled></li>
+						<li><label class="label_name">结束日期</label> <input id="leavetime" name="结束日期" type="text" class="check" disabled></li>
+						<li><label class="label_name">合同人</label><input id="contractName" name="合同人" type="text"  class="check" disabled></li>
+						<li><label class="label_name">手机</label> <input id="mphone" name="手机" type="text" class="check" disabled></li>
+						<li><label class="label_name">租赁方式</label> <input id="typeofpayment" name="租赁方式" type="text" class="check" disabled></li>
+						<li><label class="label_name">合同号</label><input  id="contractid" name="合同号" type="text" class="check" disabled></li>
+					</ul>
+				</section>
+				<section class="checkuser_wrapper clearfix">
+				<div class="checkuser_bt clearfix">
+					<div class="checkuser_button_left clearfix fl">
+ 						<label for="" class="label_name order_search"> 
+ 							会员查询
+ 						</label>
+ 						<input type="text" name="" id="searchmembercondotion"  class="check reset_input" />
+ 						<!--<button class="button_margin button_color" onclick="searchmember()">
+ 							查找 
+ 						</button> 
+ 						<button class="register_one" onclick="registermember()"> 
+ 							注册会员 
+ 						</button>
+						-->
+					</div>
+					<div class="fl" style="margin: 4px 0 0 50px;"><span id="checkinMessage" style="color: red;font-size: 17px;"></span> </div>
+					<div class="checkuser_button_right clearfix fr">
+						<!-- <span class="button_margin button_color" onclick="showupdateMember()">修改客人</span> -->
+						<span class="button_margin button_color" onclick="deleteCustomer()">删减客人</span>
+						<span class="button_margin button_color" onclick="addCustomerHand()">手动增加客人</span>
+						<span class="button_margin button_color" onclick="sethostCustomer()">设置主客人</span>
+						<span style="margin-right: 53px;" class="button_margin button_color addhand" onclick="cnacelcustom()">取消</span>
+						<span class="button_margin button_color addhand" onclick="checkusercheckin()">入住</span>
+					</div>
+				</div>
+					<!--客人信息展示ul-->
+					<div class="checkuser_info_write">
+					<form id="checkuserinfo">
+					<ul class="check_ul clearfix" id="guest">
+						<li class='check_name active'><label class="guestmemberid" style='display: none'></label><span><i class="fa fa-star"></i>新客人</span></li>
+					</ul>
+					<ul class="customer_info clearfix ">
+						<li>
+							<label class="label_name">
+								姓名
+							</label>
+							<input id="username" name="username" type="text" value="" class="check"
+								disabled="disabled">
+						</li>
+						<li>
+							<label class="label_name">
+								性别
+							</label>
+							<select class="check" id="gender" name="gender" disabled="disabled">
+								<option value="0">女</option>
+								<option value="1">男</option>
+							</select>
+						</li>
+						<!--
+						 <li>
+							<label class="label_name">
+								抵店日期
+							</label>
+							<input name="离店日期" type="text" value="" class="check"
+								disabled="disabled">
+						</li>
+						<li>
+							<label class="label_name">
+								离店日期
+							</label>
+							<input name="离店日期" type="text" value="" class="check"
+								disabled="disabled">
+						</li>
+						-->
+						<li>
+							<label class="label_name">
+								手机号码
+							</label>
+							<input id="checkphone" name="checkphone" type="text" value="" class="check"
+								disabled="disabled">
+						</li>
+						<!--  
+						<li>
+							<label class="label_name">
+								证件类型
+							</label>
+							<input name="预订人" type="text" value="" class="check"
+								disabled="disabled">
+						</li>
+						-->
+						<!-- <li>
+							<label class="label_name">
+								会员编码
+							</label>
+							<input id="memberid" type="text" value="" class="check"
+								disabled="disabled">
+						</li> -->
+						<li>
+							<label class="label_name">
+								证件号码
+							</label>
+							<input id="idcard" name="idcard" type="text" value="" class="check  card_type"
+								disabled="disabled">
+						</li>
+						<!--  
+						<li>
+							<label class="label_name">
+								客单编码
+							</label>
+							<input name="预定人会员类型" type="text" value="" class="check"
+								disabled="disabled">
+						</li>
+						-->
+						<li>
+							<label class="label_name">
+								会员类型
+							</label>
+							<select class="check" id="memberrankname" name="memberrankname" disabled="disabled">
+							</select>
+							<!-- <span role="button" class="button_margin reset_m" onclick="resetvip()">重置会员</span> -->
+						</li>
+						<li class="address">
+							<label class="label_name">
+								住址
+							</label>
+							<textarea id="address" name="address" disabled="disabled"></textarea>
+						</li>
+						<li class="record">
+							<label class="label_name">
+								备注
+							</label>
+							<textarea  id="customerreamrk" name="customerreamrk" disabled="disabled" class="te_height"></textarea>
+						</li>
+					</ul>
+					<input type="hidden" id="checkid" name="checkid">
+					</form>
+					</div>
+			</section>
+			
+				<section class="detail_three">
+					<div id="moneyproject">
+						<div class="detail_three_div">
+							<label class="label_title">退款金额</label>
+							<span class="small" id="advance"></span>
+						</div>
+						<div class="table_div">
+							<table border="1" class="myTable">
+								<thead>
+									<tr>
+										<th class="header">项目</th>
+										<th class="header">金额</th>
+									</tr>
+								</thead>
+								<tbody>	
+									<tr class="cardcontent">
+										<td>可退房租</td>
+										<td id="money"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</section>
+				<section class="detail_four" >
+					<div class="fr" role="button">
+						<ul id="savebutton" class="clearfix">
+							<li id="checkin" onclick="checkin();"><span id="checkin_span" >入住</span></li>
+							<li id="checkOut" onclick="checkOut();"><span id="checkOut_span" >退房</span></li>
+							<!-- <li id="savePerson" onclick="savePerson();"><span id="savePerson_span" >保存</span></li> -->
+							<li id="addCheckOut" onclick="addCheckOut();"><span id="addCheckOut_span" >退房申请</span></li>
+							<li id="lookBill" onclick="queryBill(1);"><span class="button_margin">查看账单</span></li>
+						</ul>
+					</div>
+				</section>
+			</div>
+		</div>
+		<script type="text/javascript" src="<%=request.getContextPath()%>/script/apartment/apartmentmainmenu/apartmentcontract/util.js"></script>
+		<script type="text/javascript" src="<%=request.getContextPath()%>/script/apartment/apartmentmainmenu/apartmentcontract/checkuser.js"></script>
+	    <script src="<%=request.getContextPath()%>/script/common/jquery.dialog.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+		<script>
+			var path = "<%=request.getContextPath() %>";
+			var contractid = '<%=request.getParameter("contractid")%>';
+			var checkid = contractid;
+			var now = new Date();
+		    var day = now.getDate();
+		    
+			$(function(){
+				$("#checkid").val(checkid);
+				laodCheckData();
+				loadCheckuser();
+				//queryCheckUser();
+				//loadCheckuser();
+				//roomStatus();
+				eqTime();
+			});
+			
+			document.onkeyup = function(event){
+				const e = event || window.event || arguments.callee.caller.arguments[0];
+				
+				if (e && e.keyCode == 27) { //ESC
+					
+				}
+				if (e && e.keyCode == 113) { //F2
+					
+				} 
+				if (e && e.keyCode == 13) { //ENTER
+					interfacecheckuser();
+				}
+			}
+			
+			function laodCheckData(){
+				$.ajax({
+			         url: path + "/quertApartmentInfo.do",
+					 type: "post",
+					 dataType: "json",
+					 data : {contractId : contractid},
+					 success: function(json) {
+						$("#roomid").val(json[0]["ROOMID"]);
+					 	$("#roomtype").val(json[0]["ROOMTYPENAME"]);
+					 	$("#arrivaltime").val(json[0]["STARTTIME"]);
+					 	$("#leavetime").val(json[0]["ENDTIME"]);
+					 	$("#contractName").val(json[0]["MEMBERID"]);
+					 	$("#mphone").val(json[0]["MOBILE"]);
+					 	$("#typeofpayment").val(json[0]["TYPEOFPAYMENT"]);
+					 	$("#contractid").val(json[0]["CONTRARTID"]);
+
+					 	var start = json[0]["STARTTIME"];
+					 	var now = new Date();    
+					    var year = now.getFullYear();       //年   
+					    var month = now.getMonth() + 1;     //月   
+					    var day = now.getDate();
+					    var time = year+"/"+month+"/"+day;
+						var starttime = new Date(start);
+						var endtime = new Date(time);
+					 	//eqTime(json[0]["STARTTIME"],json[0]["CONTRARTENDTIME"],json[0]["UNITPRICE"],json[0]["NUM"]);
+					 	if(json[0]["STATUS"] == '3' || json[0]["STATUS"] == '2'){
+						 	$("#checkin").attr("onclick","");
+						 	$("#checkOut").attr("onclick","");
+							$("#savePerson").attr("onclick","");
+							$("#addCheckOut").attr("onclick","");
+					 		$("#checkin_span").addClass("check_span");
+					 		$("#checkOut_span").addClass("check_span");
+					 		$("#savePerson_span").addClass("check_span");
+					 		$("#addCheckOut").addClass("check_span");
+					 		initcheckusercss("2", "0");
+						 }else if(json[0]["STATUS"] == '1'){
+						 	if(Date.parse(starttime) > Date.parse(endtime)){
+								$("#checkin").attr("onclick","");
+								$("#checkin_span").addClass("check_span");
+							}else{
+								$("#checkin_span").addClass("button_margin");
+							}
+							$("#checkOut").attr("onclick","");
+							$("#savePerson").attr("onclick","");
+							$("#addCheckOut").attr("onclick","");
+							$("#checkOut_span").addClass("check_span");
+							$("#savePerson_span").addClass("check_span");
+							$("#addCheckOut").addClass("check_span");
+							initcheckusercss("1", "1");
+						 }else if(json[0]["STATUS"] == '4'){
+							 $("#checkin").attr("onclick","");
+							 $("#checkin_span").addClass("check_span");
+							 $("#checkOut_span").addClass("button_margin");
+							 $("#savePerson_span").addClass("button_margin");
+							 $("#addCheckOut").addClass("button_margin");
+							 initcheckusercss("2", "1");
+						 }
+					 },
+					 error: function(json) {}
+				});
+			}
+			function eqTime(){
+				$.ajax({
+			         url: path + "/countMoney.do",
+					 type: "post",
+					 dataType: "json",
+					 data : {contractId : contractid},
+					 success: function(json) {
+						 $("#money").html(json.message);
+					 },
+					 error: function(json) {}
+				});
+// 				var now = new Date();
+// 			    var year = now.getFullYear();       //年   
+// 			    var month = now.getMonth() + 1;     //月   
+// 			    var day = now.getDate();
+// 			    var time = year+"/"+month+"/"+day;
+// 			    var d1 = new Date(startTime.replace(/\-/g, "\/"));
+// 			    var d2 = new Date(time.replace(/\-/g, "\/"));
+// 			    var end = new Date(endTime);
+// 			    var date3=end.getTime()-d2.getTime();
+// 			    var days = Math.floor(date3/(24*3600*1000));
+// 			    if(d1 > d2){
+// 				    $("#moneyproject").hide();
+// 				    $("#money").html(0 + '(元)');
+// 				}else{
+// 					$("#money").html(Math.floor(Math.floor(money / 30) * days) + '(元)');
+// 				}
+			}
+			
+			function roomStatus(){
+				$.ajax({
+			         url: path + "/queryRoomStatus.do",
+					 type: "post",
+					 data : {contractId : contractid},
+					 success: function(json) {
+						 if(json.status == '2'){
+						 	$("#checkin").attr("onclick","");
+					 		$("#checkin_span").addClass("check_span");
+					 		$("#checkOut_span").addClass("button_margin");
+					 		$("#savePerson_span").addClass("button_margin");
+					 		$("#addCheckOut").addClass("button_margin");
+						 }else{
+							$("#checkOut").attr("onclick","");
+							$("#savePerson").attr("onclick","");
+							$("#addCheckOut").attr("onclick","");
+							$("#checkin_span").addClass("button_margin");
+							$("#checkOut_span").addClass("check_span");
+							$("#savePerson_span").addClass("check_span");
+							$("#addCheckOut").addClass("check_span");
+						 }
+					 },
+					 error: function(json) {}
+				});
+			}
+
+
+			function savePerson() {
+				var checkinuser = "";
+				$.each($(".check_ul li"),function(i){
+					if (i == 0) {
+					 	checkinuser = $($(".check_ul li")[i]).find("label:hidden").html() ;
+					} else {
+						checkinuser = checkinuser + "," + $($(".check_ul li")[i]).find("label:hidden").html();
+					}
+				});
+				$.ajax({
+			         url: path + "/savePerson.do",
+					 type: "post",
+					 dataType: "json",
+					 data : { mobile : checkinuser, 
+					 			contractId: $("#contractid").val() },
+					 success: function(json) {
+					 	if (json.result == 0) { 
+					 		showMsg("保存成功!");
+					 		window.setTimeout("window.parent.JDialog.close()",1800);
+					 	} else if (json.result == 1) {
+					 		showMsg(json.message);
+					 	}	
+					 },
+					 error: function(json) {
+					 	showMsg("保存失败!");
+					 }
+				});
+			}
+			
+			$(".imooc").on("click",function(){
+				$(".detail_five").css("display","none");
+			});
+			$(".detail_imooc").on("click",function(){
+				$(".detail_six").css("display","none");
+			});
+			$(".update_order").on("click",function(){
+				$(".detail_six").css("display","block");
+			});
+			$(".info_write ul li").on("click", function() {
+				$(this).addClass("active");
+				$(this).siblings().removeClass("active");
+			});
+			
+			function checkin() {
+				if(isCheckout(contractid)){
+					return false;
+				}
+				if(numCheckuser() == 0){
+					showMsg("无入住人!");
+					return false;
+				}
+				
+				var checkinuser = "";
+				/* $.each($(".check_ul li"),function(i){
+					if (i == 0) {
+					 	checkinuser = $($(".check_ul li")[i]).find("label:hidden").html() ;
+					} else {
+						checkinuser = checkinuser + "," + $($(".check_ul li")[i]).find("label:hidden").html();
+					}
+				}); */
+				$.ajax({
+			         url: path + "/apartmentCheckIn.do",
+					 type: "post",
+					 dataType: "json",
+					 data : { contractId: $("#contractid").val() },
+					 success: function(json) {
+					 	if (json.result == 0) { 
+					 		showMsg("入住成功!");
+					 		window.setTimeout("window.parent.JDialog.close()",1000);
+					 		window.setTimeout("window.parent.document.getElementById('menu_910').click()",500);
+					 		//window.parent.document.getElementById('menu_910').click();
+					 		//window.setTimeout("window.parent.JDialog.close()",100);
+					 	} else if (json.result == 1) {
+					 		showMsg(json.message);
+					 	}	
+					 },
+					 error: function(json) {
+					 	showMsg("入住失败!");
+					 }
+				});
+			}
+			
+			function checkOut() {
+				/* $.ajax({
+			         url: path + "/queryApartmentCost.do",
+					 type: "post",
+					 dataType: "json",
+					 data : { contractId: contractid },
+					 success: function(json) {
+						 if(json["amount"] == 0){ */
+							 window.JDialog.open("公寓退房", path + "/page/apartment/apartmentmainmenu/apartmentcontract/secondquery.jsp?orderId=" + contractid , 400,250);
+						 /* } else {
+							 showMsg("请结清水电费!");
+						 }
+					 },
+					 error: function(json) {
+					 	showMsg("入住失败!");
+					 }
+				}); */
+			}
+			
+			
+			function addCheckOut(){
+				var contractId = $("#contractid").val();
+				var contractName = $("#contractName").val();
+				var mphone = $("#mphone").val();
+				var roomtype = $("#roomtype").val();
+				var roomid = $("#roomid").val();
+				JDialog.open("新增退房申请",path +"/addCheckOut.do?contractId="+contractId+"&contractName="+contractName+"&mphone="+mphone+"&roomtype="+roomtype+"&roomid="+roomid,650,420);
+			}
+
+			function queryBill(num){
+				window.JDialog.open("账单", path + "/page/apartment/apartmentmainmenu/apartmentcontract/apartment_bill.jsp?checkid=" + contractid+"&status="+num , 1000, 500);
+			}
+
+	</script>
+  </body>
+</html>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M908" name="个人中心" show="true" icon="audit" subSystem="UPMS">
+				<page pageId="R90801" name="审核人设置" editing="form" loadOnRender="true"
+					showMenu="false" role="*">
+					<url>turnTodefaultUserSet</url>
+				 </page>
+
+				 <page pageId="R90802" name="报告审核" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<conditions>AUDITRECORDUSER,AUDITBRANCHID,TABLEAUDITTYPE</conditions>
+					<functions>FRESH</functions>
+					<funcCondRate>59,40</funcCondRate>
+					<strategy>branchRank</strategy>
+					<query type="sql">
+						<sql>
+						reportAuditAll,reportAuditBranch
+						</sql>
+					</query>
+					<columns>
+						<column columnId="CZ" name="审核信息" editType="button" buttonCls="button" funcName="审核信息" callFunc="auditInfoDetail" downloadable="false" />
+						<column columnId="RECORDTIME" name="申请日期" editType="date" editable="true"/>
+						<column columnId="RECORDUSER" name="申请人" editable="true" validateRule="NOTNULL,LENGTH:20" />
+						<column columnId="BRANCHNAME" name="门店" align="center" editable="true" />
+						<column columnId="OPERID" name="操作编号"  hidden="true" />
+						<column columnId="TABLEAUDITTYPE" name="审核类型" editValue="维修申请:维修申请;退房申请:退房申请;房价申请:房价申请;采购申请:采购申请" editType="select"  align="center"/>
+						<column columnId="AUDITREMARK" name="审核状态" width="50" editable="true"  validateRule="NOTNULL" />
+					</columns>
+				  </page>
+
+
+				<page pageId="R90803" name="审核记录查看" editing="form" loadOnRender="true" showMenu="true" role="*">
+				<conditions>AUDITRECORDUSER,AUDITSTATUS,TABLEAUDITLOGTYPE</conditions>
+					<functions>FRESH</functions>
+					<funcCondRate>59,40</funcCondRate>
+					<query type="sql">
+						<sql>
+						select 
+						transtitles(a.record_user,'TB_C_STAFF','staff_id','STAFF_NAME') recordperson,
+						a.log_id logid,decode(a.oper_type,
+                                  '1',
+                                  '采购申请',
+                                  '2',
+                                  '房价申请',
+                                  '3',
+                                  '退房申请',
+                                  '4',
+                                  '维修申请') opertype, a.oper_id operid,
+                           decode(a.oper_type,
+                                  '1',
+                                  (select s.staff_name
+                                     from tb_c_staff s, TB_C_PURCHASE p
+                                    where p.record_user = s.staff_id
+                                      and p.purchase_id = a.oper_id),
+                                  '2',
+                                  (select s.staff_name
+                                     from tb_c_staff s, TB_P_PRICEAPPLY h
+                                    where h.record_user = s.staff_id
+                                      and h.apply_id = a.oper_id),
+                                  '3',
+                                  (select m.member_name
+                                     from tb_p_checkout c, tb_c_member m
+                                    where c.member_id = m.member_id(+)
+                                      and c.checkout_id = a.oper_id),
+                                  '4',
+                                  (select u.staff_name
+                                     from tb_p_repairapply r, tb_c_staff u
+                                    where r.reserved_person = u.staff_id(+)
+                                      and r.repairapply_id = a.oper_id)) recorduser,
+                           to_char(a.record_time, 'yyyy/MM/dd') recordtime,
+                           a.status status,
+                           a.branch_id branchid,
+                           nvl(a.remark, ' ') remark,
+                           s.staff_name staffname
+                      from tl_c_auditlog a, tb_c_staff s
+                     where a.record_user = s.staff_id(+)
+                       and a.branch_id like '%' || $BRANCHID || '%'
+                       and decode(a.oper_type,
+                                  '1',
+                                  (select s.staff_name
+                                     from tb_c_staff s, TB_C_PURCHASE p
+                                    where p.record_user = s.staff_id
+                                      and p.purchase_id = a.oper_id),
+                                  '2',
+                                  (select s.staff_name
+                                     from tb_c_staff s, TB_P_PRICEAPPLY h
+                                    where h.record_user = s.staff_id
+                                      and h.apply_id = a.oper_id),
+                                  '3',
+                                  (select m.member_name
+                                     from tb_p_checkout c, tb_c_member m
+                                    where c.member_id = m.member_id(+)
+                                      and c.checkout_id = a.oper_id),
+                                  '4',
+                                  (select u.staff_name
+                                     from tb_p_repairapply r, tb_c_staff u
+                                    where r.reserved_person = u.staff_id(+)
+                                      and r.repairapply_id = a.oper_id)) like
+                           '%' || :AUDITRECORDUSER || '%'
+                       and a.status like '%' || :AUDITSTATUS || '%'
+                       and a.oper_type like '%' || :TABLEAUDITLOGTYPE || '%'
+                       and a.record_user = $STAFFID
+                     order by a.record_time desc
+		                   </sql>
+					</query>
+					<columns>
+					    <column columnId="CZ" name="信息详情" editType="button" buttonCls="button" funcName="信息详情" callFunc="audiLogInfoDetail" downloadable="false" />
+					    <column columnId="LOGID" name="日志编号" align="center" primaryKey="true"  validateRule="NOTNULL,LENGTH:8" downloadable="false"/>
+						<column columnId="RECORDPERSON" name="审核人" editable="true" validateRule="NOTNULL,LENGTH:20" />
+						<column columnId="RECORDTIME" name="审核日期" editType="date" />
+						<column columnId="OPERID" name="申请单号" editable="true"  />
+						<column columnId="OPERTYPE" name="审核类型" editValue="维修申请:维修申请;退房申请:退房申请;房价申请:房价申请;采购申请:采购申请" editType="select"  align="center"/>
+						<column columnId="REMARK" name="审核意见" editable="true" />
+						<column columnId="STATUS" hidden="true" name="审核状态" width="50" editable="true" editValue="	0:已删除;1:待审核;2:审核通过;3:修改;4:作废;" editType="select" validateRule="NOTNULL" />
+					</columns>
+				</page>
+
+
+			</model>
+		</models>
+	</config>
+</configs>

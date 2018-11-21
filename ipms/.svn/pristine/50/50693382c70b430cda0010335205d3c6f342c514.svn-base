@@ -1,0 +1,167 @@
+package com.ideassoft.pms.task;
+
+import java.net.InetAddress;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+
+import com.ideassoft.bean.AptorderDetail;
+import com.ideassoft.bean.CheckUser;
+import com.ideassoft.bean.Contrart;
+import com.ideassoft.bean.Member;
+import com.ideassoft.bean.OperateLog;
+import com.ideassoft.bean.RepairApply;
+import com.ideassoft.bean.WarningLog;
+import com.ideassoft.core.constants.SystemConstants;
+import com.ideassoft.core.constants.SystemConstants.ProjectName;
+import com.ideassoft.core.factory.ServiceFactory;
+import com.ideassoft.core.task.ScheduledTask;
+import com.ideassoft.pms.service.ApartmentRentService;
+import com.ideassoft.pms.service.RoomService;
+import com.ideassoft.portal.DataDealPortalService;
+import com.ideassoft.portal.IDataDealPortal;
+import com.ideassoft.util.DateUtil;
+
+public class ContractTask extends ScheduledTask implements ProjectName {
+
+	private final Logger logger = Logger.getLogger(ContractTask.class);
+
+	private static ApartmentRentService apartmentRentService = null;
+	
+	private static RoomService roomService = null;
+	
+	private static String adminName;
+	
+	private static String CONNECTIONFAIL;
+	
+	private static String CONNECTION;
+	
+	private static String VALID;
+	
+	private static int NULL;
+
+	public ContractTask(String name) {
+		super(name);
+	}
+	
+	public void initScheduledData() {
+		apartmentRentService = (ApartmentRentService) ServiceFactory.getService("apartmentRentService");
+		roomService = (RoomService) ServiceFactory.getService("roomService");
+		adminName = SystemConstants.User.ADMIN_NAME;
+		CONNECTIONFAIL = SystemConstants.PortalResultCode.CONNECTIONFAIL;
+		CONNECTION = SystemConstants.WarningType.CONNECTION;
+		VALID = SystemConstants.WarningStatus.VALID;
+		NULL = SystemConstants.PortalResultCode.NULL;
+		logger.debug("schedule task [test1111] init...............");
+	}
+
+	@SuppressWarnings("unchecked")
+	public void run() {
+		try {
+			DataDealPortalService service = new DataDealPortalService();
+			IDataDealPortal portal = service.getDataDealPortalPort();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+			Date date = new Date();
+			String dayTime = sdf.format(date);
+			List<Contrart> contracts = apartmentRentService.findByProperties(Contrart.class, "status", "1");
+			List<Contrart> contractList = new ArrayList<Contrart>();
+			for (Contrart contract : contracts) {
+				if (dayTime.equals(sdf.format(contract.getStartTime()))) {
+					contract.setStatus("4");
+					OperateLog operlog = new OperateLog();
+					operlog.setBranchId(contract.getBranchId());
+					operlog.setLogId(DateUtil.currentDate("yyMMdd") + contract.getBranchId() + apartmentRentService.getSequence("SEQ_OPERATELOG_ID"));
+					String operid = InetAddress.getLocalHost().toString();// IP地址
+					operid = (String) operid.subSequence(operid.indexOf("/") + 1, operid.length());
+					operlog.setOperIp(operid);
+					operlog.setOperType("5");
+					operlog.setOperModule("入住操作");
+					operlog.setContent("合同号" + contract.getContrartId() + "已经入住");
+					operlog.setRecordUser(SystemConstants.User.ADMIN_NAME);
+					operlog.setRecordTime(new Date());
+					
+					List <CheckUser> aptOrderCheckPersonList =  apartmentRentService.findByProperties(CheckUser.class, "checkId", contract.getContrartId(), "status","1");
+					if(aptOrderCheckPersonList.size() > 0){
+						for(CheckUser checkUser:aptOrderCheckPersonList){
+							CheckUser checkUserContractType = new CheckUser();
+							checkUserContractType.setCheckuserId(contract.getBranchId() + "1" + apartmentRentService.getSequence("SEQ_NEW_CHECKUSER"));
+							checkUserContractType.setCheckuserName(checkUser.getCheckuserName());
+							checkUserContractType.setIdcard(checkUser.getIdcard());
+							checkUserContractType.setGender(checkUser.getGender());
+							checkUserContractType.setMobile(checkUser.getMobile());
+							checkUserContractType.setStatus("1");
+							checkUserContractType.setRecordUser(SystemConstants.User.ADMIN_NAME);
+							checkUserContractType.setRecordTime(new Date());
+							checkUserContractType.setCheckId(contract.getContrartId());
+							checkUserContractType.setCheckuserType(checkUser.getCheckuserType());
+							checkUserContractType.setCheckinType("2");
+							apartmentRentService.save(checkUserContractType);
+						}
+					} else {
+						Member member = (Member) apartmentRentService.findOneByProperties(Member.class, "mobile", contract.getMobile());
+						CheckUser checkUser = new CheckUser();
+						checkUser.setCheckuserId(contract.getBranchId() + "3" + apartmentRentService.getSequence("SEQ_NEW_CHECKUSER"));
+						checkUser.setCheckuserName(member.getMemberName());
+						checkUser.setIdcard(member.getIdcard());
+						checkUser.setGender(member.getGendor());
+						checkUser.setMobile(member.getMobile());
+						checkUser.setStatus("1");
+						checkUser.setRecordUser(SystemConstants.User.ADMIN_NAME);
+						checkUser.setRecordTime(date);
+						checkUser.setCheckId(contract.getContrartId());
+						checkUser.setCheckuserType("1");
+						checkUser.setCheckinType("2");
+						apartmentRentService.save(checkUser);
+					}
+					
+					List<RepairApply> repairApplys = apartmentRentService.findByProperties(RepairApply.class, "branchId", contract.getBranchId(), "roomId", contract.getRoomId());
+					String status = "3";
+					if(repairApplys.size() > 0){
+						for(RepairApply repairApply : repairApplys){
+							if(repairApply.getStatus().equals("2") || repairApply.getStatus().equals("3")){
+								status = "W";
+							}
+						}
+					}
+					
+					String code = portal.call(SystemConstants.EnginType.COMMON_DATA,
+							SystemConstants.Movement.CUSTOM_QUERY,
+							"{ function: \"apartmentList.checkInHydropower\", "
+									+ "data:{branchId:" + contract.getBranchId()
+									+ ",roomId:" + contract.getRoomId() + ",orderId:"
+									+ contract.getContrartId() + "  } }");
+
+					if (code.equals(String.valueOf(NULL))) {
+						WarningLog warningLog = new WarningLog();
+						warningLog.setLogId(DateUtil.currentDate("yyMMdd")
+								+ contract.getBranchId()
+								+ apartmentRentService.getSequence("SEQ_WARNINGLOG_ID"));
+						warningLog.setBranchId(contract.getBranchId());
+						warningLog.setRoomId(contract.getRoomId());
+						warningLog.setSerialNo(CONNECTIONFAIL);
+						warningLog.setWarningType(CONNECTION);
+						warningLog.setWarningDate(new Date());
+						warningLog.setStatus(VALID);
+						warningLog.setRecordTime(new Date());
+						warningLog.setRecordUser(adminName);
+						warningLog.setRemark("合同号" + contract.getContrartId() + DateUtil.d2s(new Date()) + "入住时连接水电后台失败!");
+						apartmentRentService.save(warningLog);
+					}
+					
+					roomService.upateroomstatus(contract.getBranchId(), contract.getRoomId(), status);
+					apartmentRentService.update(contract);
+					apartmentRentService.save(operlog);
+					apartmentRentService.AptOrderCheckIn(contract.getBranchId());
+				}
+			}
+			if (contractList.size() > 0) {
+				apartmentRentService.saveOrUpdateAll(contractList);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}

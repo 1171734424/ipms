@@ -1,0 +1,59 @@
+.basicInfo table{
+	border:none;
+	width: 87%;
+    margin: 2px;
+}
+table td {
+    vertical-align: middle;
+    font-size: 0.85rem;
+    /*white-space: nowrap;*/
+    text-align:right;
+}
+select{
+    table-layout: fixed;
+    word-break: break-all;
+    width: 165px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    background: #fff;
+    height: 32px;
+    margin-left:10px;
+    border-radius: 2px;
+}
+.basicInfo input{
+	width:165px;
+	height:32px;
+	margin-left:10px;
+	padding-left:4px;
+}
+.basicInfo table tr td:nth-child(even){
+	width: 11%;
+}
+.basicInfo .div_button{
+	float:right;
+	display:inline-block;
+}
+
+.basicInfo table tr{
+    line-height: 50px;
+}
+
+table.specialone{
+	margin-left:28px
+}
+label.yuan{
+	position:relative;
+}
+
+label.floatstyle{
+	float：right;
+}
+
+
+
+
+
+
+
+
+

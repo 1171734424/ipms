@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M909" name="通知管理" show="false" icon="sms" subSystem="CRM">
+				<page pageId="R90901" name="短信模板设置" editing="form" loadOnRender="true" showMenu="false" role="*">
+					<functions>FRESH,TEMPLATEADD</functions>
+					<conditions>SMSTEMPLATETYPE,SMSTEMPLATESTATUS</conditions>
+					<target>SmsTemplate</target>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>smsTemplatesQuery</sql>
+					</query>
+					<columns>
+						<column columnId="CZ1" name="操作" width="80" editType="button" align="center"
+								funcName="修改" callFunc="alterSmsTemplate" buttonCls="button_first" downloadable="false"/>
+						<column columnId="TEMPLATEID" name="模板编号" editable="true" hidden="true" align="center"/>
+						<column columnId="TEMPLATENAME" name="模板名称" editable="true" align="center" />
+						<column columnId="SMSCATEGORY" name="模板类型" editable="true" align="center"/>
+						<column columnId="BRANCHID" name="归属门店" align="center" editable="true" editType="dialog-radio" dialogTarget="Branch" dialogColumns="branchId,branchName" hidden="true"/>
+						<column columnId="TEMPLATECONTENT" name="模板内容" editable="true" align="left"/>
+						<column columnId="RECORDUSER" name="创建人" editable="true" align="center" editType="dialog-radio" dialogTarget="Staff" dialogColumns="staffId,staffName"/>
+						<column columnId="RECORDTIME" name="创建时间" editable="true" align="center" editType="date"/>
+						<column columnId="STATUS" name="状态" editable="true" editValue="0:未启用;1:启用;" editType="select"/>
+						<column columnId="REMARK" name="备注" editable="true" align="center"/>
+					</columns>
+				</page>
+				<page pageId="R90902" name="短信列表查询" editing="form" loadOnRender="true" showMenu="true" role="*">
+				    <functions>FRESH</functions>
+					<conditions>STARTDATE,ENDDATE,SMSTEMPLATETYPE,SMSTEMPLATESTATUS</conditions>
+					<strategy>default</strategy>
+					<query type="sql">	
+						<sql>smsListQuery</sql>
+					</query>
+					<columns>
+						<column columnId="CZ1" name="操作" width="100" editType="button" align="center"
+								funcName="发送详情" callFunc="turnToSmsShowDetail" buttonCls="button_first" downloadable="false"/>
+						<column columnId="TEMPLATEID" name="模板编号" align="center"/>
+						<column columnId="TEMPLATENAME" name="模板名称" editType="datetime" align="center"/>
+						<column columnId="SMSCATEGORY" name="模板类型" align="center"/>
+						<column columnId="WORKSTATUS" name="状态" editValue="0:未启用;1:启用;" editType="select"/>
+						<column columnId="BRANCHID" name="归属门店" align="center" editable="true" editType="dialog-radio" dialogTarget="Branch" dialogColumns="branchId,branchName" hidden="true" />
+						<column columnId="WAITSEND" name="待发" align="center"/>
+						<column columnId="SENDSUCCESS" name="发送成功" align="center"/>
+						<column columnId="SENDFAIL" name="发送失败" align="center"/>
+						<column columnId="REMARK" name="备注" align="center"/>
+					</columns>
+				</page>
+				<page pageId="R90903" name="test" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<functions>FRESH</functions>
+					<url>testtest</url>
+				</page>
+			</model>
+		</models>
+	</config>
+</configs>
+

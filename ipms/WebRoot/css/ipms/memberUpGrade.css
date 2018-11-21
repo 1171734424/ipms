@@ -1,0 +1,100 @@
+@charset "utf-8";
+
+
+.membercard{
+	margin: 5px;
+    height: 40px;
+    width: 80%;
+    padding-left: 5px;
+}
+.membercard_td_one{
+	text-align:right;
+    width: 20%;
+}
+.submit,.cancel{
+	height: 34px;
+    line-height: 31px;
+    text-align: center;
+    width: 80px;
+    border: 1px solid #CCCCCC;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    border-radius: 2px;
+    float:right;
+    margin:4px;
+    
+}
+.submit:hover,.cancel:hover{
+	background:#4A5064;
+	color:#fff;
+}
+.table_account tr td:nth-child(odd){
+	text-align:center;
+}
+.table_account tr td:nth-child(even){
+	text-align:left;
+}
+ul,li{
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.member_li{
+	height: 100px;
+    border: 1px solid #CCCCCC;
+    margin: 8px 20px;
+    border-radius: 5px;
+}
+.member_li_img{
+	height: 100px;
+	float: left;
+	margin-left: 10%;
+}
+.member_li_img img{
+	height: 35px;
+	margin-top: 90%;
+}
+.member_li_span{
+    float: left;
+    height: 100px;
+    margin-left: 20px;
+    line-height: 100px;
+}
+.member_li_button{
+    float: right;
+    height: 100px;
+    margin-right: 10%;
+}
+.member_li_button button{
+	height: 35px;
+	width: 80px;
+	border: 1px solid #CCCCCC;
+	background: #fff;
+	color: #333;
+	border-radius: 5px;
+    margin-top: 45%;
+}
+.member_li_button button:hover{
+    background: #4A5064;
+    color: #fff;
+}
+
+
+/*提交按钮样式*/
+
+ .submit_div .pdepartsubmit {
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    width: 80px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: normal;
+    margin: 8px 195px;
+    display: inline-block;
+    font-size: 14px;
+    background-color: #5A5D9C;
+}

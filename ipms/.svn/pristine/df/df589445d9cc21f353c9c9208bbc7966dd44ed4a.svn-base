@@ -1,0 +1,220 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="../../common/script.jsp"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>换房</title>
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/rentrenewal/rentrenewal.css"/>
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css"/>
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/jquery-dialog.css"/>
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/roomlistfont.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>	
+  </head>
+  
+  <body>
+  	<div style="height:100%;">
+		<h3 class="div_h">换房</h3>
+		<i class="imooc imooc_log" style="color:#fff;" onclick="window.parent.JDialog.close();">&#xe900;</i>
+		<div class="big_div">
+			<div class="left_div">
+				<input type="hidden" id="contractId" value="${contrart.contrartId }"/>
+				<input type="hidden" id="memberId" value="${contrart.memberId }"/>
+				<input type="hidden" id="status" value="${contrart.status }"/>
+				<input type="hidden" id="aptRenewTime" value="${aptRenewTime }"/>
+				<ul>
+					<li class="initially_li">
+						<label class="normalroom">原房间</label>
+					</li>
+					<li class="next_li">
+						<label class="div_label">房间号</label>
+						<input class="div_input text_search" value="${contrart.roomId }" readonly="readonly" />
+					</li>
+					<li class="next_li">
+						<label class="div_label">房价</label>
+						<input class="div_input text_search" id="roomPrice" value="${contrart.unitPrice }" readonly="readonly"  />
+					</li>
+					<li class="next_li">
+						<label class="div_label">租赁方式</label>
+						<input class="div_input text_search" value="${TypeOfPaymentName }" readonly="readonly"  />
+					</li>
+					<li class="next_li">
+						<label class="div_label">交租时间</label>
+						<input class="div_input text_search" id="contrartEndTime" value="${contrartEndTime }" readonly="readonly"  />
+					</li>
+					<li class="next_li">
+						<label class="div_label">剩余房费</label>
+						<input class="div_input text_search" id="endPrice" value="${money }" readonly="readonly"  />
+					</li>
+					<li class="next_li">
+						<label class="div_label">补交费用</label>
+						<input id="repayMoney"  class="div_input text_search" value="" readonly="readonly" />
+					</li>
+				</ul>
+			</div>
+			<div class="right_div">
+				<ul>
+					<li class="initially_li">
+						<label class="normalroom">替换房</label>
+					</li>
+					<li class="next_li">
+						<label class="div_label">房间号</label>
+						<input class="div_input text_search" id="newRoomId" value="" onclick="queryRoom()" readonly />
+					</li>
+					<li class="next_li">
+						<label class="div_label">房价</label>
+						<input class="div_input text_search" id="newRoomPrice" value="" readonly="readonly" />
+					</li>
+					<li class="next_li">
+						<label class="div_label">租赁方式</label>
+						<input class="div_input text_search" value="${TypeOfPaymentName }" readonly="readonly" />
+					</li>
+					<li class="next_li">
+						<label class="div_label">开始时间</label>
+						<input class="div_input text_search" id="newStartTime" value="" readonly="readonly" />
+					</li>
+					<li class="next_li">
+						<label class="div_label">房价对比</label>
+						<input class="div_input text_search" id="contrastPrice" value="" readonly="readonly" />
+						<input type="hidden" id="daymoney" value=""/>
+					</li>
+					<li class="next_li">
+						<label class="div_label">换房费</label>
+						<input id="changeHouse" class="div_input text_search" value="" />
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div style="width: 600px;height: 50px;">
+			<div style="float: left; width: 50%; line-height: 34px;">
+				<label class="div_label">合同</label>
+				<input class="div_input text_search" type="file" id ="contrartFile" name="contrartFile" />
+			</div>
+			<div style="float: right;width: 50%;">
+				<button class="check_span" onclick="repayBill()">提交</button>
+			</div>
+		</div>
+  	</div>
+  </body>
+  <script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+  <script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+  <script type="text/javascript">
+  	var base_path ="<%=request.getContextPath()%>";	
+  	function showMsg(msg, fn) {
+		if (!fn) {
+			TipInfo.Msg.alert(msg);
+		} else {
+			TipInfo.Msg.confirm(msg, fn);
+		}
+	}
+	function queryRoom(){
+		JDialog.open("查询房间", base_path + "/queryAptRoom.do?memberId="+$("#memberId").val()+"&roomPrice="+$("#roomPrice").val()
+				+"&contrartEndTime="+$("#contrartEndTime").val()+"&endPrice="+$("#endPrice").val()+"&status="+$("#status").val()
+				+"&aptRenewTime="+$("#aptRenewTime").val()+"&contractId="+$("#contractId").val(),450,350);
+	}
+	function repayBill(){
+		var formData = document.getElementById("contrartFile").files[0];
+		var repayMoney = $("#repayMoney").val();
+		if(formData == undefined){
+			window.parent.showMsg("请上传合同文件!");
+		 	return false;
+		} else {
+			var flag = checkFileImage($("#contrartFile").val());
+			if(!flag){
+				return false;
+			}
+		}
+		var form = new FormData();
+		form.append("file", formData);
+		form.append("contractId", $("#contractId").val());
+ 		form.append("repayMoney", repayMoney);
+		form.append("newRoomId", $("#newRoomId").val());
+		form.append("newRoomPrice", $("#newRoomPrice").val());
+		form.append("endPrice", $("#endPrice").val());
+		form.append("contrastPrice", $("#contrastPrice").val());
+		form.append("daymoney", $("#daymoney").val());
+		form.append("changeHouse", $("#changeHouse").val());
+		console.log(form);
+		$.ajax({
+	         url: base_path + "/isConflict.do",
+			 type: "post",
+			 data : {
+				 contractId : $("#contractId").val(),
+				 roomId : $("#newRoomId").val()
+				 },
+			 success: function(json) {
+				 if(json.result != '0'){
+					 var re = /^[0-9]+$/;
+					 if($("#changeHouse").val() != ""){
+						 if(!re.test($("#changeHouse").val()) && $("#changeHouse").val() < 10000){
+							 window.parent.showMsg("请输入正整数并且不能大于一万!");
+							 return false;
+						 }
+					 }
+					 
+					 if($("#newRoomId").val() == ""){
+						 window.parent.showMsg("请选择房间!");
+						 return false;
+					 }
+					 
+					 $.ajax({
+				         url: base_path + "/submintBill.do",
+						 type: "post",
+						 data: form,
+	   	 				 contentType: false,
+	   	 		         processData: false,
+	   	 				 dataType : "json",
+						 success: function(json) {
+							 window.setTimeout("window.parent.parent.document.getElementById('menu_910').click()",1000);
+							 //window.parent.parent.document.getElementById('menu_910').click();
+							 window.setTimeout("window.parent.JDialog.close()",1000);
+							 window.parent.showMsg(json.message);
+						 },
+						 error: function(json) {}
+					});
+				 } else {
+					 window.parent.showMsg(json.message);
+				 }
+			 },
+			 error: function(json) {}
+		});
+	}
+	function checkFileImage(filename){
+		var flag = false;
+		var arr = ["docx"];
+		var index = filename.lastIndexOf(".");
+		var ext = filename.substr(index+1);
+		for(var i=0;i<arr.length;i++){
+			if(ext == arr[i]){
+			 flag = true; 
+			 break;
+			}
+		}
+		if(!flag){
+			window.parent.showMsg("上传docx类型文档!");
+		}
+		return flag;
+	}
+  </script>
+  <script type="text/javascript">
+  	$(function(){
+  		var now = new Date();
+	    var year = now.getFullYear();       //年   
+	    var month = now.getMonth() + 1;     //月   
+	    var day = now.getDate();
+	    var time = year+"/"+month+"/"+day;
+	    $("#newStartTime").val(time);
+  	})
+  </script>
+</html>

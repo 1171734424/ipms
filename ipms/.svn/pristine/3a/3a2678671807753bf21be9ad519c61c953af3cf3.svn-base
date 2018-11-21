@@ -1,0 +1,155 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="../../common/taglib.jsp"%>
+<%@ include file="../../common/css.jsp"%>
+<%@ include file="../../common/script.jsp"%>
+<% request.setAttribute("basePath", request.getContextPath()); 
+   request.setAttribute("rproomtype", request.getAttribute("rproomtype"));
+   request.setAttribute("rpstatus", request.getAttribute("rpstatus"));
+   request.setAttribute("branchId", request.getAttribute("branchId"));
+   request.setAttribute("theme", request.getAttribute("theme"));
+   request.setAttribute("branchname", request.getAttribute("branchname"));
+   request.setAttribute("themename", request.getAttribute("themename"));
+  %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <title>添加记录</title>
+	<meta http-equiv="pragma" content="no-cache"/>
+	<meta http-equiv="cache-control" content="no-cache"/>
+	<meta http-equiv="expires" content="0"/>    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3"/>
+	<meta http-equiv="description" content="This is my page"/>
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/datepicker.css"/>	
+	<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/pmsmanage/pmsmanage.css" />
+	<link href="<%=request.getContextPath()%>/css/reset.css" rel="stylesheet" media="all" />
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+	<script> 
+	var base_path = '<%=request.getContextPath()%>';
+	</script>
+  </head>  
+  <body class="room-body">
+     <input id="oldtheme" name="themeid" type="hidden" value="${theme}"/>
+	 <input id="oldbranchid" name="branchid" type="hidden" value="${branchId}"/>
+     <form  name="myFrom" id="myForm" class="ctdform">
+		 <table class="ptable crm-table" border="0" cellspacing="0" cellpadding="0">
+		    <tbody>
+		     <col width="13%">
+		     <col width="80%">
+		     <col width="2%">
+		     <col width="2%">
+		     <tr>
+				   <td class="rm_tabletop"></td>
+				   <td></td>
+				   <td class="ctdtitle"></td>
+				   <td class="ctdtitle"></td>
+		     </tr>
+			 <tr id="trprojectid">
+				   <td class="ctdtitle notnull" align="center;">场景</td>
+				   <td align="left" class="pinputtd">
+				   <input id="rptheme" name="rptheme" class="ptdinput" type="hidden" value="${ theme}"/>
+				   <input id="rpthemename" name="rpthemename" class="ptdinput" type="text" value="${ themename}" readonly="true"/></td>
+				   <td class="ctdtitle"></td>
+				   <td class="ctdtitle"></td>
+			 </tr>
+			 <tr>
+				   <td class="ctdtitle notnull" align="center;">门店</td>
+				   <td align="left" class="pinputtd">
+				   <input id=branchid name="branchid" class="ptdinput" type="hidden" value="${branchId}"/>
+				   <input id="branchname" name="branchname" class="ptdinput" type="text" value="${branchname}" readonly="true"/></td>
+				   <td class="ctdtitle"></td>
+				   <td class="ctdtitle"></td>
+			 </tr>
+			 <tr>
+				   <td class="ctdtitle notnull" align="center;">房型</td>
+				   <td align="left" class="pinputtd">
+					  <select id="rproomtype" name="" class="ptdinput">
+							  <option value="">
+									       请选择房型
+							  </option>
+							  <c:forEach var="a" items="${rproomtype}">
+		                         <option  value="${a.roomtype}">
+		                             ${a.roomname}
+                                  </option>
+							   </c:forEach>
+				     </select></td>
+				   <td class="ctdtitle"></td>
+				   <td class="ctdtitle"></td>
+			 </tr>
+			 <tr>
+				   <td class="ctdtitle notnull" align="center">楼层</td>
+				   <td align="left" class="pinputtd">
+					   <input type="text" id="rpfloor" class="ptdinput"  onKeyUp="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="2"/> </td>
+				   <td class="ctdtitle"></td>
+				   <td class="ctdtitle"></td>
+			 </tr>
+			 <tr>
+				   <td class="ctdtitle notnull" align="center;">房号</td>
+				   <td align="left" class="pinputtd">
+					   <input type="text" id="rproomid" class="ptdinput" onKeyUp="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="6"/></td>
+				   <td class="ctdtitle"></td>
+				   <td class="ctdtitle"></td>
+			 </tr>
+			 <tr>
+				   <td class="ctdtitle" align="center;">面积</td>
+				   <td align="left" class="pinputtd">
+					   <input type="text" id="rparea" class="ptdinput" onKeyUp="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="3"/></td>
+				   <td class="ctdtitle"></td>
+				   <td class="ctdtitle"></td>
+			 </tr>
+			 <tr>
+				   <td class="ctdtitle notnull" align="center;">状态</td>
+				   <td align="left" class="pinputtd">
+						         <select id="rpstatus1" name="" class="ptdinput">
+							      <c:forEach var="a" items="${rpstatus}">
+								    <c:set var="flag" value="${a.orderno}"></c:set>
+		                            <c:if  test="${(flag==null)||(flag==1)}">
+		                            <option value="<c:out value='${a.content}' />"/>
+		                            <c:out value="${a.paramname}"/>
+		                             </c:if>
+                                    </option>
+							      </c:forEach>
+						         </select>
+						         <select id="rpstatus2" name="" class="ptdinput" style="display:none">
+							       <c:forEach var="a" items="${rpstatus}">
+								    <c:set var="flag" value="${a.orderno}"></c:set>
+		                            <c:if  test="${(flag==null)||(flag==2)}">
+		                            <option value="<c:out value='${a.content}' />"/>
+		                            <c:out value="${a.paramname}"/>
+		                             </c:if>
+                                    </option>
+							      </c:forEach>
+						         </select>
+						         <select id="rpstatus3" name="" class="ptdinput" style="display:none">
+							      <c:forEach var="a" items="${rpstatus}">
+								    <c:set var="flag" value="${a.orderno}"></c:set>
+		                            <c:if  test="${(flag==null)||(flag==3)}">
+		                            <option value="<c:out value='${a.content}' />"/>
+		                            <c:out value="${a.paramname}"/>
+		                             </c:if>
+                                    </option>
+							      </c:forEach>
+						         </select> </td>
+				    <td class="ctdtitle"></td>
+				    <td class="ctdtitle"></td>
+			</tr>
+			<tr>
+				    <td class="ctdtitle" align="center;">备注</td>
+				    <td align="left" class="pinputtd">
+					   <input type="text" id="rpremark" class="ptdinput" /></td>
+				    <td class="ctdtitle"></td>	
+				    <td class="ctdtitle"></td>
+			</tr>									
+		</tbody>
+	</table>			
+	 </form>
+	  <hr class="ctdhr"/>
+	 <div class="contractbutton parents-content">
+	 <div class="pdepartsubmit crm-confirmbt" onclick="roomadd()">提交</div>
+	 <div class="pdepartcancle crm-cancelbt" onclick="window.parent.JDialog.close()">取消</div>
+	 </div>
+	   <script src="<%=request.getContextPath()%>/script/ipms/js/pmsmanage/room/roomadd.js"></script>
+  </body>
+</html>

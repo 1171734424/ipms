@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M911" name="供应商管理" show="true" icon="parameter" subSystem="CRM">
+				<page pageId="R91101" name="供应商资料" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<conditions>SUPPLIERNAME,CONTRACT,SUPPILERSTATUS</conditions>
+					<functions>FRESH,EDIT</functions>
+					<target>Supplier</target>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>supplierQuery</sql>
+					</query>
+					<columns>						
+						<column columnId="SUPPLIERID" name="供应商编号" width="120"  align="center" hidden="true" primaryKey="true" sequenceSource = "cloud" sequence="SEQ_NEW_SUPPLIERID"/>
+						<column columnId="SUPPLIERNAME" name="供应商名" width="120" editable="true" align="center" validateRule="NOTNULL,LENGTH:15"/>
+						<column columnId="ADDRESS" name="详细地址" width="140" editable="true" align="left" validateRule="NOTNULL,LENGTH:30"/>
+						<column columnId="PHONE" name="座机" width="100" editable="true" align="center" validateRule="NOTNULL,LENGTH:13"/>
+						<column columnId="POSTCODE" name="邮编" width="100" editable="true" align="center" validateRule="NOTNULL,LENGTH:6,NUMBER"/>
+						<column columnId="CONTACTS" name="联系人" width="100" editable="true" align="center" validateRule="NOTNULL,LENGTH:5"/>
+						<column columnId="MOBILE" name="手机" width="100" editable="true" align="center" validateRule="NUMBER,LENGTH:11"/>
+						<column columnId="STATUS" name="状态 " width="80" align="center" editValue="0:已删除;1:有效" editType="select" validateRule="NOTNULL,LENGTH:1" hidden="true"/>
+						<column columnId="REMARK" name="备注" width="240" editable="true" align="left" editType="textarea"/>	
+					</columns>
+				</page>
+			</model>
+		</models>
+	</config>
+</configs>
+
+
+
+
+
+
+

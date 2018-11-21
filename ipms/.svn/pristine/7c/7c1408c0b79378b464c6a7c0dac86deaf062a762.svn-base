@@ -1,0 +1,1065 @@
+@CHARSET "UTF-8";
+
+/*common*/
+.ostable {
+	height: 10%;
+	border: none;
+	margin-top: 1%;
+	margin-bottom: 1%;
+}
+::-webkit-scrollbar {
+	display:none;
+}
+.osinput {
+    width: 150px;
+    padding: 7px 5px;
+    margin-left: 10px;
+    font-size: 14px !important;
+}
+
+.ostr {
+	border-bottom: 1px solid #e9e9e9;
+}
+
+.ostbcontent {
+	height: 70%;
+	overflow-y: scroll;
+}
+
+.ostdh {
+	height: 45px;
+}
+
+.osearch {
+    font-size: 14px;
+    font-family: "微软雅黑";
+    height: 32px;
+    line-height: 25px;
+    text-align: center;
+    width: 70px;
+    margin-left: 42px;
+    background: #4A5064;
+    border:none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+table.myTable td {
+	padding:5px;
+}
+table.myTable tr:hover{
+	background:rgb(74, 80, 100);
+	cursor:pointer;
+	color:#fff;
+}
+.whitebg{
+	background-color:white;
+}
+
+/*预订入住*/
+.orderearch_frame{
+   width: 100%; 
+   height:97%;	
+	}
+
+.orderdata_td{
+	white-space: normal !important;
+	}
+.left_imooc_order{
+	top: -1px;
+    left: -3%;
+    font-size: 38px;
+}
+/*单品售卖*/
+.imooc_order_gdspage {
+	top: -10px;
+	left: 93%;
+}
+.submitbotton_gdspage {
+	font-size: 14px;
+	font-family: "微软雅黑";
+	height: 23px;
+	line-height: 21px;
+	text-align: center;
+	width: 80px;
+	margin-left: 4px;
+	border:none;
+	background: #5A5D9C;
+	color: #fff;
+	cursor: pointer;
+}
+.sbotton_gdspage .clean{
+	height: 30px;
+    line-height: 28px;
+    width: 59px;
+    margin-left: 10px;
+}
+.sbotton_gdspage .enter{
+	background: #FF9A00;
+	border:none;
+}
+.sbotton_gdspage .workbutton {
+    height: 30px;
+    line-height: 28px;
+    width: 83px;
+    margin-left: 10px;
+}
+.gds_hidden{
+    display:none;
+}
+/*数量加减*/
+.acount_gdspage {
+	width: 50px;
+	padding: 4px;
+	text-align: center;
+}
+
+.totaltable {
+    height: 40px;
+    line-height: 40px;
+    float: right;
+}
+
+.totalinput {
+    color: red;
+    width: 58px;
+    font-weight: bold;
+    border: none;
+}
+#totalnumber{
+		width:36px!important;
+		}
+#totalprice{
+		width:60px!important;
+		}
+.pay_gdspage {
+	margin-top: 35%;
+	border: none;
+}
+
+.roomselect_gdspage {	
+	font-size: 14px;
+	width: 25%;
+    height: 25px;
+}
+.projectselect_gdspage{
+	font-size: 14px;
+	width: 40%;
+    height: 25px;
+	
+	}
+
+.paymethod_gdspage {
+	margin-top: 10%;
+	width: 100%;
+}
+
+.reset_gdspage {
+	font-size: 14px;
+	font-family: "微软雅黑";
+	height: 25px;
+	line-height: 20px;
+	text-align: center;
+	width: 49px;
+	margin-left: 4px;
+	background: #FF9A00;
+	color: #fff;
+	cursor: pointer;
+	border:none;
+}
+
+.footerzero_gdspage {
+	float: left;
+	display: inline;
+	font-size: 14px;
+	width: 31.5%;
+    margin: 10px -58px 10px 30px;
+}
+
+.footerone_gdspage {
+	width: 383px;
+	margin-left: 14.3%;
+	margin-top: -4.4%;
+	float: left;
+	font-size:14px;
+	display: none;
+}
+
+.footertwo_gdspage {
+	margin-top: 9%;
+	margin-left: 4%;
+	width: 100%;
+	font-size:14px;
+}
+
+.footerthree_gdspage,.footerthree_gdspage_mul {
+	margin: 2% 1% 1% 14.5%;
+	height: 26px;
+}
+.spanmar_gdspage {
+}
+
+.payinput_gdspage_cash {
+	display: none;
+	width: 99px;
+	height: 25px;
+	font-size: 12px;
+}
+
+.payinput_gdspage_card {
+    display: none;
+    width: 150px;
+    height: 25px;
+    font-size: 14px;
+    padding-left: 5px;
+    font-size: 13px;
+}
+.payinput_gdspage_card_mul{
+	display: none;
+   /* margin-left: 40.3%;*/
+    width: 150px;
+    height: 25px;
+    font-size: 14px;
+    padding-left: 5px;
+    font-size: 13px;
+	}
+
+.tabledata_gdspage {
+	margin-top: 3%;
+}
+.tabledata_gdspage thead tr {
+	background: #f1f1f1;
+    font-size: 13px;
+}
+.tabledata_gdspage thead tr th{
+    padding: 4px;
+}
+#costproject {
+	display: none;
+}
+
+#payproject {
+	display: none;
+}
+
+.sbotton_gdspage {
+	margin-right: 30px;
+    bottom:24px;
+    right: 0;
+    position: absolute;
+    font-size:14px;
+}
+/*会员查询*/
+.imooc_membersearch {
+    top: 0;
+    left: -2%;
+    font-size: 38px;
+}
+.member_margin{
+}
+.member_padding{
+    height: 64px;
+    padding: 43px 10px;
+    border: 1px solid #f0f0f0;
+    background: #EFF3F5;
+    border-radius: 4px;
+}
+.member_padding h3{
+	position:absolute;
+	top: 9px;
+}
+
+.table_member .submitbotton_membersearch {
+	width: 80px;
+    margin-left: 28px;
+    margin-right: 1px;
+    background: #5A5D9D;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    /* float: right; */
+}
+
+.editdata_ms .submitbotton_membersearch{
+	width: 80px;
+	background: #FC8A15;
+    border: none;
+	color: #fff;
+	cursor: pointer;
+	float:right;
+	}
+.one_button{
+	margin-right: 41px;
+	margin-top: 10px;
+}
+.two_button{
+	margin: 7% 5.25% 5% 5%;
+}
+.table_member{
+	padding: 10px;
+	height: 70px;
+	background: #fff;
+}
+
+.member_margin .two_button {
+  position: absolute;
+  left: 797px;
+  top: 329.5px;
+} 
+.detail_one_order .label_name_order { /* float: left; */
+	/* width: 106px; */
+	text-align: right;
+	font-weight: normal;
+	font-size: 0.85rem;
+}
+
+.sectionone_ms {
+	margin-top: 3%;
+}
+
+
+.table_member .label_name{
+	width: 98px;
+    line-height: 55px;
+}
+.register_one .label_name{
+    width: 71px;
+}
+.detail_one  .label_sp{
+	width:106px;
+}
+.input_ms {
+    padding: 8px 5px;
+    margin-top: 1px;
+    width: 172px;
+    margin-left: 9px;
+    font-size: 14px;
+}
+.member_margin table tr td{
+	height: 50px;
+}
+.member_margin .detail_one{
+	padding: 0 10px;
+}
+.table_ms {
+	border: none;
+	font-size: 0.85rem;
+    background: #fff;
+ 	border-radius: initial;
+ 	height: 55px;
+}
+.label_title_ms {
+	margin-left: 3.5%;
+	font-size: 0.85rem;
+}
+.member_span{
+	margin-left:66px;
+}
+.textarea_members {
+    padding: 4px 5px;
+    margin-left: 10px;
+    font-size: 14px;
+    width: 810px !important;
+    height: 74px !important;
+    margin: 10px 0px 9px 10px !important;
+}
+
+.editdata_ms {
+    width: 100%;
+    background: #fff;
+    height: 152px;
+}
+
+.editdata_mss {
+    width: 100%;
+    background: #fff;
+    height: 130px;
+    padding: 13px 9.4%;
+}
+.order_pzh {
+    margin-left: 25.6%;
+	margin-top: 1%;
+	display: none;
+}
+
+.yfk {
+	color: red;
+	border: none;
+	font-size: 15px;
+	margin-left: 5px;
+	width: 35px;
+}
+
+.yfkspan {
+	margin-left: 10px;
+}
+
+/*预订*/
+.order_input{
+
+	}
+.order_textarea{
+	width:959.6px !important;
+	height:66px;
+	}
+.walk_margin .check_one{
+	width: 149.5px;
+    margin-left: -18px;
+}
+
+.walk_margin {
+	width: 100%;
+ /*   height: 510px; */
+ 
+ height:690px;
+    border: 1px solid #f1f1f1;
+	position: relative;
+	margin: 0 auto;
+	background: #EFF3F5;
+	padding: 7px 15px;
+	border-radius: 4px;
+	overflow:scroll;
+}
+.walk_form  .submitbutton_order{
+	
+	  cursor:pointer;
+}
+.walk_margin span.orange{
+	background: #FC8A15;
+    border: none;
+    line-height: 34px;
+}
+.walk_form  .addmember_order{
+
+
+    cursor:pointer;
+}
+
+.order_order{
+	margin-right: -0.9% !important;
+	}
+.imooc_order {
+    top: -1px;
+    left: -3%;
+    font-size: 38px;
+}
+.close_span{
+	position: absolute;
+    top: 5px;
+    right: 20px;
+    line-height: 32px;
+    height: 35px;
+    width: 38px;
+    padding: 5px 10px;
+    border: 1px solid #638CCC;
+    background: #fff;
+    border-radius: 2px;
+}
+.walk_margin h3 {
+	height: 34px;
+}
+
+.walk_form {
+	height: 93%;
+	background: #FFF;
+	padding-top:18px;
+}
+.count {
+	border: 1px solid #ddd;
+    width: 44px;
+    height: 32px;
+    line-height: 23px;
+    padding: 3px 8px;
+    margin: 4px;
+    display: inline-block;
+    margin-top: 0px;
+    border-radius: 4px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: #fff;
+}
+#singlesale table.myTable tbody tr:hover .count,#singlesale table.myTable tbody tr:nth-child(odd):hover .count{
+	color:#333;
+}
+.number {
+	width:  63.9px;
+    text-align: center;
+    margin-left: 0;
+    height: 32px;
+}
+
+.walk_form .jia {
+	margin: 0;
+}
+.walk_form .jian {
+	margin: 0;
+	margin-left: 9px;
+}
+.paymethod {
+    padding: 4px 9.8%;
+    display:inline-block;
+}
+
+.walk_form .button_margin {
+	margin-left: 8px;
+	float: right;
+	
+	width: 85px;
+	cursor: pointer;
+	background:#5A5D9C;
+	color:#fff;
+}
+
+.payscore{
+	display:none;
+}
+	
+.check_ul {
+    margin: 0 20px;
+    border-bottom: 2px solid #535474;
+    clear: both;
+}
+
+.check_ul li.check_name:last-child {
+    border-right: 1px solid #ccc;
+}
+
+.check_ul .check_name.active {
+    color: #fff;
+    background: rgb(74, 80, 100);
+}
+.check_ul li.check_name {
+    border-top: 1px solid #333;
+    border-left: 1px solid #333;
+    width: 102px;
+    text-align: center;
+    margin: 0;
+    color: #333;
+    background: #fff;
+}
+.xx_wrap {
+    width:  99.15%;
+    overflow-x: auto;
+    position:relative;
+}
+.nav {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.xx_wrap ul {
+    display: flex;
+    margin-left: 3%;
+    margin-top: 21px;
+    overflow-y: hidden;
+    border-bottom: 2px solid #5A5D9C;
+}
+    
+.xx_wrap li {
+    margin: 0 5px !important;
+    border: 1px solid #DADADA;
+    color: black;
+    margin-left: 0px !important;
+    width: 102px !important;
+    text-align: center !important;
+    border: 1px solid  #4A5064 !important;
+    cursor:pointer;
+}
+.detail_one .orlabel_name {
+    float: left;
+    width: 89px;
+    text-align: right;
+    font-weight: normal;
+    font-size: 14px;
+}
+
+.walk_margin .check {
+    padding: 8px 5px;
+    width: 160px;
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.walk_margin .label_title {
+    margin: 5px 7.3px;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.orlabel_red{
+	color:red;
+}
+/*入住人active状态*/
+.nav li.active{
+    background-color: #5A5D9C;
+    color:#FFF;
+}
+
+.tabli{
+    width:10%;
+    display: inline-table;
+}
+
+.showuser{
+    display:block;
+}
+
+.hiddenuser{
+    display:none;
+}
+
+.detail_one_order .label_name_order {
+    /* float: left; */
+    /* width: 106px; */
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+
+.order_pzh{
+	margin-left: 22.5%;
+    margin-top: 1%;
+    display:none;
+}
+
+#addnewtab{
+    position: absolute;
+    top: 41.4%;
+    left: 13.3%;
+    background-color: #FC8A15;
+    cursor: pointer;
+    border-radius: 4px;
+    width: 85px !important;
+    border: none !important;
+    line-height: 34px;	
+}
+
+.order_four{
+  
+    padding-right: 1.75%;
+}
+.order_form{
+    padding: 0% 2%;
+}
+.order_form_later{
+	padding: 0% 3%;
+}
+/*新增入住人信息*/
+.deletespan{
+	margin-left: -28px;
+    display: none;
+    margin-top: -1px;
+
+}
+/*设置滚动条样式*/
+::-webkit-scrollbar  
+{  
+    width: 5px;  
+    height: 5px;  
+    background-color:transparent;  
+}  
+  
+/*定义滚动条轨道 内阴影+圆角*/  
+::-webkit-scrollbar-track  
+{  
+    border-radius: 10px;  
+    background-color:transparent;  
+}  
+  
+/*定义滑块 内阴影+圆角*/  
+::-webkit-scrollbar-thumb  
+{  
+    border-radius: 10px;  
+    background-color:transparent;  
+} 
+
+.addmember_order {
+	font-size: 14px;
+	font-family: "微软雅黑";
+	height: 34px;
+	line-height: 31px;
+	text-align: center;
+	width: 80px;
+	margin-left: 48%;
+	background: #4A5064;
+	color: #fff;
+	cursor: pointer;
+	border:none;
+}
+
+.select_omadd {
+    padding: 6px 5px;
+    width: 170px;
+    margin-left: 10px;
+    font-size: 14px;
+}
+.markcolor {
+	color: red;
+}
+.warnningspan_om {
+	margin: 2.5% 10%;
+    font-size: 14px;
+    color: red;
+    position: absolute;
+}
+
+/*预订人判断*/
+.whitebg_judge {
+	background: #fff;
+	width: 100%;
+	height: 100%;
+}
+
+.divalign_judge {
+	text-align: center;
+	height: 25%;
+    margin-top: 10%;
+}
+
+.section_judge {
+	height: 20%;
+	display: none
+}
+
+.sectionb_judge {
+	height: 50%
+}
+
+/*.ul_judge {
+	margin: 4% 17% 4% 17%;
+}*/
+
+.ul_judge {
+	margin: 6% 18% 0% 0%;
+}
+
+.body_exception{
+    background: #EFF3F5;
+}
+	
+/*日结异常*/
+.search_margin h3{
+    position: absolute;
+    top: 12px;
+    left: 21px;
+    color: #333;
+    font-size: 20px;
+}
+.search_margin{
+	height: 58px;
+    background: #fff;
+    margin: 47px 20px 0 20px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+.search_margin .ostable_exception{
+	border: none;
+	line-height: 60px;
+}
+.excep_margin{
+    width: 1280px;
+	height: 580px;
+    border-radius: 4px;
+    z-index: 9999;
+    padding: 0px 20px 20px 20px;
+    position: relative;
+	background: #EFF3F5;
+}
+.search_margin .ostable_exception tr td{
+	width: 80px;
+}
+.excep_margin .color{
+	background: #fff;
+    padding: 0px  10px;
+    overflow-y: scroll;
+    height: 490px;
+}
+.search_margin .five{
+	padding:5px;
+}
+.imooc_ex{
+    top: -1px;
+    left: -2%;
+    font-size: 38px;
+}
+.operate{
+	padding: 4px 8px;
+    font-size: 0.75rem;
+    background: #FC8A15;
+    color: #fff;
+    border: none;
+}
+.excep_margin #pager .pageRegion{
+	background: #fff;
+    bottom: 35px;
+    height: 35px;
+    width: 96.9%;
+    margin: 0 6px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    margin-bottom: 20px;
+}
+.disabledinput { pointer-events: none; } 
+/*注册会员*/
+.register_margin{
+	padding-top: 2%;
+	height: 100%;
+}
+.register_margin ul li{
+	float:left;
+	margin:4px;
+	line-height: 38px;
+	position: relative;
+}
+.register_margin ul li .text_check{
+	padding: 8 5px;
+    width: 172px;
+    margin-left: 10px;
+    font-size: 14px;
+	position: relative;   
+}
+.register_margin ul li:nth-child(9),.register_margin ul li:nth-child(10),.register_margin ul li:nth-child(11){
+	width:100%;
+}
+.register_margin ul li .text_address,.register_margin ul li .text_mark{
+	width: 81.5%;
+}
+.register_margin ul li .button_submit{
+	width: 80px;
+    margin-right: 77px;
+    background: #FC8A15;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    float: right;
+}
+.warnning_om{
+	margin: -3.6% 10%;
+    font-size: 14px;
+    color: red;
+    position: absolute;
+}
+.red{
+	color:#f00;
+}
+.fa {
+    position: absolute;
+    z-index: 1;
+    right: 6px;
+    top: 12px;
+    color: #333;
+}
+/*备用金扥登记*/
+.check_wrap_margin .close_cash{
+	top: 10px;
+}
+
+
+/*备用金修改&投缴*/
+ 
+.petty_td {
+   padding: 4px;
+   white-space: normal !important;
+  }
+  
+.petty_div{
+    height: 390px;
+    width: 89.6%;
+    overflow: scroll;
+    margin: 2% 0% 1% 5.4%;
+   }
+   
+.petty_hidden{
+   display:none;
+   }
+   
+ .petty_title{
+    position: relative;
+   }
+   
+ .petty_search{
+    position: absolute;
+    float: left;
+    margin-left: 5.38%;
+    margin-top: 0.2%;
+    width: 73.3%;
+   }
+   
+  .petty_button{
+    float: left;
+    width: 27%;
+    margin-left: 68.4%;
+    margin-top: 0.2%;
+   }
+   
+   .pp_input{
+     width:100%;
+   }
+   
+   .count_table{
+     width: 90.5%;
+     margin: 0% 6% 0 6%;
+   }
+   
+   .count_td{
+     width:100%;
+     border:none;
+   }
+   
+   .petty_form{
+    margin-right: 5.5%;
+    margin-left: 3.9%;
+   }
+   
+   .cashdata_mss .submitbotton_membersearch{
+	width: 80px;
+	background: #FC8A15;
+    border: none;
+	color: #fff;
+	cursor: pointer;
+	float:right;
+	}
+	
+	.pettypayinput{
+	margin: 3% 2% 3% 2%;
+    height: 30px;
+    width: 80%;
+	
+	}
+	.pettypaydata{
+	 margin: 3% 2% 3% 2%;
+    height: 30px;
+    width: 80%;
+    border:none;
+	}
+	
+	.imooc_cash {
+    top: -1px;
+    left: -2%;
+    font-size: 38px;
+}
+   .shiftpay_body{
+    background-color: #EFF3F5;
+    height: 100%;
+   }
+   .shiftpay_table{
+    background-color: white;
+    margin: 9% 0% 0% 5%;
+    width: 90%;
+   }
+   .close_span_sp{
+    position: absolute;
+    top: 4px;
+    right: 3px;
+    line-height: 32px;
+    height: 35px;
+    width: 38px;
+    padding: 5px 10px;
+    border: 1px solid #638CCC;
+    background: #fff;
+    border-radius: 2px;
+   }
+   .sbotton_pettyshift{
+    height: 17%;
+    margin-right: 5.2%;
+    margin-left: 5.4%;
+    background-color: white;
+    font-size: 14px;
+   }
+   
+   .sbotton_pettyshift .clean{
+	height: 30px;
+    line-height: 28px;
+    width: 59px;
+    margin-left: 10px;
+    margin-top: 7px;
+}
+   .sbotton_pettyshift .enter{
+	background: #FF9A00;
+	border:none;
+	margin-right: 10px;
+}
+	
+/*新增退房申请*/
+.detail_one .checkout_ul{
+	padding-top:15px;
+}
+.detail_one .checkout_ul li{
+	float: left;
+    margin-top: 15px;
+    line-height: 38px;
+    margin: 4px;
+    position: relative;
+}
+.checkout_ul li input.text_add{
+	padding: 8px 5px;
+    width: 172px;
+    margin-left:10px;
+}
+.checkout_ul li textarea.textarea_ms{
+	width: 468px;
+}
+ input.checkout_margin{
+	background-color: #FC8A15;
+    color: #fff;
+    border: none;
+    float: right;
+    margin-right: 52px;
+    margin-top: 0px;	
+}
+.class_main ul li{
+	float: left;
+}
+.input_ms{
+  position: relative;
+
+}
+.two_button {
+  position: absolute;
+  left: 511px;
+  top: 235px;
+}
+.button_margin.confirm_editdata{
+  position: absolute;
+  top: 235px;
+  right: 29px;
+}
+.member_margin .button_margin.button_query{
+	margin-left: 30px;
+	background: #5A5D9C;
+	color: #fff;
+}
+.button_add{
+	background-color:#FC8A15;
+}
+/*新增公寓预约*/
+.table_ms .textarea_ms{
+	   width: 518px;
+}
+.member_margin table tr td {
+    height: 50px;
+    width: 172px;
+}
+.member_margin .detail_one .table_ms .first_td{
+      width: 85px;
+}
+    .pp_input{
+      width:100%;
+    }
+    
+    .count_table{
+      width: 90.5%;
+      margin: 0% 6% 0 6%;
+    }
+    
+    .count_td{
+      width:100%;
+      border:none;
+    }
+    .petty_voucher{
+    height:29px !important;
+    }
+	

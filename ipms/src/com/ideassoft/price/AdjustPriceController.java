@@ -1,0 +1,140 @@
+package com.ideassoft.price;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.apartment.service.ApartmentCleanService;
+import com.ideassoft.bean.PriceVolatility;
+import com.ideassoft.core.factory.ServiceFactory;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.crm.service.AdjustPriceService;
+import com.ideassoft.util.JSONUtil;
+
+
+@Transactional
+@Controller
+public class AdjustPriceController {
+	
+@Autowired
+private AdjustPriceService adjustPriceService;
+
+
+	/**
+	 * 跳转到规则选择页面
+	 * @param request
+	 * @param response
+	 * @return 
+	 */
+	@RequestMapping("/turnToRulePage.do")
+	public ModelAndView turnToRulePage(HttpServletRequest request,HttpServletResponse response) {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/crm/adjustPrice/adpDialog");
+		return mv;
+	}
+
+	/**
+	 * 
+	 * @param request
+	 * @param response
+	 * @param groupId 规则名称
+	 */
+	
+	//@RequestMapping("/ruledataIframe.do")
+	public void ruledataIframe(HttpServletRequest request,HttpServletResponse response, String groupId){
+		Pagination pagination;
+		Integer pageNum = Integer.parseInt(request.getParameter("page"));
+		Integer rows = Integer.parseInt(request.getParameter("rows"));
+		pagination = new Pagination(pageNum, rows);
+		List<?> result = adjustPriceService.findBySQLWithPagination("querypr", new String[] {groupId}, pagination, true);
+		JSONUtil.responseJSON(response, JSONUtil.buildReportJSONByPagination(result, pagination));
+	}
+	
+
+	
+/**
+ * 保存调整后的价格到新的TB_P_PRICERULES表
+ * @param branchId 门店编号，此处对应houseid
+ * @param starttime 规则开始时间
+ * @param endtime 规则结束时间
+ * @param price 调整后的价格
+ * @param rulesid 对应规则的id号
+ */
+	
+	@SuppressWarnings("unchecked")
+	public static void savePrice2newTable(String branchId,Date starttime,Date endtime,Double price,
+			String pricetypeDetail,String rulesid){
+		ApartmentCleanService cleanService = (ApartmentCleanService)ServiceFactory.getService("apartmentCleanService");
+		
+
+				String seq = cleanService.getSequence("SEQ_NEW_VOLATILITY");
+				PriceVolatility pv = new PriceVolatility();
+				pv.setBranchId(branchId);
+				pv.setEndTime(endtime);
+				pv.setPriceType("1");//民宿默认为日租
+				//pv.setPriceTypeDetail(priceTypeDetail);
+				pv.setPriority("2");
+				pv.setRecordTime(new Date());
+				pv.setRoomPrice(price);
+				//pv.setRoomType(roomType);
+				pv.setRpId("MSJ");
+				pv.setRulesId(rulesid);
+				pv.setStartTime(starttime);
+				pv.setTheme("3");
+				pv.setVolatilityId(seq);
+				cleanService.save(pv);
+			
+		}
+		
+		
+	
+	
+	
+	/**
+	 * 
+	 * @param branchid 门店编号
+	 * @param validstartdata 规则开始时间
+	 * @param validenddata 规则结束时间
+	 * @param price 调整的房价
+	 * @param validday 生效周期
+	 * @param ruleid 规则id
+	 * @param theme 主题
+	 * @param rpid 房价码
+	 * @param rptypename 房型（BR...）
+ 	 * @param rpkind 价格类型(调整、基准)
+	 */
+	public static void saveHotelPrice2newTable(String branchid,Date validstartdata,Date validenddata, Double price,
+			String validday,String ruleid,String theme,String rpid,String rptypename,String rpkind){
+	 
+		ApartmentCleanService cleanService = (ApartmentCleanService)ServiceFactory.getService("apartmentCleanService");
+		String seq = cleanService.getSequence("SEQ_NEW_VOLATILITY");
+		PriceVolatility pv = new PriceVolatility();
+		pv.setBranchId(branchid);
+		pv.setEndTime(validenddata);
+		pv.setPriceType(rpkind);
+		//pv.setPriceTypeDetail(priceTypeDetail);
+		pv.setPriority("2");
+		pv.setRecordTime(new Date());
+		pv.setRoomPrice(price);
+		pv.setRoomType(rptypename);
+		pv.setRpId(rpid);
+		pv.setRulesId(ruleid);
+		pv.setStartTime(validstartdata);
+		pv.setTheme(theme);
+		pv.setVolatilityId(seq);
+		cleanService.save(pv);
+		
+		
+	}
+	
+	
+}

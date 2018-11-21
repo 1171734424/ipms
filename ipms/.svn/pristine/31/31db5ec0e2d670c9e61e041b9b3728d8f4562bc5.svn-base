@@ -1,0 +1,65 @@
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ include file="../../common/script.jsp"%>
+<%@ include file="../../common/css.jsp"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>储值卡充值</title>
+    
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/addCustom.css"/>
+
+  </head>
+  <body>
+ 	<div style="width: 600px;height: 350px;margin-top: 20px;">
+		<div style="height: 185px;">
+			<input id="account_Id" type="hidden" value="${memberAccount.accountId }" readonly="readonly"/>
+			<input id="member_Id" type="hidden" value="${member.memberId }" readonly="readonly"/>
+			<input id="memberRank" type="hidden" value="${member.memberRank }" readonly="readonly"/>
+			<ul class="ul_custom">
+				<li class="addCustom_li">
+					<label>会员等级:</label>
+					<input type="text" value="${memberRank.rankName }" readonly="readonly"/>
+				</li>
+				<li class="addCustom_li">
+					<label>会员名称:</label>
+					<input type="text" value="${member.memberName }" readonly="readonly"/>
+				</li>
+				<li class="addCustom_li">
+					<label>已冲金额:</label>
+					<input type="text" value="${memberAccount.totalRecharge }" readonly="readonly"/>
+				</li>
+				<li class="addCustom_li">
+					<label>当前余额:</label>
+					<input type="text" value="${memberAccount.currBalance }" readonly="readonly"/>
+				</li>
+				<li class="addCustom_li">
+					<label>选择活动:</label>
+					<input id="total_recharge" name="total_recharge" value="" readonly="readonly"/>
+					<input type="hidden" id="total_recharge_CUSTOM_VALUE" name="total_recharge_CUSTOM_VALUE" value=""/>
+				</li>
+				<li class="addCustom_li">
+					<label>充值金额:</label>
+					<input id="discount_gift" type="text" value="" 
+		   			onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'');}else{this.value=this.value.replace(/\D/g,'');}" 
+		   			onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"/>
+				</li>
+			</ul>
+		</div>
+<!-- 		<div class="div_desc" id="total_recharge_DESC"></div> -->
+		<div class="div_button">
+			<input class="cancel" type="button" value="清空" onclick="empty()"/>
+	    	<input class="submit" type="button" value="提交" onclick="updateReserve()"/>  
+	    </div>
+	</div>
+  </body>
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+	<script src="<%=request.getContextPath()%>/script/crm/member/addCustom.js"></script>
+</html>

@@ -1,0 +1,288 @@
+package com.ideassoft.pmsinhouse.controller;
+
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONObject;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.pmsinhouse.service.HouseStasticService;
+import com.ideassoft.bean.House;
+import com.ideassoft.bean.HouseAccount;
+import com.ideassoft.core.annotation.interfaces.RightMethodControl;
+import com.ideassoft.core.annotation.interfaces.RightModelControl;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.RightConstants;
+import com.ideassoft.util.DateUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Transactional
+@RightModelControl( rightModel = RightConstants.RightModel.HOUSE_CONTROL )
+@Controller
+public class HouseStatisticCtrl {
+	@Autowired
+	private HouseStasticService houseStasticService;
+	
+	
+	
+	/**
+	 * 
+	 * @Description 当日房态统计
+	 * @author ideas_mengl
+	 * @date   2018年5月21日下午3:23:09
+	 * @return
+	 */
+	@RequestMapping("/currentHouse.do")
+	public ModelAndView currentHouse(HttpServletRequest request){
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);		
+		ModelAndView mv = new ModelAndView();
+		String staffId = loginUser.getStaff().getStaffId();
+		String madate = request.getParameter("madate");
+		HouseAccount account = (HouseAccount) houseStasticService.findOneByProperties(HouseAccount.class, "staffId", staffId,"status", "1" );
+		String sql ;
+		List<?> result;
+		if(account == null){
+			sql = "queryCurrentHouseNew";
+			result = houseStasticService.findBySQL(sql, true);
+		}else{
+			List houses = houseStasticService.findByProperties(House.class, "staffId", account.getHouseAccountName(), "status" ,"1");
+			if(houses.size() > 0){
+				sql = "queryCurrentHouse";
+				result = houseStasticService.findBySQL(sql,new String []{staffId,staffId,staffId,staffId,staffId,staffId,staffId}, true);	
+			}else{
+				sql = "queryCurrentHouseNew";
+				result = houseStasticService.findBySQL(sql, true);	
+			}	
+		}
+		
+		mv.addObject("result", result);
+		mv.addObject("madate", madate);
+		mv.setViewName("page/ipmshouse/topMenu/houseStatistics/currentStatus");
+		//mv.setViewName("page/ipmspage/houseStatistics/currentStatus");
+		return mv;
+	}
+	
+	/**
+	 * 
+	 * @Description 远期房态查询数据展示页面
+	 * @author ideas_mengl
+	 * @date   2018年5月22日上午11:40:59
+	 * @param request
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping("/forwardHouse.do")
+	public ModelAndView forwardHouse(HttpServletRequest request){
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);		
+		ModelAndView mv = new ModelAndView();
+		boolean flag = true;
+		String staffId = loginUser.getStaff().getStaffId();
+		String madate = request.getParameter("madate");
+		String edate = request.getParameter("edate");
+		List<String> timelist = new ArrayList<String>();
+		timelist.add(madate);
+		List<Object> result = null;
+		List<String> timeParamList = new ArrayList<String>();
+		Map<String, List<Object>> listinfo = new HashMap<String, List<Object>>();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(DateUtil.s2d(madate, "yy/MM/dd"));
+		
+		Calendar calendar2 = Calendar.getInstance();
+		calendar2.setTime(DateUtil.s2d(edate, "yy/MM/dd"));
+			while(flag){
+				calendar.add(Calendar.DATE, 1);
+				timelist.add(DateUtil.d2s(calendar.getTime(), "yyyy/MM/dd"));
+				if(calendar.compareTo(calendar2) == 0){
+					
+                     flag = false;
+				}
+			}
+		HouseAccount account = (HouseAccount) houseStasticService.findOneByProperties(HouseAccount.class, "staffId", staffId,"status", "1" );
+		if(account == null){
+			Map<String,List<String>> map = new HashMap<String,List<String>>();
+			for(String timeParam : timelist){
+				String str ="select r6.*,(r6.zg - r6.weiXiu - r6.tingShou) keShou2,(r6.zg - r6.zaiZhu - r6.tingshou - r6.weiXiu - r6.yuDing) keShou,round((r6.zaiZhu / r6.zg) * 100, 2) || '%' rzrate, round(((r6.zaiZhu + r6.yuDing) / r6.zg) * 100, 2) || '%' czrate "+
+							"from (select * from (select nvl(count(o.order_id), '0') zaiZhu from TB_P_ORDER o  where to_char(o.arrival_time, 'yyyy/MM/dd') <=  '"
+							+timeParam+"' and to_char(o.leave_time, 'yyyy/MM/dd') >   '"
+							+timeParam+"'   and o.status = '3' and o.theme = '3' and o.branch_id in (select t.house_id from TB_P_HOUSE t where  t.status <> '0')) rr1, "
+							+"(select count(p.log_id) tingShou from tb_p_haltplan p where p.halt_type = '1' and to_char(p.start_time, 'yyyy/MM/dd') <=   '"+timeParam+"'  and to_char(p.end_time, 'yyyy/MM/dd') >   '"+timeParam+"'  and p.status in ('1', '3') and p.branch_id in (select t.house_id from TB_P_HOUSE t where  t.status <> '0')) rr2,"
+							+"(select count(rp.branch_id) weiXiu from tb_p_repairapply rp where rp.status in ('2', '3') and to_char(rp.application_date, 'yyyy/MM/dd') <= '"+timeParam+"' and rp.branch_id in (select t.house_id from TB_P_HOUSE t where  t.status <> '0')) r3, "
+							+"(select count(od.order_id) yuDing from TB_P_ORDER od where od.theme = '3' and to_char(od.arrival_time, 'yyyy/MM/dd') <=   '"+timeParam+"'  and to_char(od.leave_time, 'yyyy/MM/dd') >   '"+timeParam+"'  and od.status in ('1', '2') and od.branch_id in (select t.house_id from TB_P_HOUSE t where  t.status <> '0')) r4,"
+							+"(select count(h7.house_id) zg from tb_p_house h7 where h7.status <> '0') r5) r6";
+				result = houseStasticService.findBySQL(str);
+				listinfo.put(timeParam,  result);
+				timeParamList.add(timeParam);
+				
+			}
+		}else{
+			List houses = houseStasticService.findByProperties(House.class, "staffId", account.getHouseAccountName(), "status" ,"1"); 
+			Map<String,List<String>> map = new HashMap<String,List<String>>();
+			for(String timeParam : timelist){
+				String str;
+				if(houses.size() > 0){
+					str =" select r6.*,(r6.zg - r6.weiXiu - r6.tingShou) keShou2,(r6.zg - r6.zaiZhu - r6.tingshou - r6.weiXiu - r6.yuDing) keShou,round((r6.zaiZhu / r6.zg) * 100, 2) || '%' rzrate, round(((r6.zaiZhu + r6.yuDing) / r6.zg) * 100, 2) || '%' czrate "+
+							"from (select * from (select nvl(count(o.order_id), '0') zaiZhu from TB_P_ORDER o  where to_char(o.arrival_time, 'yyyy/MM/dd') <=  '"
+							+timeParam+"' and to_char(o.leave_time, 'yyyy/MM/dd') >   '"
+							+timeParam+"'   and o.status = '3' and o.theme = '3' and o.branch_id in (select t.house_id from TB_P_HOUSE t, TB_C_HOUSEACCOUNT hacc where t.staff_id = hacc.houseaccount_name  and t.status <> '0' and hacc.staff_id like '%' || '"+staffId
+							+"' || '%'  and hacc.status = '1')) rr1, "
+							+"(select count(p.log_id) tingShou from tb_p_haltplan p where p.halt_type = '1' and to_char(p.start_time, 'yyyy/MM/dd') <=   '"+timeParam+"'  and to_char(p.end_time, 'yyyy/MM/dd') >   '"+timeParam+"'  and p.status in ('1', '3') and p.branch_id in (select t2.house_id from TB_P_HOUSE t2, TB_C_HOUSEACCOUNT hacc where t2.staff_id = hacc.houseaccount_name and t2.status <> '0' and hacc.staff_id like '%' ||  '"+staffId+"' || '%' and hacc.status = '1')) rr2,"
+							+"(select count(rp.branch_id) weiXiu from tb_p_repairapply rp where rp.status in ('2', '3') and to_char(rp.application_date, 'yyyy/MM/dd') <= '"+timeParam+"' and rp.branch_id in (select t3.house_id from TB_P_HOUSE t3, TB_C_HOUSEACCOUNT hacc where t3.staff_id = hacc.houseaccount_name and t3.status <> '0' and hacc.staff_id like '%' ||  '"+staffId+"' || '%' and hacc.status = '1')) r3, "
+							+"(select count(od.order_id) yuDing from TB_P_ORDER od where od.theme = '3' and to_char(od.arrival_time, 'yyyy/MM/dd') <=   '"+timeParam+"'  and to_char(od.leave_time, 'yyyy/MM/dd') >   '"+timeParam+"'  and od.status in ('1', '2') and od.branch_id in (select t4.house_id from TB_P_HOUSE t4, TB_C_HOUSEACCOUNT hacc where t4.staff_id = hacc.houseaccount_name and t4.status <> '0' and hacc.staff_id like '%' || '"+staffId+"' || '%' and hacc.status = '1')) r4,"
+							+"(select count(h7.house_id) zg from tb_p_house h7, TB_C_HOUSEACCOUNT hacc where h7.staff_id = hacc.houseaccount_name and h7.status <> '0' and hacc.staff_id like '%' || '"+staffId+"' || '%' and hacc.status = '1') r5) r6";
+				}else{
+					str ="select r6.*,(r6.zg - r6.weiXiu - r6.tingShou) keShou2,(r6.zg - r6.zaiZhu - r6.tingshou - r6.weiXiu - r6.yuDing) keShou,round((r6.zaiZhu / r6.zg) * 100, 2) || '%' rzrate, round(((r6.zaiZhu + r6.yuDing) / r6.zg) * 100, 2) || '%' czrate "+
+							"from (select * from (select nvl(count(o.order_id), '0') zaiZhu from TB_P_ORDER o  where to_char(o.arrival_time, 'yyyy/MM/dd') <=  '"
+							+timeParam+"' and to_char(o.leave_time, 'yyyy/MM/dd') >   '"
+							+timeParam+"'   and o.status = '3' and o.theme = '3' and o.branch_id in (select t.house_id from TB_P_HOUSE t where  t.status <> '0')) rr1, "
+							+"(select count(p.log_id) tingShou from tb_p_haltplan p where p.halt_type = '1' and to_char(p.start_time, 'yyyy/MM/dd') <=   '"+timeParam+"'  and to_char(p.end_time, 'yyyy/MM/dd') >   '"+timeParam+"'  and p.status in ('1', '3') and p.branch_id in (select t.house_id from TB_P_HOUSE t where  t.status <> '0')) rr2,"
+							+"(select count(rp.branch_id) weiXiu from tb_p_repairapply rp where rp.status in ('2', '3') and to_char(rp.application_date, 'yyyy/MM/dd') <= '"+timeParam+"' and rp.branch_id in (select t.house_id from TB_P_HOUSE t where  t.status <> '0')) r3, "
+							+"(select count(od.order_id) yuDing from TB_P_ORDER od where od.theme = '3' and to_char(od.arrival_time, 'yyyy/MM/dd') <=   '"+timeParam+"'  and to_char(od.leave_time, 'yyyy/MM/dd') >   '"+timeParam+"'  and od.status in ('1', '2') and od.branch_id in (select t.house_id from TB_P_HOUSE t where  t.status <> '0')) r4,"
+							+"(select count(h7.house_id) zg from tb_p_house h7 where h7.status <> '0') r5) r6";
+				}
+				result = houseStasticService.findBySQL(str);
+				listinfo.put(timeParam,  result);
+				timeParamList.add(timeParam);
+				
+			}
+		}
+
+		mv.addObject("listinfo", JSONObject.fromObject(listinfo));
+		mv.addObject("timeParamList", timeParamList);
+		mv.setViewName("page/ipmshouse/topMenu/houseStatistics/forwardHouse");
+		return mv;
+	}
+	/**
+	 * 
+	 * @Description 民宿远期房态统计跳转页面
+	 * @author ideas_mengl
+	 * @date   2018年7月24日下午2:20:04
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/houseStatistics.do")
+	@RightMethodControl(rightType = RightConstants.RightType.HO_STATIC)
+	public ModelAndView houseStatistics(HttpServletRequest request, HttpServletResponse response){
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/ipmshouse/topMenu/houseStatistics/houseStatistics");
+		return mv;
+	}
+	
+	/**
+	 * 
+	 * @Description 民宿房态图跳转页面
+	 * @author ideas_mengl
+	 * @date   2018年7月24日下午2:20:41
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/room_statusinhouse.do")
+	@RightMethodControl(rightType = RightConstants.RightType.HO_STATUS)
+	public ModelAndView room_statusinhouse(HttpServletRequest request, HttpServletResponse response){
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/ipmshouse/room_status/room_statusinhouse");
+		return mv;
+	}
+	
+	/**
+	 * 
+	 * @Description 民宿订单跳转
+	 * @author ideas_mengl
+	 * @date   2018年7月24日下午2:29:53
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/houseorder.do")
+	@RightMethodControl(rightType = RightConstants.RightType.HO_ORDERF)
+	public ModelAndView houseorder(HttpServletRequest request, HttpServletResponse response){
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/ipmshouse/houseorder/houseorder");
+		return mv;
+	}
+	
+	/**
+	 * 
+	 * @Description 民宿房单跳转
+	 * @author ideas_mengl
+	 * @date   2018年7月24日下午2:33:51
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/housecheck.do")
+	@RightMethodControl(rightType = RightConstants.RightType.HO_CHECK)
+	public ModelAndView housecheck(HttpServletRequest request, HttpServletResponse response){
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/ipmshouse/housecheck/housecheck");
+		return mv;
+	}
+	
+	/**
+	 * 				
+	 * @Description 民宿日志
+	 * @author ideas_mengl
+	 * @date   2018年7月24日下午2:36:40
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/integralhouse.do")
+	@RightMethodControl(rightType = RightConstants.RightType.HO_INTEG)
+	public ModelAndView integralhouse(HttpServletRequest request, HttpServletResponse response){
+		ModelAndView mv = new ModelAndView();
+		String type = request.getParameter("type");
+		mv.setViewName("page/ipmshouse/houseintegral/integralhouse");
+		mv.addObject("type",type);
+		return mv;
+	}
+	
+	/**
+	 * 
+	 * @Description 民宿停售房
+	 * @author ideas_mengl
+	 * @date   2018年7月24日下午3:06:56
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/stopsellhouse.do")
+	@RightMethodControl(rightType = RightConstants.RightType.HO_STOP)
+	public ModelAndView stopsellhouse(HttpServletRequest request, HttpServletResponse response){
+		ModelAndView mv = new ModelAndView();
+		String type = request.getParameter("type");
+		mv.setViewName("page/ipmshouse/stophouse/stopsellhouse");
+		mv.addObject("type",type);
+		return mv;
+	}
+	
+	/**
+	 * 
+	 * @Description 民宿远期房态
+	 * @author ideas_mengl
+	 * @date   2018年7月24日下午3:08:12
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/house_forward.do")
+	@RightMethodControl(rightType = RightConstants.RightType.HO_STOP)
+	public ModelAndView houseforward(HttpServletRequest request, HttpServletResponse response){
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/ipmshouse/topMenu/room_forward/house_forward");
+		return mv;
+	}
+}

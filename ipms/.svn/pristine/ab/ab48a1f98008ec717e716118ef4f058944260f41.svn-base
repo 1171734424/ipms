@@ -1,0 +1,64 @@
+ul,li{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+input{
+	background:none;
+   	outline:none;
+   	border:0px;
+}
+.div_ul li input{
+	height: 35px;
+	width: 80%;
+	border: 1px solid #ADADAD;
+}
+.div_img_input{
+	width: 100%;
+}
+.div_ul li label{
+	display:inline-block;
+	height: 35px;
+	width: 35%;
+}
+.big_div{
+	width: 100%;
+}
+.ul_div{
+	padding:17px;
+}
+.div_ul{
+	width: 100%;
+}
+.div_li{
+	float: left;
+	width: 50%;
+	margin: 5px 0;
+}
+.div_big_li{
+	width: 100%;
+} 
+.button_div{
+	height: 5%;
+	width: 800px;
+	padding: 12px 0;
+	margin-left: -55px;
+}
+.button_div button{
+	float: right;
+	width: 100px;
+	height: 35px;
+	border: 0;
+	border-radius: 5px;
+	margin-left: 15px;
+}
+.left_button{
+	color: oldlace;
+	background-color: #FC8A15;
+	margin-top: 10px;
+}
+.right_button{
+	color: oldlace;
+	background-color: #5A5D9D;
+	margin-top: 10px;
+}

@@ -1,0 +1,757 @@
+package com.ideassoft.apartment.controller;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONArray;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.apartment.service.ApartmentGoodsService;
+import com.ideassoft.bean.Bill;
+import com.ideassoft.bean.Branch;
+import com.ideassoft.bean.Contrart;
+import com.ideassoft.bean.Goods;
+import com.ideassoft.bean.Order;
+import com.ideassoft.bean.Recording;
+import com.ideassoft.bean.SaleLog;
+import com.ideassoft.bean.Staff;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.bean.WorkBill;
+import com.ideassoft.bean.WorkBillDetail;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.annotation.interfaces.RightMethodControl;
+import com.ideassoft.core.annotation.interfaces.RightModelControl;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.RightConstants;
+import com.ideassoft.core.jdbc.SqlBuilder;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.util.DateUtil;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Transactional
+@Controller
+@RightModelControl(rightModel = RightConstants.RightModel.APARTMENT_CONTROL)
+public class ApartmentGoodsController {
+	
+	@Autowired
+	private ApartmentGoodsService apartmentGoodsService;
+	
+	/**
+	 * 商品售卖(公寓)-跳转商品售卖-侧面导航栏页面
+	 * 
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/apartmentGoods.do")
+	@RightMethodControl(rightType = RightConstants.RightType.APA_GOODS)
+	public ModelAndView apartmentGoods(HttpServletRequest request) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchid = loginuser.getStaff().getBranchId();
+		List<?> categoryCondition = apartmentGoodsService.getCategorycondition(branchid);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentgoods/goods");
+		request.setAttribute("categoryCondition", categoryCondition);
+		return mv;
+	}
+	
+	/**
+	 * 商品售卖(公寓)-跳转小商品售卖页面
+	 * 
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/goodsApartPage.do")
+	public ModelAndView goodsApartPage(HttpServletRequest request) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchid = loginuser.getStaff().getBranchId();
+		/*if (branchid.equals(SystemConstants.User.BRANCH_ID)) {
+			branchid = "%";
+		}*/
+		List<?> categoryCondition = apartmentGoodsService.getCategorycondition(branchid);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentgoods/goodspage");
+		request.setAttribute("categoryCondition", categoryCondition);
+		return mv;
+	}
+	
+	/**
+	 * 商品售卖(公寓)-跳转小商品管理查询页面
+	 * 
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdmanageApartData.do")
+	public ModelAndView gdmanageApartData(HttpServletRequest request) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchid = loginuser.getStaff().getBranchId();
+		/*if (branchid.equals(SystemConstants.User.BRANCH_ID)) {
+			branchid = "%";
+		}*/
+		List<?> categoryCondition = apartmentGoodsService.getCategorycondition(branchid);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentgoods/gdsmanage");
+		request.setAttribute("categoryCondition", categoryCondition);
+		return mv;
+	}
+	
+	/**
+	 * 商品售卖(公寓)-跳转小商品管理详情页面
+	 * 
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/goodsApartManage.do")
+	public ModelAndView goodsApartManage(HttpServletRequest request) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		pagination.setRows(13);
+		// @SuppressWarnings("unchecked")
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginuser.getStaff().getBranchId();
+		/*if (branchId.equals(SystemConstants.User.BRANCH_ID)) {
+			branchId = "%";
+		}*/
+		List<?> goodsSale = apartmentGoodsService.getGoodssale(pagination, branchId);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentgoods/gdsmanagedata");
+		mv.addObject("goodsSale", goodsSale);
+		mv.addObject("pagination", pagination);
+		return mv;
+	}
+	
+	/**
+	 * 商品售卖(公寓)-下架商品
+	 * 
+	 * @param request
+	 * @param response
+	 * @param gdsid
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdsApartDown.do")
+	public void gdsApartDown(HttpServletRequest request, HttpServletResponse response, String gdsid) throws Exception {
+		Goods goods = ((Goods) (apartmentGoodsService.findOneByProperties(Goods.class, "goodsId", gdsid)));
+		goods.setStatus("2");
+		apartmentGoodsService.save(goods);
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+	}
+	
+	/**
+	 * 商品售卖(公寓)-上架商品
+	 * 
+	 * @param request
+	 * @param response
+	 * @param gdsid
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdsApartUp.do")
+	public void gdsApartUp(HttpServletRequest request, HttpServletResponse response, String gdsid) throws Exception {
+		Goods goods = ((Goods) (apartmentGoodsService.findOneByProperties(Goods.class, "goodsId", gdsid)));
+		goods.setStatus("1");
+		apartmentGoodsService.save(goods);
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+	}
+	
+	/**
+	 * 商品售卖(公寓)-商品管理查询条件
+	 * 
+	 * @param request
+	 * @param response
+	 * @param goodsid
+	 * @param goodsname
+	 * @param categoryid
+	 * @param status
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdmanageApartCondition.do")
+	public ModelAndView gdmanageApartCondition(HttpServletRequest request, HttpServletResponse response, String goodsid,
+			String goodsname, String categoryid, String status) throws Exception {
+		
+		ModelAndView mv = new ModelAndView();
+			Pagination pagination = SqlBuilder.buildPagination(request);
+			LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+			String branchId = loginuser.getStaff().getBranchId();
+			List<?> gdsmanageCondition = apartmentGoodsService.getGdmanagecondition(goodsid, goodsname, categoryid, status,
+					branchId, pagination);
+			mv.setViewName("page/apartment/apartmentLeftmenu/apartmentgoods/gdsmanagecondition");
+			mv.addObject("gdsmanageCondition", gdsmanageCondition);
+			mv.addObject("goodsid", goodsid);
+			mv.addObject("goodsname", goodsname);
+			mv.addObject("categoryid", categoryid);
+			mv.addObject("status", status);
+			mv.addObject("pagination", pagination);
+			return mv;
+	}
+	
+	/**
+	 * 商品售卖(公寓)-商品售卖查询功能
+	 * 
+	 * @param request
+	 * @param response
+	 * @param goodsid
+	 * @param goodsname
+	 * @param categoryid
+	 * @param gdscontent
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdsaleApartCondition.do")
+	public ModelAndView gdsaleApartCondition(HttpServletRequest request, HttpServletResponse response, String goodsid,
+			String goodsname, String categoryid,String gdscontent) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		pagination.setRows(13);
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginuser.getStaff().getBranchId();
+		/*if (branchId.equals(SystemConstants.User.BRANCH_ID)) {
+			branchId = "%";
+		}*/
+		List<?> gdsaleCondition = apartmentGoodsService.getGdsalecondition(goodsid, goodsname, categoryid, branchId,
+				pagination);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentgoods/gdsalecondition");
+		mv.addObject("gdsaleCondition", gdsaleCondition);
+		mv.addObject("pagination", pagination);
+		mv.addObject("gdscontent", gdscontent);
+		mv.addObject("goodsid", goodsid);
+		mv.addObject("goodsname", goodsname);
+		mv.addObject("categoryid", categoryid);
+		return mv;
+	}
+	
+	/**
+	 * 商品售卖(公寓)-单品售卖
+	 * 
+	 * @param request
+	 * @param gdsid
+	 * @param gdsname
+	 * @param gdsprice
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdsApartPage.do")
+	public ModelAndView gdsApartPage(HttpServletRequest request, String gdsid, String gdsname, String gdsprice)
+			throws Exception {
+		ModelAndView mv = new ModelAndView();
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String loginstaff = loginuser.getStaff().getStaffId().toString();
+		Branch branchData = (Branch) apartmentGoodsService.findOneByProperties(Branch.class, "branchId", loginuser.getStaff().getBranchId());
+		List<?> gdsproject = apartmentGoodsService.getGdsproject();
+		List<?> gdsprojectpay = apartmentGoodsService.getGdsprojectpay();
+		String branchid = loginuser.getStaff().getBranchId();
+		List<?> workbill = apartmentGoodsService.getWorkbill(branchid, loginstaff);
+		//List<?> house = leftmenuService.findByProperties(House.class, "staffId", loginuser.getStaff().getStaffId());
+		List<?> house = apartmentGoodsService.findBySQL("fHouseWithStaffid",new String[]{loginuser.getStaff().getStaffId(),loginuser.getStaff().getStaffId()}, true);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentgoods/gdspage");
+		String systemtheme = "hotel";
+		if (branchData.getBranchType().equals(CommonConstants.Branch.APARTMENTID)) {
+			systemtheme = "depart";
+		}
+		if (house.size() > 0) {
+			systemtheme = "house";
+		}
+		request.setAttribute("systemtheme", systemtheme);
+		request.setAttribute("gdsid", gdsid);
+		request.setAttribute("gdsname", gdsname);
+		request.setAttribute("gdsprice", gdsprice);
+		request.setAttribute("gdsproject", gdsproject);
+		request.setAttribute("gdsprojectpay", gdsprojectpay);
+		request.setAttribute("workbill", workbill);
+		return mv;
+	}
+	
+	/**
+	 * 商品售卖(公寓)-单品售卖 -判断挂房账时是否有房号，如果没有直接弹出提示框，如果有正常进入！
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws Exception
+	 */
+	@RequestMapping("/selectApartgdsRoom.do")
+	public  void selectApartgdsRoom(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginuser.getStaff().getBranchId();
+		List<?> gdsroomId;
+		Branch branchInfo = (Branch) apartmentGoodsService.findOneByProperties(Branch.class, "branchId", branchId);
+		if (branchInfo.getRank().equals(CommonConstants.SystemLevel.MarketCenter)) {
+			gdsroomId = apartmentGoodsService.findBySQL("querylivehouse", new String[] { loginuser.getStaff().getStaffId()}, true);
+		} else if (branchInfo.getBranchType().equals(CommonConstants.Branch.APARTMENTID)) {
+			gdsroomId = apartmentGoodsService.findBySQL("gdsroomIdapart", new String[] { branchId,branchId, branchId,branchId}, true);
+		} else {
+			gdsroomId = apartmentGoodsService.getGdsroomid(branchId,CommonConstants.SystemTheme.HOTEL);
+		}
+		String a = "没有在住房间!";
+		if (gdsroomId.size() <= 0) {
+			JSONUtil.responseJSON(response, new AjaxResult(-1, a));
+		}else{
+			a = "有在住房间！";
+			JSONUtil.responseJSON(response, new AjaxResult(1,a));
+		}
+	}
+	
+	/**
+	 * 商品售卖(公寓)-单品售卖-选择房间挂房账
+	 * 
+	 * @param request
+	 * @param response
+	 * @param totalprice
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdsroomApartSelect.do")
+	public ModelAndView gdsroomApartSelect(HttpServletRequest request, HttpServletResponse response, String totalprice) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginuser.getStaff().getBranchId();
+		// if (branchId.equals(SystemConstants.User.BRANCH_ID)) {
+		// branchId = "%";
+		// }
+		List<?> gdsroomId;
+		Branch branchInfo = (Branch) apartmentGoodsService.findOneByProperties(Branch.class, "branchId", branchId);
+		if (branchInfo.getRank().equals(CommonConstants.SystemLevel.MarketCenter)) {//民宿
+			gdsroomId = apartmentGoodsService.findBySQL("querylivehouse", new String[] { loginuser.getStaff().getStaffId()}, true);
+			mv.addObject("theme", CommonConstants.Branch.HOUSEID);
+		} else if (branchInfo.getBranchType().equals(CommonConstants.Branch.APARTMENTID)) {
+			gdsroomId = apartmentGoodsService.findBySQL("gdsroomIdapart", new String[] { branchId,branchId, branchId,branchId}, true);
+			mv.addObject("theme", CommonConstants.Branch.APARTMENTID);
+
+		} else {//酒店
+			gdsroomId = apartmentGoodsService.getGdsroomid(branchId,CommonConstants.SystemTheme.HOTEL);
+			mv.addObject("theme", CommonConstants.Branch.HOTELID);
+		}
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentgoods/gdsroomselect");
+		mv.addObject("allCost", totalprice);
+		mv.addObject("gdsroomId", gdsroomId);
+		return mv;
+	}
+	
+	/**
+	 * 商品售卖(公寓)-新建工作账页面
+	 * 
+	 * @param request
+	 * @param response
+	 */
+	@RequestMapping("/getcreatapartworkbillinfo.do")
+	public void getcreatapartworkbillinfo(HttpServletRequest request, HttpServletResponse response) {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		WorkBill workbill = new WorkBill();
+		Calendar calendar = Calendar.getInstance();
+		String workbillid = null;// DateUtil.d2s(calendar.getTime(), "yyMMdd") +
+									// workservice.getSequence("SEQ_NEW_WORKBILL");
+		workbill.setWorkbillId(workbillid);
+		workbill.setRecordTime(calendar.getTime());
+		workbill.setRecordUser(staff.getStaffId());
+		String recordTime = DateUtil.d2s(calendar.getTime(), "yyyy/MM/dd HH:mm");
+		String staffName = staff.getStaffName();
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("workbill", workbill);
+		map.put("recordTime", recordTime);
+		map.put("staffName", staffName);
+		try {
+			JSONUtil.responseJSON(response, JSONUtil.fromObject(map));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 商品售卖(公寓)-提交填写的工作账
+	 * 
+	 * @param workbill
+	 * @param request
+	 * @param response
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping("/creatapartworkbill.do")
+	public void creatapartworkbill(WorkBill workbill, HttpServletRequest request, HttpServletResponse response) {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchId = staff.getBranchId();
+		String recorduser = staff.getStaffId();
+		List<WorkBill> listworkbill = apartmentGoodsService.findByProperties(WorkBill.class, "branchId", branchId, "status", CommonConstants.WorkBillStatus.NEW);
+		if (listworkbill.size() <= 0) {
+			String workbillid = DateUtil.d2s(new Date(), "yyMMdd") + branchId + apartmentGoodsService.getSequence("SEQ_NEW_WORKBILL");
+			workbill.setWorkbillId(workbillid);
+			workbill.setRecordUser(recorduser);
+			workbill.setBranchId(branchId);
+			workbill.setStatus(CommonConstants.WorkBillStatus.NEW);
+			try {
+				apartmentGoodsService.save(workbill);
+				JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, "创建成功!"));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.FALSE, "已有未结工作账!"));
+		}
+	}
+	
+	/**
+	 *  商品售卖(公寓)-挂房账
+	 * 
+	 * @param request
+	 * @param response
+	 * @param gdscheckid
+	 * @param totalprice
+	 * @param gdsroomid
+	 * @param gdsid
+	 * @param totalnumber
+	 * @param gdsprice
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdsApartRoompay.do")
+	public void gdsApartRoompay(HttpServletRequest request, HttpServletResponse response, String gdscheckid,
+			String totalprice, String gdsroomid, String gdsid, String totalnumber, String gdsprice) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		SysParam sysParamrpay = ((SysParam) (apartmentGoodsService.findOneByProperties(SysParam.class, "paramType",
+				"PROJECT", "paramName", "商品售卖")));
+		String content = sysParamrpay.getContent().toString();
+		Staff staff = loginuser.getStaff();
+		Order order = (Order) apartmentGoodsService.findById(Order.class, gdscheckid);
+		Contrart contract = (Contrart) apartmentGoodsService.findById(Contrart.class, gdscheckid);
+		String branchid = order != null ? order.getBranchId() : contract.getBranchId();
+		String logId = this.apartmentGoodsService.getSequence("SEQ_NEW_BILL", null);
+		Date day = new Date();
+		SimpleDateFormat df = new SimpleDateFormat("yyMMdd");
+		String t = df.format(day);
+		String datId = t + branchid + logId;
+		Double cost = Double.parseDouble(totalprice);
+		Bill bill = new Bill();
+		bill.setBillId(datId);
+		bill.setBranchId(branchid);
+		bill.setCheckId(gdscheckid);
+		bill.setProjectId(content);
+		bill.setProjectName("商品售卖");
+		bill.setDescribe("商品");
+		bill.setCost(cost);
+		bill.setPay((double) 0);
+		bill.setPayment("0");
+		bill.setStatus("1");
+		bill.setRecordUser(staff.getStaffId());
+		apartmentGoodsService.save(bill);
+		Goods goods = ((Goods) (apartmentGoodsService.findOneByProperties(Goods.class, "goodsId", gdsid)));
+		// String goodsname = goods.getGoodsName();
+		String categoryid = goods.getCategoryId();
+		// GoodsCategory goodscategory = ((GoodsCategory)
+		// (LeftmenuService.findOneByProperties(GoodsCategory.class,
+		// "categoryId", categoryid)));
+		// String categoryname = goodscategory.getCategoryName();
+		String salelogId = this.apartmentGoodsService.getSequence("SEQ_NEW_SALELOG", null);
+		String saledatId = t + branchid + salelogId;
+		Integer amount = Integer.valueOf(totalnumber);
+		Double price = Double.parseDouble(gdsprice);
+		SaleLog salelog = new SaleLog();
+		salelog.setLogId(saledatId);
+		salelog.setBranchId(branchid);
+		salelog.setDebts("2");
+		salelog.setCheckId(gdscheckid);
+		salelog.setRoomId(gdsroomid);
+		salelog.setCategoryId(categoryid);
+		salelog.setGoodsName(gdsid);
+		salelog.setAmount(amount);
+		salelog.setPrice(price);
+		salelog.setPayType("1");
+		salelog.setRecordUser(staff.getStaffId());
+		apartmentGoodsService.save(salelog);
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+	} 
+	
+	/**
+	 * 商品售卖(公寓)-挂哑房
+	 * 
+	 * @param request
+	 * @param response
+	 * @param totalprice
+	 * @param gdsid
+	 * @param totalnumber
+	 * @param gdsprice
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdsApartDumbpay.do")
+	public void gdsApartDumbpay(HttpServletRequest request, HttpServletResponse response, 
+			String totalprice, String gdsid, String totalnumber, String gdsprice) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchId = loginuser.getStaff().getBranchId();
+		SysParam sysParam = ((SysParam) (apartmentGoodsService.findOneByProperties(SysParam.class, "paramType",
+				"PROJECT", "paramName", "挂哑房", "status", "1")));
+		SysParam sysParams = ((SysParam) (apartmentGoodsService.findOneByProperties(SysParam.class, "paramType",
+				"BILLPAYMENT", "paramName", "挂哑房", "status", "1")));
+		WorkBill workbill = (WorkBill) apartmentGoodsService.findOneByProperties(WorkBill.class, "branchId", branchId, 
+				"status", CommonConstants.WorkBillStatus.NEW);
+		/*String content = sysParam.getContent().toString();*/
+/*		Order order = (Order) leftmenuService.findById(Order.class, gdscheckid);
+		Contrart contract = (Contrart) leftmenuService.findById(Contrart.class, gdscheckid);*/
+		/*String logId = this.apartmentGoodsService.getSequence("SEQ_NEW_BILL", null);*/
+		Date day = new Date();
+		SimpleDateFormat df = new SimpleDateFormat("yyMMdd");
+		String t = df.format(day);
+		/*String datId = t + branchId + logId;*/
+		Double cost = Double.parseDouble(totalprice);
+		WorkBillDetail wbDetail = new WorkBillDetail();
+		wbDetail.setBranchId(branchId);
+		wbDetail.setCost(cost);
+		wbDetail.setDescribe("商品售卖");
+		wbDetail.setDetailId(DateUtil.currentDate("yyMMdd") + branchId + apartmentGoodsService.getSequence("SEQ_NEW_WORKBILLDETAIL", null));
+		wbDetail.setPay(0.00);
+		wbDetail.setPayment(sysParams.getContent());
+		wbDetail.setProjectId(sysParam.getContent());
+		wbDetail.setProjectName(sysParam.getParamName());
+		wbDetail.setRecordTime(new Date());
+		wbDetail.setRecordUser(staff.getStaffId());
+		wbDetail.setWorkbillId(workbill.getWorkbillId());
+		wbDetail.setStatus("1");
+		apartmentGoodsService.save(wbDetail);
+		Goods goods = ((Goods) (apartmentGoodsService.findOneByProperties(Goods.class, "goodsId", gdsid)));
+		// String goodsname = goods.getGoodsName();
+		String categoryid = goods.getCategoryId();
+		// GoodsCategory goodscategory = ((GoodsCategory)
+		// (LeftmenuService.findOneByProperties(GoodsCategory.class,
+		// "categoryId", categoryid)));
+		// String categoryname = goodscategory.getCategoryName();
+		String salelogId = this.apartmentGoodsService.getSequence("SEQ_NEW_SALELOG", null);
+		String saledatId = t + branchId + salelogId;
+		Integer amount = Integer.valueOf(totalnumber);
+		Double price = Double.parseDouble(gdsprice);
+		SaleLog salelog = new SaleLog();
+		salelog.setLogId(saledatId);
+		salelog.setBranchId(branchId);
+		salelog.setDebts("1");
+		salelog.setCategoryId(categoryid);
+		salelog.setGoodsName(gdsid);
+		salelog.setAmount(amount);
+		salelog.setPrice(price);
+		salelog.setCheckId(workbill.getWorkbillId());
+		salelog.setPayType(sysParams.getContent());
+		salelog.setRecordUser(staff.getStaffId());
+		salelog.setRecordTime(new Date());
+		apartmentGoodsService.save(salelog);
+		Recording recording = new Recording();
+		recording.setRecordId(DateUtil.currentDate("yyMMdd") + branchId + apartmentGoodsService.getSequence("SEQ_NEW_RECORDING", null));
+		recording.setBranchId(branchId);
+		recording.setCheckId(workbill.getWorkbillId());
+		recording.setRecordType("2");
+		recording.setProjectId(sysParam.getContent());
+		recording.setFee(cost);
+		recording.setRecordUser(staff.getStaffId());
+		apartmentGoodsService.save(recording); 
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+	}
+	
+	/**
+	 * 商品售卖(公寓)-现金支付
+	 * 
+	 * @param request
+	 * @param response
+	 * @param gdscheckid
+	 * @param gdsworkbill
+	 * @param gdsworkbillname
+	 * @param totalprice
+	 * @param cashpayvalue
+	 * @param gdsid
+	 * @param totalnumber
+	 * @param gdsprice
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdsApartRoompaycash.do")
+	public void gdsApartRoompaycash(HttpServletRequest request, HttpServletResponse response, String gdscheckid, String gdsworkbill, String gdsworkbillname,
+			String totalprice, String cashpayvalue, String gdsid, String totalnumber, String gdsprice) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = loginuser.getStaff().getBranchId();
+		String logId = this.apartmentGoodsService.getSequence("SEQ_NEW_WORKBILLDETAIL", null);
+		Date day = new Date();
+		SimpleDateFormat df = new SimpleDateFormat("yyMMdd");
+		String t = df.format(day);
+		String datId = t + branchid + logId;
+		Double pay = Double.parseDouble(totalprice);
+		WorkBillDetail workbilldetail = new WorkBillDetail();
+		workbilldetail.setDetailId(datId);
+		workbilldetail.setBranchId(branchid);
+		SysParam paymentsysparam = (SysParam) apartmentGoodsService.findOneByProperties(SysParam.class, "paramType", "BILLPAYMENT", "content", "1");
+		String projectid = paymentsysparam.getOrderNo().toString();
+		SysParam projectsysparam = (SysParam) apartmentGoodsService.findOneByProperties(SysParam.class, "paramType", "PROJECT", "content", projectid);
+		String projectname = projectsysparam.getParamName();
+		/*bill.setProjectId(projectid);
+		bill.setProjectName(projectname);*/
+		workbilldetail.setProjectId(projectid);
+		workbilldetail.setProjectName(projectname);
+		workbilldetail.setDescribe("商品售卖");
+		workbilldetail.setPay(pay);
+		workbilldetail.setCost((double) 0);
+		workbilldetail.setPayment("1");
+		workbilldetail.setStatus("1");
+		workbilldetail.setRecordUser(staff.getStaffId());
+		workbilldetail.setWorkbillId(gdsworkbill);
+		apartmentGoodsService.save(workbilldetail);
+		Goods goods = ((Goods) (apartmentGoodsService.findOneByProperties(Goods.class, "goodsId", gdsid)));
+		String categoryid = goods.getCategoryId();
+		String salelogId = this.apartmentGoodsService.getSequence("SEQ_NEW_SALELOG", null);
+		String saledatId = t + branchid + salelogId;
+		Integer amount = Integer.valueOf(totalnumber);
+		Double price = Double.parseDouble(gdsprice);
+		SaleLog salelog = new SaleLog();
+		salelog.setLogId(saledatId);
+		salelog.setBranchId(branchid);
+		salelog.setDebts("1");
+		salelog.setCategoryId(categoryid);
+		salelog.setGoodsName(gdsid);
+		salelog.setAmount(amount);
+		salelog.setPrice(price);
+		salelog.setPayType("2");
+		salelog.setRecordUser(staff.getStaffId());
+		apartmentGoodsService.save(salelog);
+		String recordlogId = this.apartmentGoodsService.getSequence("SEQ_NEW_RECORDING", null);
+		String recorddatId = t + branchid + recordlogId;
+		Recording recording = new Recording();
+		recording.setRecordId(recorddatId);
+		recording.setBranchId(branchid);
+		recording.setCheckId(gdsworkbill);
+		recording.setRecordType("2");
+		recording.setProjectId(projectid);
+		recording.setFee(pay);
+		recording.setRecordUser(staff.getStaffId());
+		apartmentGoodsService.save(recording);
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+
+	}
+	/**
+	 * 商品售卖(公寓)-银行卡支付
+	 * 
+	 * @param request
+	 * @param response
+	 * @param gdscheckid
+	 * @param gdsworkbill
+	 * @param gdsworkbillname
+	 * @param totalprice
+	 * @param cardpayvalue
+	 * @param gdsid
+	 * @param totalnumber
+	 * @param gdsprice
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdsApartRoompaycard.do")
+	public void gdsApartRoompaycard(HttpServletRequest request, HttpServletResponse response, String gdscheckid, String gdsworkbill, String gdsworkbillname,
+			String totalprice, String cardpayvalue, String gdsid, String totalnumber, String gdsprice) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchid = loginuser.getStaff().getBranchId();
+		String logId = this.apartmentGoodsService.getSequence("SEQ_NEW_WORKBILLDETAIL", null);
+		Date day = new Date();
+		SimpleDateFormat df = new SimpleDateFormat("yyMMdd");
+		String t = df.format(day);
+		String datId = t + branchid + logId;
+		Double pay = Double.parseDouble(totalprice);
+		WorkBillDetail workbilldetail = new WorkBillDetail();
+		workbilldetail.setDetailId(datId);
+		workbilldetail.setBranchId(branchid);
+		SysParam paymentsysparam = (SysParam) apartmentGoodsService.findOneByProperties(SysParam.class, "paramType", "BILLPAYMENT", "content", "2");
+		String projectid = paymentsysparam.getOrderNo().toString();
+		SysParam projectsysparam = (SysParam) apartmentGoodsService.findOneByProperties(SysParam.class, "paramType", "PROJECT", "content", projectid);
+		String projectname = projectsysparam.getParamName();
+		workbilldetail.setProjectId(projectid);
+		workbilldetail.setProjectName(projectname);
+		workbilldetail.setDescribe("商品售卖");
+		workbilldetail.setPay(pay);
+		workbilldetail.setCost((double) 0);
+		workbilldetail.setPayment("2");
+		workbilldetail.setStatus("1");
+		workbilldetail.setRecordUser(staff.getStaffId());
+		workbilldetail.setVoucher(cardpayvalue);
+		workbilldetail.setWorkbillId(gdsworkbill);
+		apartmentGoodsService.save(workbilldetail);
+		Goods goods = ((Goods) (apartmentGoodsService.findOneByProperties(Goods.class, "goodsId", gdsid)));
+		String categoryid = goods.getCategoryId();
+		String salelogId = this.apartmentGoodsService.getSequence("SEQ_NEW_SALELOG", null);
+		String saledatId = t + branchid + salelogId;
+		Integer amount = Integer.valueOf(totalnumber);
+		Double price = Double.parseDouble(gdsprice);
+		SaleLog salelog = new SaleLog();
+		salelog.setLogId(saledatId);
+		salelog.setBranchId(branchid);
+		salelog.setDebts("1");
+		salelog.setCategoryId(categoryid);
+		salelog.setGoodsName(gdsid);
+		salelog.setAmount(amount);
+		salelog.setPrice(price);
+		salelog.setPayType("3");
+		salelog.setRecordUser(staff.getStaffId());
+		apartmentGoodsService.save(salelog);
+		String recordlogId = this.apartmentGoodsService.getSequence("SEQ_NEW_RECORDING", null);
+		String recorddatId = t + branchid + recordlogId;
+		Recording recording = new Recording();
+		recording.setRecordId(recorddatId);
+		recording.setBranchId(branchid);
+		recording.setRecordType("2");
+		recording.setProjectId(projectid);
+		recording.setFee(pay);
+		recording.setRecordUser(staff.getStaffId());
+		apartmentGoodsService.save(recording);
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+
+	}
+	
+	/**
+	 * 商品售卖(公寓)-批量售卖
+	 * 
+	 * @param request
+	 * @param saletype
+	 * @param newstr
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/gdsmulApartPage.do")
+	public ModelAndView gdsmulApartPage(HttpServletRequest request, String saletype, String newstr) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		List<?> gdsproject = apartmentGoodsService.getGdsproject();
+		List<?> gdsprojectpay = apartmentGoodsService.getGdsprojectpay();
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchid = loginuser.getStaff().getBranchId();
+		Branch branchData = (Branch) apartmentGoodsService.findOneByProperties(Branch.class, "branchId", branchid);
+		String loginstaff = loginuser.getStaff().getStaffId().toString();
+		List<?> workbill = apartmentGoodsService.getWorkbill(branchid, loginstaff);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentgoods/gdsmulpage");
+		List<Goods> listgoods = new ArrayList<Goods>();
+		JSONArray newstrr = new JSONArray(newstr);
+		for (int i = 0; i < newstrr.length(); i++) {
+			String s = newstrr.getString(i);
+			Goods goods = (Goods) apartmentGoodsService.findOneByProperties(Goods.class, "goodsId", s);
+			listgoods.add(goods);
+		}
+		//List<?> house = leftmenuService.findByProperties(House.class, "staffId", loginuser.getStaff().getStaffId());
+		List<?> house = apartmentGoodsService.findBySQL("fHouseWithStaffid",new String[]{loginuser.getStaff().getStaffId(),loginuser.getStaff().getStaffId()}, true);
+
+		String systemtheme = "hotel";
+		if (branchData.getBranchType().equals(CommonConstants.Branch.APARTMENTID)) {
+			systemtheme = "depart";
+		}
+		if (house.size() > 0) {
+			systemtheme = "house";
+		}
+		request.setAttribute("systemtheme", systemtheme);
+		request.setAttribute("listgoods", listgoods);
+		request.setAttribute("saletype", saletype);
+		request.setAttribute("gdsproject", gdsproject);
+		request.setAttribute("gdsprojectpay", gdsprojectpay);
+		request.setAttribute("workbill", workbill);
+		return mv;
+	}
+	
+}

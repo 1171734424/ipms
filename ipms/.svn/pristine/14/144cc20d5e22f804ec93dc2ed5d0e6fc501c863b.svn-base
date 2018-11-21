@@ -1,0 +1,906 @@
+package com.ideassoft.util;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import com.ideassoft.bean.Bill;
+import com.ideassoft.bean.Check;
+import com.ideassoft.bean.CheckUser;
+import com.ideassoft.bean.Member;
+import com.ideassoft.bean.MemberAccount;
+import com.ideassoft.bean.MemberRank;
+import com.ideassoft.bean.OrdchePrice;
+import com.ideassoft.bean.Order;
+import com.ideassoft.bean.RoomMapping;
+import com.ideassoft.bean.RoomPrice;
+import com.ideassoft.bean.RoomType;
+import com.ideassoft.bean.Staff;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.bean.WorkBillDetail;
+import com.ideassoft.bean.wrapper.CheckAllAmount;
+import com.ideassoft.bean.wrapper.CheckoutRoom;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.ErrorConstants;
+import com.ideassoft.core.exception.DAOException;
+import com.ideassoft.core.exception.MessageException;
+import com.ideassoft.core.factory.ServiceFactory;
+import com.ideassoft.exception.BusinessException;
+import com.ideassoft.pmsinhouse.service.RoomUtilService;
+import com.ideassoft.price.SinglePrice;
+
+public class RoomUtil {
+	private static RoomUtilService roomUtilService = (RoomUtilService) ServiceFactory.getService("roomUtilService");
+	
+	private static HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();  
+	
+	public static CheckAllAmount getCheckamount(String checkid){
+		return getCheckamount(request, checkid);
+	}
+	
+	public static CheckAllAmount getCheckamount(String checkid, String strbillIds){
+		return getCheckamount(request, checkid, strbillIds);
+	}
+	
+	public static CheckAllAmount getCheckamount(HttpServletRequest request, String checkid){
+		return getCheckamount(request, checkid, null);
+	}
+	
+	public static CheckAllAmount getCheckamount(HttpServletRequest request, String checkid, String strbillIds) {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchId = staff.getBranchId();
+		Check check = (Check) roomUtilService.findOneByProperties(Check.class, "checkId", checkid);
+		Order order = (Order) roomUtilService.findOneByProperties(Order.class, "orderId", checkid);
+		
+		//查出账单所有的cost不管状态如何
+		String sqlcost = "totalcostfromcheck";
+		List<?> costresult = roomUtilService.findBySQL(sqlcost, new String[] { checkid, branchId },
+				true);
+		//查出账单所有的pay不管状态如何
+		String sqlpay = "totalpayfromcheck";
+		List<?> payresult = roomUtilService.findBySQL(sqlpay, new String[] { checkid, branchId },
+				true);
+		
+		//查出始终不参与运算的状态，如状态为5，拆分后的状态
+		List<?> inVpay = roomUtilService.findBySQL("inVpay", new String[]{"5", checkid, branchId}, true);
+		List<?> inVcost = roomUtilService.findBySQL("inVcost", new String[]{"5", checkid, branchId}, true);
+		
+		
+		//查出已经结掉的账单pay，已结状态为4
+		List<?> partcheckoutpayresult = roomUtilService.findBySQL("partpayfromcheck", new String[] { checkid, branchId },
+				true);
+		//查出已经结掉的账单cost，已结状态为4
+		List<?> partcheckoutcostresult = roomUtilService.findBySQL("partcostfromcheck", new String[] { checkid, branchId },
+				true);
+		
+		double pay = 0;
+		double cost = 0;
+		double checkoutPay = 0;
+		double checkoutCost = 0;
+		double chosedPay = 0;
+		double chosedCost = 0;
+		//判断有没有传入strbillIds，如果有则查出选中的账单，并开始对chosedPay和chosedCost赋值
+		if( strbillIds != null && !strbillIds.isEmpty()){
+			List<?> chosedcheckoutpayresult = roomUtilService.chosedpayfromcheck(checkid, branchId, strbillIds);
+			List<?> chosedcheckoutcostresult = roomUtilService.chosedcostfromcheck(checkid, branchId, strbillIds);
+			if(chosedcheckoutpayresult != null && !chosedcheckoutpayresult.isEmpty()){
+				Map<?, ?> mapchosedcheckoutpayresult = (Map<?, ?>) chosedcheckoutpayresult.get(0);
+				chosedPay = ((BigDecimal)mapchosedcheckoutpayresult.get("totalpay")).doubleValue();
+			}
+			if(chosedcheckoutcostresult != null && !chosedcheckoutcostresult.isEmpty()){
+				Map<?, ?> mapchosedcheckoutcostresult = (Map<?, ?>) chosedcheckoutcostresult.get(0);
+				chosedCost = ((BigDecimal)mapchosedcheckoutcostresult.get("totalcost")).doubleValue();
+			}
+		}
+		
+		if(payresult != null && !payresult.isEmpty()){
+			Map<?, ?> mappayresult = (Map<?, ?>) payresult.get(0);
+			pay = ((BigDecimal)mappayresult.get("totalpay")).doubleValue();
+		}
+		if(costresult != null && !costresult.isEmpty()){
+			Map<?, ?> mapcostresult = (Map<?, ?>) costresult.get(0);
+			cost = ((BigDecimal)mapcostresult.get("totalcost")).doubleValue();
+		}
+		
+		//减去所有的pay和cost中的拆分账单
+		if(inVpay != null && !inVpay.isEmpty()){
+			Map<?, ?> mapinVpay = (Map<?, ?>) inVpay.get(0);
+			double temppay = ((BigDecimal)mapinVpay.get("totalpay")).doubleValue();
+			pay = pay -temppay;
+		}
+		if(inVcost != null && !inVcost.isEmpty()){
+			Map<?, ?> mapinVcost = (Map<?, ?>) inVcost.get(0);
+			double tempcost = ((BigDecimal)mapinVcost.get("totalcost")).doubleValue();
+			
+			cost = cost -tempcost;
+		}
+		
+		if(partcheckoutpayresult != null && !partcheckoutpayresult.isEmpty()){
+			Map<?, ?> mappartcheckoutpayresult = (Map<?, ?>) partcheckoutpayresult.get(0);
+			checkoutPay = ((BigDecimal)mappartcheckoutpayresult.get("totalpay")).doubleValue();
+		}
+		if(partcheckoutcostresult != null && !partcheckoutcostresult.isEmpty()){
+			Map<?, ?> mappartcheckoutcostresult = (Map<?, ?>) partcheckoutcostresult.get(0);
+			checkoutCost = ((BigDecimal)mappartcheckoutcostresult.get("totalcost")).doubleValue();
+		}
+		
+		List<?> listbill = roomUtilService.findByProperties(Bill.class, "checkId", checkid, "projectId", "1234");
+		List<?> listbillclock = roomUtilService.findByProperties(Bill.class, "checkId", checkid, "projectId", "2004");
+
+		Calendar fourtime = Calendar.getInstance();
+		fourtime.set(Calendar.HOUR_OF_DAY, 4);
+		fourtime.set(Calendar.MINUTE, 0);
+		fourtime.set(Calendar.SECOND, 0);
+		Calendar sixtime = Calendar.getInstance();
+		sixtime.set(Calendar.HOUR_OF_DAY, 6);
+		sixtime.set(Calendar.MINUTE, 0);
+		sixtime.set(Calendar.SECOND, 0);
+		Calendar twelvetime = Calendar.getInstance();
+		twelvetime.set(Calendar.HOUR_OF_DAY, 12);
+		twelvetime.set(Calendar.MINUTE, 0);
+		twelvetime.set(Calendar.SECOND, 0);
+		Calendar twelvetime30min = Calendar.getInstance();
+		twelvetime30min.set(Calendar.HOUR_OF_DAY, 12);
+		twelvetime30min.set(Calendar.MINUTE, 30);
+		twelvetime30min.set(Calendar.SECOND, 0);
+		Calendar fourteentime = Calendar.getInstance();
+		fourteentime.set(Calendar.HOUR_OF_DAY, 14);
+		fourteentime.set(Calendar.MINUTE, 0);
+		fourteentime.set(Calendar.SECOND, 0);
+		Calendar sixteen15min = Calendar.getInstance();
+		sixteen15min.set(Calendar.HOUR_OF_DAY, 16);
+		sixteen15min.set(Calendar.MINUTE, 15);
+		sixteen15min.set(Calendar.SECOND, 0);
+		Calendar eighteentime = Calendar.getInstance();
+		eighteentime.set(Calendar.HOUR_OF_DAY, 18);
+		eighteentime.set(Calendar.MINUTE, 0);
+		eighteentime.set(Calendar.SECOND, 0);
+		Calendar twentytwotime = Calendar.getInstance();
+		twentytwotime.set(Calendar.HOUR_OF_DAY, 22);
+		twentytwotime.set(Calendar.MINUTE, 0);
+		twentytwotime.set(Calendar.SECOND, 0);
+
+		Calendar currenttime = Calendar.getInstance();
+
+		Calendar checkIntime = Calendar.getInstance();
+		checkIntime.setTime(check.getCheckinTime());
+
+		String activity = order.getActivity();
+		Member member = (Member) roomUtilService.findOneByProperties(Member.class, "memberId", order.getOrderUser());
+		String memberRank = member.getMemberRank();
+		RoomPrice roomprice = (RoomPrice) roomUtilService.findOneByProperties(RoomPrice.class, "memberRank", memberRank,
+				"roomPriceId.branchId", branchId, "roomPriceId.roomType", check.getRoomType(), "roomPriceId.status",
+				"1", "roomPriceId.rpKind", "2");
+		double hourprice = roomprice.getRoomPrice();
+		double subprice = 0;
+		String subpriceType = null;
+		if (StringUtils.isEmpty(activity)) {// 无担保StringUtils.isEmpty(activity)
+
+			if (listbillclock.size() > 0) {// 判断是不是钟点房
+
+				if (listbill.size() <= 0) {// 判断是（全日租）
+					subpriceType = "FullDayCharge";
+					if (sixtime.compareTo(checkIntime) > 0
+							|| currenttime.compareTo(twentytwotime) > 0) {//早上六点之前和晚上十点之后
+						subprice = check.getRoomPrice();
+					} else {
+						Calendar checkIntime15min = (Calendar) checkIntime.clone();
+						checkIntime15min.add(Calendar.MINUTE, 15);
+						Calendar checkIntime4hour = (Calendar) checkIntime.clone();
+						checkIntime4hour.add(Calendar.HOUR_OF_DAY, 4);
+						if (currenttime.compareTo(checkIntime15min) < 0) {
+							subprice = 0;
+						} else if (currenttime.compareTo(checkIntime) >= 0
+								&& currenttime.compareTo(checkIntime4hour) < 0) {
+							subprice = DateUtil.subHour(currenttime,checkIntime)* hourprice;
+						} else if (currenttime.compareTo(checkIntime4hour) >= 0) {
+							subprice = check.getRoomPrice();
+						}
+					}
+				} else {// 判断不是全日租,不是钟点房，是全天房
+					subpriceType = "FullDayRoom";
+					if (currenttime.compareTo(twelvetime30min) < 0) {// 12点30分钟之前
+						subprice = 0;
+					} else if (currenttime.compareTo(twelvetime30min) >= 0
+							&& currenttime.compareTo(eighteentime) < 0) {
+						subprice = check.getRoomPrice() / 2;
+					} else if (currenttime.compareTo(eighteentime) >= 0) {
+						subprice = check.getRoomPrice();
+					}
+				}
+			} else {// 是钟点房
+				subpriceType = "HourRoom";
+				if(sixtime.compareTo(checkIntime) > 0 || currenttime.compareTo(twentytwotime) > 0){
+					subprice = check.getRoomPrice();
+				}else{
+					subprice = DateUtil.subHour(currenttime, checkIntime) * hourprice;					
+				}
+			}
+		} else {// 有担保，自动checkin
+			if (listbill.size() <= 0) {// 判断是（全日租）
+				subpriceType = "FullDayCharge";
+				subprice = check.getRoomPrice();
+			} else {// 判断不是全日租,不是钟点房，是全天房
+				subpriceType = "FullDayRoom";
+				if (currenttime.compareTo(twelvetime30min) < 0) {// 12点30分钟之前
+					subprice = 0;
+				} else if (currenttime.compareTo(twelvetime30min) >= 0 && currenttime.compareTo(sixteen15min) < 0) {
+					subprice = DateUtil.subHour(currenttime, twelvetime) * hourprice;
+				} else if (currenttime.compareTo(sixteen15min) >= 0) {
+					subprice = check.getRoomPrice();
+				}
+			}
+		}
+		Calendar checkIntime15min = (Calendar) checkIntime.clone();
+		checkIntime15min.add(Calendar.MINUTE, 15);
+		if (currenttime.compareTo(checkIntime15min) < 0) {
+			subprice = 0;
+		}
+		String status = check.getStatus();
+		
+		if(CommonConstants.CheckStatus.CheckOff.equals(status) 
+				|| CommonConstants.CheckStatus.CheckOffAndUnout.equals(status) 
+				|| CommonConstants.CheckStatus.CheckLeave.equals(status)){
+			subprice = 0;
+		}
+		CheckAllAmount checkallamount = new CheckAllAmount();
+		checkallamount.setPay(pay);
+		checkallamount.setCost(cost);
+		checkallamount.setCheckoutPay(checkoutPay);
+		checkallamount.setCheckoutCost(checkoutCost);
+		checkallamount.setUncheckoutPay(pay - checkoutPay);
+		checkallamount.setUncheckoutCost(cost - checkoutCost);
+		checkallamount.setChosedPay(chosedPay);
+		checkallamount.setChosedCost(chosedCost);
+		checkallamount.setTtv(check.getTtv() == null ? 0 : check.getTtv());
+		checkallamount.setRoomPrice(check.getRoomPrice());
+		checkallamount.setSubPrice(subprice);
+		checkallamount.setAllPay(cost + subprice -pay );
+		checkallamount.setShouldPay((cost - checkoutCost) + subprice - (pay - checkoutPay));
+		checkallamount.setSubpriceType(subpriceType);
+		checkallamount.setCheckStatus(check.getStatus());
+		return checkallamount;
+	}
+	
+	public static String checkstatus(CheckAllAmount checkallamount, CheckoutRoom checkoutroom){
+		double shouldpay = checkallamount.getShouldPay();
+		boolean signed = false;
+		if( shouldpay >= 0 && !CommonConstants.BillProject.CashOutlay.
+				equals(checkoutroom.getProjectid()) ){//如果本该负的钱为负数，并且
+			signed = true;
+		}else if (shouldpay <= 0 && "2001".equals(checkoutroom.getProjectid()) ){
+			signed = true;
+		}
+		if(signed && Math.abs(shouldpay) == Double.valueOf(checkoutroom.getAmount())){
+			return  CommonConstants.CheckStatus.CheckOff;
+		}else {
+			return  CommonConstants.CheckStatus.CheckOffAndUnout;
+		}
+	}
+	
+	/*public static void savePrice(String startDay, String endDay, String roomPrices, String orderId, 
+			String branchId, String user, String status, HttpServletRequest request) throws ParseException {
+			//LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+			//String branchId = loginuser.getStaff().getBranchId();
+		try {
+			OrdchePrice ordchePrice = new OrdchePrice();
+			String dataId = DateUtil.currentDate("yyyyMMdd") + branchId + roomUtilService.getSequence("SEQ_PRICE_DATAID");
+			String[] roomPrice = roomPrices.split(",");
+			
+			SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy/MM/dd");    
+			Date stDate = format.parse(startDay);
+			Date edDate = format.parse(endDay);
+			long day = (edDate.getTime() - stDate.getTime())/(24*60*60*1000);
+			int days= new Long(day).intValue();
+			for (int i = 0;i < days;i++) {
+				Calendar cal = Calendar.getInstance();
+				ordchePrice.setBranchId(branchId);
+				ordchePrice.setDataId(dataId);
+				ordchePrice.setDayPrice(Double.valueOf(roomPrice[i]));
+				ordchePrice.setOrderId(orderId);
+				ordchePrice.setRecordTime(new Date());
+				ordchePrice.setRecordUser(user);
+				ordchePrice.setStatus(status);
+				cal.setTime(stDate);
+				cal.add(Calendar.DATE, i);
+				ordchePrice.setWhichDay(cal.getTime());
+				roomUtilService.save(ordchePrice);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}*/
+	
+	/**
+	 * 
+	 * @param startDate 开始日期
+	 * @param endDate 结束日期
+	 * @param roomType 房型（适用于酒店、公寓） 民宿（null)
+	 * @param rpId 房价码
+	 * @param branchId 门店
+	 * @param theme 场景 1-酒店 2-公寓 3-民宿
+	 * @param orderId 订单编号
+	 * @param recorduser 当前操作人
+	 * @param amount 调整价格（可以 null，默认取价格表塞入）
+	 */
+	public static void saveCheckinPrice(Date startDate, Date endDate, String roomType, String rpId, String branchId,String theme, String orderId,String recorduser, String amount) {
+		Calendar start = Calendar.getInstance();
+		start.setTime(startDate);
+		int days = DateUtil.daysOfTwo(startDate, endDate);
+		//查看是否有数据，有数据，删掉，重新保存
+		List<?> orderchs = roomUtilService.findByProperties(OrdchePrice.class, "orderId", orderId);
+		if(orderchs != null && !orderchs.isEmpty()){
+			roomUtilService.deleteOrdchin(orderId);
+		}
+		for(int i = 0; i <= days ; i++){
+			String dataId = DateUtil.currentDate("yyMMdd") + branchId + roomUtilService.getSequence("SEQ_PRICE_DATAID");
+			OrdchePrice ordchePrice = new OrdchePrice();
+			ordchePrice.setBranchId(branchId);
+			ordchePrice.setDataId(dataId);
+			if(StringUtils.isEmpty(amount)){
+				Double price = new SinglePrice(branchId, theme, roomType, rpId, "1", start.getTime()).checkRoomPrice();
+				ordchePrice.setDayPrice(price);
+			}else{
+				ordchePrice.setDayPrice(Double.valueOf(amount));
+			}
+			ordchePrice.setOrderId(orderId);
+			ordchePrice.setRecordTime(new Date());
+			ordchePrice.setRecordUser(recorduser);
+			ordchePrice.setStatus("1");
+			ordchePrice.setWhichDay(start.getTime());
+			roomUtilService.save(ordchePrice);
+			start.add(Calendar.DATE, 1);
+		}
+	}
+	
+	/**
+	 * 新方法，根据指定的日期修改价格
+	 * @param startDate 开始日期
+	 * @param endDate 结束日期
+	 * @param roomType 房型（适用于酒店、公寓） 民宿（null)
+	 * @param rpId 房价码
+	 * @param branchId 门店
+	 * @param theme 场景 1-酒店 2-公寓 3-民宿
+	 * @param orderId 订单编号
+	 * @param recorduser 当前操作人
+	 * @param amount 调整价格（可以 null，默认取价格表塞入）
+	 */
+	public static void updateCheckinPricenew(Date startDate, Date endDate, String roomType, String rpId, String branchId,String theme, String orderId, String amount) {
+		
+		List<?> list = roomUtilService.getorderchePricebydate(startDate, endDate, orderId);
+		for (Object object : list) {
+			Map<?, ?> map = (Map<?, ?>) object;
+			String dataId = (String) map.get("DATA_ID");
+			String dayPrice = null;
+			Date date = (Date) map.get("WHICHDAY");
+			if(StringUtils.isEmpty(amount)){
+				Double price = new SinglePrice(branchId, theme, roomType, rpId, "1", date).checkRoomPrice();
+				dayPrice = "" +  price;
+			}else{
+				dayPrice = amount;
+			}
+			roomUtilService.updateOrdchin(branchId, dataId, dayPrice);
+		}
+	}
+	
+	public static Double getCheckinPrice(Date startDate, Date endDate, String orderId){
+		List<?> list = roomUtilService.getorderchePricebydate(startDate, endDate, orderId);
+		Double roomprice = 0D;
+		for (Object object : list) {
+			Map<?, ?> ordche = (Map<?, ?>) object;
+			roomprice = roomprice + ((BigDecimal)ordche.get("DAYPRICE")).doubleValue();
+		}
+		return roomprice;
+	}
+	
+	public static List<?> getroomPriceByroomType(String branchId, String date, String rpId) {
+		return getroomPriceByroomType(null, branchId, date, rpId);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static List<?> getroomPriceByroomType(String roomType, String branchId, String date, String rpId) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(DateUtil.s2d(date, "yyyy/MM/dd"));
+		int weekday = c.get(Calendar.DAY_OF_WEEK) - 1;
+		String todayNum = "" + weekday;
+		List<?> listroomprice = roomUtilService.getRoomPrice(branchId, todayNum, date + " 12:00:00", rpId);
+			
+		for (int i=0;i<listroomprice.size();i++) {
+			if (((Map<?, ?>) listroomprice.get(i)).get("ADJUSTMEMDAY") != null && 
+					((Map<?, ?>) listroomprice.get(i)).get("ADJUSTMEMDAY").equals(date)) {
+				((Map<String, Double>) listroomprice.get(i)).put("ADJUSTMEM",0.00);
+			}
+			if (((Map<?, ?>) listroomprice.get(i)).get("MSJPRICEDAY") != null && 
+					((Map<?, ?>) listroomprice.get(i)).get("MSJPRICEDAY").equals(date)) {
+				((Map<String, Double>) listroomprice.get(i)).put("MSJPRICE",0.00);
+			}
+			if (((Map<?, ?>) listroomprice.get(i)).get("MEMPRICEDAY") != null && 
+					((Map<?, ?>) listroomprice.get(i)).get("MEMPRICEDAY").equals(date)) {
+				((Map<String, Double>) listroomprice.get(i)).put("MEMPRICE",0.00);
+			}
+			if (((Map<?, ?>) listroomprice.get(i)).get("ADJUSTMSJDAY") != null && 
+					((Map<?, ?>) listroomprice.get(i)).get("ADJUSTMSJDAY").equals(date)) {
+				((Map<String, Double>) listroomprice.get(i)).put("ADJUSTMSJ",0.00);
+			}
+		}
+		if(roomType != null ){
+			List<Object> listroompricetype= new ArrayList<Object>();
+			for (Object object : listroomprice) {
+				if(object != null){
+					Map<?, ?> map = (Map<?, ?>) object;
+					if(roomType.equals(map.get("ROOM_TYPE"))){
+						listroompricetype.add(object);
+					}
+				}
+			}
+			return listroompricetype;
+		}
+		return listroomprice;
+	}
+	
+	public static boolean cancelRoommap(String roomid){
+		RoomMapping roommapping = (RoomMapping) roomUtilService.findOneByProperties(RoomMapping.class, "relaRoomid", roomid);
+		if (roommapping == null) {
+			return false;
+		} else {
+			List<Map<String, Object>> roommappinglist = roomUtilService.findallroommapping(roommapping.getRoomId());
+			try {
+				if(roommappinglist.size() == 2){
+					roomUtilService.deleteroommapping(roommapping.getRoomId());
+					return true;
+				}else{
+					roomUtilService.deleteroommappingbyroomid(roommapping.getRoomId(), roomid);
+					return true;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
+	}
+	
+	public static void setBillPayment(Bill bill, String paymentorproject, double amount){
+		if(bill == null)
+			return;
+		if(paymentorproject ==null || paymentorproject.isEmpty()){
+			return;
+		}
+		int length = paymentorproject.length();
+		if(length == 1){
+			String payment = paymentorproject;
+			SysParam paymentsysparam = (SysParam) roomUtilService.findOneByProperties(SysParam.class, 
+					"paramType", "BILLPAYMENT", "content", payment);
+			String projectid = paymentsysparam.getOrderNo().toString();
+			
+			SysParam projectsysparam = (SysParam) roomUtilService.findOneByProperties(SysParam.class, 
+					"paramType", "PROJECT", "content", projectid);
+			if(projectsysparam != null){
+				String projectname = projectsysparam.getParamName();
+				bill.setProjectId(projectid);
+				bill.setProjectName(projectname);
+				bill.setPayment(payment);
+				if( CommonConstants.BillPayment.CashOutlay.equals(payment)){
+					bill.setPay(-amount);
+				}
+				else{
+					bill.setPay(amount);
+				}
+				bill.setCost(0.0);
+			}
+		}
+		if(length == 4){
+			String projectid = paymentorproject;
+			SysParam projectsysparam = (SysParam) roomUtilService.findOneByProperties(SysParam.class, 
+					"paramType", "PROJECT", "content", projectid);
+			
+			List<?> sys = roomUtilService.findSysparam(projectid, "BILLPAYMENT");
+			SysParam paymentsysparam = null;
+			if(sys !=null && !sys.isEmpty()){
+				paymentsysparam = (SysParam) sys.get(0);
+			}
+			
+			if(projectsysparam != null){
+				String orderNo = projectsysparam.getOrderNo().toString();
+				if("1".equals(orderNo)){
+					bill.setCost(amount);
+					bill.setPay(0.0);
+				}else if("2".equals(orderNo)){
+					bill.setCost(0.0);
+					if(CommonConstants.BillProject.CashOutlay.equals(projectid)){
+						bill.setPay(-amount);
+					}
+					else{
+						bill.setPay(amount);
+					}
+				}
+				bill.setProjectId(projectid);
+				bill.setProjectName(projectsysparam.getParamName());
+			}
+			if(paymentsysparam != null){
+				String payment = paymentsysparam.getContent();
+				bill.setPayment(payment);
+			}
+			else{
+				if(projectid.startsWith("2")){
+					bill.setPayment(CommonConstants.BillPayment.Cash);					
+				}else if(projectid.startsWith("1")){
+					bill.setPayment(CommonConstants.BillPayment.NonPayment);
+				}
+			}
+		}
+		
+	}
+	
+	public static void setBillPayment(WorkBillDetail workbilldetail, String paymentorproject, double amount){
+		if(workbilldetail == null)
+			return;
+		if(paymentorproject ==null || paymentorproject.isEmpty()){
+			return;
+		}
+		int length = paymentorproject.length();
+		if(length == 1){
+			String payment = paymentorproject;
+			SysParam paymentsysparam = (SysParam) roomUtilService.findOneByProperties(SysParam.class, 
+					"paramType", "BILLPAYMENT", "content", payment);
+			String projectid = paymentsysparam.getOrderNo().toString();
+			
+			SysParam projectsysparam = (SysParam) roomUtilService.findOneByProperties(SysParam.class, 
+					"paramType", "PROJECT", "content", projectid);
+			if(projectsysparam != null){
+				String projectname = projectsysparam.getParamName();
+				workbilldetail.setProjectId(projectid);
+				workbilldetail.setProjectName(projectname);
+				workbilldetail.setPayment(payment);
+				if( CommonConstants.BillPayment.CashOutlay.equals(payment)){
+					workbilldetail.setPay(-amount);
+				}
+				else{
+					workbilldetail.setPay(amount);
+				}
+				workbilldetail.setCost(0.0);
+			}
+		}
+		if(length == 4){
+			String projectid = paymentorproject;
+			SysParam projectsysparam = (SysParam) roomUtilService.findOneByProperties(SysParam.class, 
+					"paramType", "PROJECT", "content", projectid);
+			
+			List<?> sys = roomUtilService.findSysparam(projectid, "BILLPAYMENT");
+			SysParam paymentsysparam = null;
+			if(sys !=null && !sys.isEmpty()){
+				paymentsysparam = (SysParam) sys.get(0);
+			}
+			
+			if(projectsysparam != null){
+				String orderNo = projectsysparam.getOrderNo().toString();
+				if("1".equals(orderNo)){
+					workbilldetail.setCost(amount);
+					workbilldetail.setPay(0.0);
+				}else if("2".equals(orderNo)){
+					workbilldetail.setCost(0.0);
+					if(CommonConstants.BillProject.CashOutlay.equals(projectid)){
+						workbilldetail.setPay(-amount);
+					}
+					else{
+						workbilldetail.setPay(amount);
+					}
+				}
+				workbilldetail.setProjectId(projectid);
+				workbilldetail.setProjectName(projectsysparam.getParamName());
+			}
+			if(paymentsysparam != null){
+				String payment = paymentsysparam.getContent();
+				workbilldetail.setPayment(payment);
+			}
+			else{
+				if(projectid.startsWith("2")){
+					workbilldetail.setPayment(CommonConstants.BillPayment.Cash);					
+				}else if(projectid.startsWith("1")){
+					workbilldetail.setPayment(CommonConstants.BillPayment.NonPayment);
+				}
+			}
+		}
+	}
+	
+
+/*	@SuppressWarnings("unchecked")
+	public static void queryRoomPrice(String roomType, String date, String today, String rpId) {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchId = staff.getBranchId();
+		String msjIp = CommonConstants.DefaultRoomPrice.DEFAULT_RP_ID;
+		List<?> list = roomUtilService.queryRoom(branchId, branchId, branchId, branchId, branchId, branchId);
+		//List<RoomType> roomTypes = roomUtilService.findByProperties(RoomType.class, "roomTypeKey.branchId", branchId);
+		if (!roomType.equals("") && roomType.length() > 0) {
+			for (int j=0;j<list.size();j++) {
+				((Map<?, ?>) list.get(j)).get("ROOM_TYPE");
+			}
+		}
+		
+	}*/
+
+	//提取了会员中的手机，地址，备注，会员等级
+	public static boolean cansetCheckuserbyMember(CheckUser checkuser, Member member){
+		if(member != null){
+			checkuser.setAddress(member.getAddress());
+			checkuser.setRemark(member.getRemark());
+			MemberRank memberrank = (MemberRank) roomUtilService.findOneByProperties(MemberRank.class, 
+					"memberRank", member.getMemberRank());
+			checkuser.setRankName(memberrank.getRankName());
+			checkuser.setMobile(member.getMobile());
+			return true;
+		}else{
+			checkuser.setRankName(CommonConstants.MembenRank.NM);
+			return false;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List getNowRoomPrice(String branchId) throws ParseException {
+		return getNowRoomPrice(branchId, null, null);
+	}
+	
+	//查询当天的房间价格
+	@SuppressWarnings("unchecked")
+	public static  List getNowRoomPrice(String branchId, String rpId, String roomType) throws ParseException {
+		List<SysParam> rpIds = roomUtilService.findByProperties(SysParam.class, "paramType", "RPSETUP", "status", "1");;
+		List<RoomType> roomTypes = roomUtilService.findByProperties(RoomType.class, "roomTypeKey.branchId", branchId, "status", "1");
+		List<?> listroomprice = new ArrayList<Object>();
+		//List<Object> priceByRpid = new ArrayList<Object>();
+		List<Object> roomprices = new ArrayList<Object>();
+		String rpStatus = "2";
+		
+		if (roomType == null) {
+			for (int i=0;i<roomTypes.size();i++) {
+				if (rpId == null) { 
+					for (int j=0;j<rpIds.size();j++) {
+						listroomprice = roomUtilService.queryNowRoomPrice(branchId, (rpIds.get(j).getParamName()).toString(),
+								(roomTypes.get(i).getRoomTypeKey().getRoomType()).toString(), rpStatus);
+						if (listroomprice.size() <= 0) {
+							rpStatus = "1";
+							listroomprice = roomUtilService.queryNowRoomPrice(branchId, (rpIds.get(j).getParamName()).toString(),
+									(roomTypes.get(i).getRoomTypeKey().getRoomType()).toString(), rpStatus);
+						}
+						roomprices.add(listroomprice);
+					}
+				} else {
+					listroomprice = roomUtilService.queryNowRoomPrice(branchId, rpId, (roomTypes.get(i).getRoomTypeKey().getRoomType()).toString(), rpStatus);
+					if (listroomprice.size() <= 0) {
+						rpStatus = "1";
+						listroomprice = roomUtilService.queryNowRoomPrice(branchId, rpId, (roomTypes.get(i).getRoomTypeKey().getRoomType()).toString(), rpStatus);
+					}
+					roomprices.add(listroomprice);
+				}
+			}
+		} else {
+			if (rpId == null) {
+				for (int i=0;i<rpIds.size();i++) {
+					listroomprice = roomUtilService.queryNowRoomPrice(branchId, (rpIds.get(i).getParamName()).toString(), roomType, rpStatus);
+					if (listroomprice.size() <= 0) {
+						rpStatus = "1";
+						listroomprice = roomUtilService.queryNowRoomPrice(branchId, (rpIds.get(i).getParamName()).toString(), roomType, rpStatus);
+					}
+					roomprices.add(listroomprice);
+				}
+			} else {
+				listroomprice = roomUtilService.queryNowRoomPrice(branchId, rpId, roomType, rpStatus);
+				if (listroomprice.size() <= 0) {
+					rpStatus = "1";
+					listroomprice = roomUtilService.queryNowRoomPrice(branchId, rpId, roomType, rpStatus);
+				}
+				roomprices.add(listroomprice);
+			}
+		}	
+		return roomprices;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static List getForwardRoomPrice(String branchId, String date) {
+		return getForwardRoomPrice(branchId, date, null, null);
+	}
+	
+	//查询远期的房间价格
+	@SuppressWarnings("unchecked")
+	public static List getForwardRoomPrice(String branchId, String date, String rpId, String roomType) {
+		List<SysParam> rpIds = roomUtilService.findByProperties(SysParam.class, "paramType", "RPSETUP", "status", "1");;
+		List<RoomType> roomTypes = roomUtilService.findByProperties(RoomType.class, "roomTypeKey.branchId", branchId, "status", "1");
+		List<?> listroomprice = new ArrayList<Object>();
+		//List<Object> priceByRpid = new ArrayList<Object>();
+		List<List<?>> roomprices = new ArrayList<List<?>>();
+		Calendar c = Calendar.getInstance();
+		Calendar filteradjstart = Calendar.getInstance();
+		Calendar filteradjend = Calendar.getInstance();
+		Calendar filterjzstart = Calendar.getInstance();
+		Calendar filterjzend = Calendar.getInstance();
+		Calendar querytime = Calendar.getInstance();
+		c.setTime(DateUtil.s2d(date, "yyyy/MM/dd"));
+		int weekday = c.get(Calendar.DAY_OF_WEEK) - 1;
+		String todayNum = "" + weekday;
+		
+		if (roomType == null) {
+			for (int i=0;i<roomTypes.size();i++) {
+				if (rpId == null) { 
+					for (int j=0;j<rpIds.size();j++) {
+						listroomprice = roomUtilService.queryForwardRoomPrice(branchId, (rpIds.get(j).getParamName()).toString(), todayNum, date + " 12:00:00",
+								(roomTypes.get(i).getRoomTypeKey().getRoomType()).toString());
+						roomprices.add(listroomprice);
+					}
+				} else {
+					listroomprice = roomUtilService.queryForwardRoomPrice(branchId, rpId, todayNum, date + " 12:00:00", (roomTypes.get(i).getRoomTypeKey().getRoomType()).toString());
+					roomprices.add(listroomprice);
+				}
+			}
+		} else {
+			if (rpId == null) {
+				for (int i=0;i<rpIds.size();i++) {
+					listroomprice = roomUtilService.queryForwardRoomPrice(branchId, (rpIds.get(i).getParamName()).toString(), todayNum, date + " 12:00:00", roomType);
+					roomprices.add(listroomprice);
+				}
+			} else {
+				listroomprice = roomUtilService.queryForwardRoomPrice(branchId, rpId, todayNum, date + " 12:00:00",roomType);
+				roomprices.add(listroomprice);
+			}
+		}
+		
+		for (int i=0;i<roomprices.size();i++) {
+			for (int j=0;j<roomprices.get(i).size();j++) {
+				querytime.setTime(DateUtil.s2d(date + " 12:00:00", "yyyy/MM/dd HH:mm:ss"));
+				querytime.getTime();
+				if (((Map<?, ?>) roomprices.get(i).get(j)).get("ADJFILTER") != null) {
+					String[] splits = ((Map<?, ?>) roomprices.get(i).get(j)).get("ADJFILTER").toString().split("至");
+					filteradjstart.setTime(DateUtil.s2d(splits[0], "yyyy/MM/dd HH:mm:ss"));
+					filteradjend.setTime(DateUtil.s2d(splits[1], "yyyy/MM/dd HH:mm:ss"));
+					filteradjstart.getTime();
+					filteradjend.getTime();
+					if (querytime.after(filteradjstart) && querytime.before(filteradjend)) {
+						((Map<String, Double>) roomprices.get(i).get(j)).put("ADJUSTMEM", 0.00);
+					}
+				}
+				
+				if (((Map<?, ?>) roomprices.get(i).get(j)).get("JZFILTER") != null)  {
+					String[] splits = ((Map<?, ?>) roomprices.get(i).get(j)).get("JZFILTER").toString().split("至");
+					filterjzstart.setTime(DateUtil.s2d(splits[0], "yyyy/MM/dd HH:mm:ss"));
+					filterjzend.setTime(DateUtil.s2d(splits[1], "yyyy/MM/dd HH:mm:ss"));
+					filterjzstart.getTime();
+					filterjzend.getTime();
+					if (querytime.after(filterjzstart) && querytime.before(filterjzend)) {
+						((Map<String, Double>) roomprices.get(i).get(j)).put("JZPRICE",0.00);
+					}
+				}
+			}
+		}
+		return roomprices;
+	}
+	
+	/**
+	 * 传入非会员的手机号和身份证ID
+	 * 如果查到会员信息手机号和身份证ID一致时，返回会员的memberId
+	 * 如果身份证号或者手机号不一致时。需更新会员信息。
+	 * 如果身份证和手机号都没有查到，则会生成新的会员记录，返回新的会员memberId
+	 * @param response
+	 * @param nonmobile
+	 * @param nonidcard
+	 * @return
+	 * 返回值：
+	 * 存在会返回memberId
+	 * "2"表示是否填充会员信息
+	 * null表示操作，非会员和会员信息不一致，需要跟新
+	 */
+	public static String checkMember(HttpServletResponse response, String nonmobile, String nonidcard ){
+		if(StringUtils.isEmpty(nonmobile))
+			throw BusinessException.withErrorCode(ErrorConstants.Common.PARAM_IS_EMPTY);
+		if(StringUtils.isEmpty(nonidcard))
+			throw BusinessException.withErrorCode(ErrorConstants.Common.PARAM_IS_EMPTY);
+		Member member = roomUtilService.findMemberhasRank(nonmobile, nonidcard);
+		if(member != null){
+			return member.getMemberId();
+		}
+		
+		Member idmember = (Member) roomUtilService.findMemberhasRank(null, nonidcard);
+		if(idmember != null){
+			//身份证查明，该第三方非会员存在于会员之中，提取手机号是否存在，
+			String mobile = idmember.getMobile();
+			if(!StringUtils.isEmpty(mobile)){
+				//存在手机号，手机号冲突，请去会员中心修改
+				JSONUtil.responseJSON(response, new AjaxResult(0, "手机号冲突，请修改会员中心 !"));
+				return null;
+			}else{
+				//不存在手机号，提示是否覆盖，将非会员中的手机号覆盖到会员数据库中
+				JSONUtil.responseJSON(response, new AjaxResult(2, "是否填充此会员手机号?"));
+				return "2";
+			}
+		}else{
+			//没有身份证，用手机号查询
+			Member momember = (Member) roomUtilService.findMemberhasRank(nonmobile, null);
+			if(momember != null){
+//				String idcard = momember.getIdcard();
+//				if(!StringUtils.isEmpty(idcard)){
+					//存在身份证号，身份证号冲突，请去会员中心修改
+					JSONUtil.responseJSON(response, new AjaxResult(0, "无身份证号，请完善会员信息 !"));
+					return null;
+				//}
+				
+			}else{
+				//不存在身份证号，也没有手机号
+				Member m = (Member) roomUtilService.findOneByProperties(Member.class, "mobile", nonmobile, "idcard", nonidcard);
+				Member mem;
+				try {
+					mem = (Member) CloneUtil.deepClone(m);
+					mem.setMemberId(roomUtilService.getSequence("SEQ_MEMBER_ID"));
+					mem.setMemberRank(CommonConstants.MembenRank.PM);
+					roomUtilService.save(mem);
+					roomUtilService.newandsaveaccount(mem.getMemberId());
+					return mem.getMemberId();
+				} catch (Exception e) {
+					e.printStackTrace();
+					return null;
+				}
+				
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param memberupdate
+	 * @param memberId
+	 * @return 返回memberId值
+	 */
+	public static String memupdate(String memberupdate, String memberId){
+		
+		Member mem = (Member) roomUtilService.findOneByProperties(Member.class, "memberId", memberId);
+		
+		if(!CommonConstants.MembenRank.NM.equals(mem.getMemberRank())){
+			return mem.getMemberId();
+		}
+		
+		String mobile = mem.getMobile();
+		String idcard = mem.getIdcard();
+			Member momember = (Member) roomUtilService.findMemberhasRank(mobile, null);
+			if(momember != null){
+				try {
+					if("confirm".equals(memberupdate)){
+//						Member newmem = (Member) CloneUtil.deepClone(roomUtilService.findOneByProperties(Member.class, "memberId", momember.getMemberId()));
+//						newmem.setIdcard(idcard);
+//						roomUtilService.update(newmem);
+						roomUtilService.updateidcardbyid(momember.getMemberId(), idcard);
+					}
+					return momember.getMemberId();
+				} catch (Exception e) {
+					e.printStackTrace();
+					return null;
+				} 
+			}
+			Member idmember = (Member) roomUtilService.findMemberhasRank(null, idcard);
+			if(idmember != null){
+				try {
+					if("confirm".equals(memberupdate)){
+//						Member newmem = (Member) CloneUtil.deepClone(roomUtilService.findOneByProperties(Member.class, "memberId", idmember.getMemberId()));
+//						newmem.setMobile(mobile);
+//						roomUtilService.update(newmem);
+						roomUtilService.updatemobilebyid(idmember.getMemberId(), mobile);
+					}
+					return idmember.getMemberId();
+				} catch (Exception e) {
+					e.printStackTrace();
+					return null;
+				} 		
+			}
+			return null;
+		}
+}

@@ -1,0 +1,279 @@
+
+.bill_width{
+	width:100%;	
+	background: #fff;
+	height:550px;
+}
+.bill_one{
+	width:100%;
+	height:400px;
+	
+    overflow: auto;
+}
+.bill_one section.box_content_widget {
+	width: 100%;
+    height: 100%;
+    background: #fff;
+    margin:0;
+    padding:0 10px;
+    min-height: 400px;	
+}
+
+.bill_two,.bill_three{
+    width: 96%;
+   	border: 1px solid #ddd;
+    background: #F1F6F8;
+    height: 50px;
+    margin: 10px 0 0 1.8%;
+    color: #333;
+    font-size: 15px;
+}
+.bill_two .guest{
+	color: #fff;
+    background: #F1B149;
+    border: 1px solid #f1f1f1;
+}
+.bill_width .bill_two{
+	height:55px;
+}
+.bill_three{
+	 line-height: 50px;
+}
+.bill_two span{
+    float: left;
+    width: 60px;
+    line-height: 50px;
+    font-size: 1.0rem;
+    margin-left: 10px;
+    cursor: pointer;
+}
+.bill_two ul li{
+    float: left;
+    height: 45px;
+    line-height: 18px;
+    border: 1px solid #535474;
+    border-radius: 3px;
+    text-align: center;
+    margin: 4px 5px;
+    padding: 2px 5px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition:all 0.15s ease-in-out;
+}
+.bill_two ul li p{
+	
+}
+.bill_three span{
+	display: inline-block;
+	line-height:40px;
+	margin-left:10px;
+}
+.bill_three .money{
+	color: #31588a;
+    font-weight: bold;	
+}
+.bill_four{
+    height: 44px;
+    border-bottom: 1px solid #2D5C7F;
+    padding-right: 2px;
+    width: 96%;
+    margin: 8px 0 7px 23px;
+}
+.button_margin{
+	float: right;
+    display: block;
+    height: 34px;
+    line-height: 34px;
+    text-align: center;
+    width: 80px;
+    margin-left: 10px;
+    background-color:#5A5D9D;
+    border-radius:4px;
+    font-size:0.85rem;
+    color:#FFF;
+	border:none;
+}
+.foot_submit{
+    height: 40px;
+    padding-right: 25px;
+}
+.bill_two .owner:hover{
+	color: #fff;
+    background: #535474;
+}
+.bill_two .owner.active{
+	background: #FC8A15;
+    color: #fff;
+    border:none;
+}
+.cd-popup3{
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    -webkit-transition: opacity 0.3s 0s, visibility 0s 0.3s;
+    -moz-transition: opacity 0.3s 0s, visibility 0s 0.3s;
+    transition: opacity 0.3s 0s, visibility 0s 0.3s;
+    z-index:9999;
+}
+.cd-popup3.is-visible3 {
+    opacity: 1;
+    visibility: visible;
+    -webkit-transition: opacity 0.3s 0s, visibility 0s 0s;
+    -moz-transition: opacity 0.3s 0s, visibility 0s 0s;
+    transition: opacity 0.3s 0s, visibility 0s 0s;
+}
+.enter_account {
+    width: 634px;
+    height: 499px;
+	position: relative;
+	background: #FFF;
+	z-index: 100;
+	top: 50%;
+	margin-top: -300px;
+	left: 50%;
+	margin-left: -238px;
+	border-radius: .4rem .4rem .4rem .4rem;
+	text-align: center;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+	-webkit-transform:scale(0.8);
+	-moz-transform:scale(0.8);
+	-ms-transform:scale(0.8);
+	-o-transform:scale(0.8);
+	transform:scale(0.8);
+	-webkit-backface-visibility: hidden;
+	-webkit-transition-property: -webkit-transform;
+	-moz-transition-property: -moz-transform;
+	transition-property: transform;
+	-webkit-transition-duration: 0.3s;
+	-moz-transition-duration: 0.3s;
+	-ms-transition-duration: 0.3s;
+	-o-transition-duration: 0.3s;
+	transition-duration: 0.3s;
+}
+.is-visible3 .enter_account {
+	-webkit-transform: scale(1);
+	-moz-transform: scale(1);
+	-ms-transform: scale(1);
+	-o-transform: scale(1);
+	transform: scale(1);
+}
+.enter_account h2{
+	padding-left: 10px;
+	width: 100%;
+    height: 40px;
+    line-height: 40px;
+    background: #DADADA;
+}
+.enter_account ul li{
+	float:left;
+	line-height: 38px;
+	margin:4px;
+}
+.enter_account .margintop{
+	margin-top:10px;
+}
+.enter_account .label_name {
+    float: left;
+    width: 70px;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+input {
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    color: #323232;
+    background-color: #fff;
+    border: 1px solid #DDDDDD;
+    line-height: 1.2;
+    font-size: 0.85rem;
+    -webkit-box-shadow: none!important;
+    box-shadow: none!important;
+    -webkit-transition-duration: .1s;
+    transition-duration: .1s;
+}
+.enter_account .add_info {
+    padding: 10px 5px;
+    width: 522px;
+    margin-left: 10px;
+}
+.enter_account textarea{
+	padding-left:4px;
+	border:1px solid #DDDDDD;
+	margin-left: 10px;
+	border-radius:3px;
+}
+.button_margin_submit{
+	position: absolute;
+    left: 521px;
+    top: 91%;
+}
+
+
+
+.bill_one table.myTable td {
+    vertical-align: middle;
+    padding: 10px;
+    font-size: 0.7rem;
+    white-space: initial;
+    border: none;
+    text-align: center;
+}
+
+.bill_width .apartment_bill{
+	width: 100%;
+    height: 408px;
+    overflow: scroll;
+    margin-top: 10px;
+    padding-top: 0;
+}
+
+.splitmargin .label_name{
+	width:120px;
+	float:none;
+}
+.splitmargin  ul.segment_ul{margin: 2% 7%;}
+.splitmargin  ul li{
+	margin: 2px;
+    line-height: 38px;
+}
+.input_money{
+}
+.input_money li input{
+	margin: 6px 10px;
+}
+ul .li_split{
+	float:left;
+}
+.splitmargin  ul li textarea{
+	vertical-align: middle;
+    margin-top: 7px;
+    width: 374px;
+}
+.splitmargin  ul li input:nth-child(5){
+	margin-left: 25%;
+}
+.splitmargin .button_margin{
+	margin-top:2%;
+}
+
+.mybill {
+	margin-right: 4%;
+}
+
+
+
+
+
+
+
+
+
+

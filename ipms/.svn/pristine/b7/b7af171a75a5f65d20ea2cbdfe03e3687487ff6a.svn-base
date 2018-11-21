@@ -1,0 +1,259 @@
+package com.ideassoft.pmsinhouse.controller;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import com.ideassoft.bean.Bill;
+import com.ideassoft.bean.CleanApply;
+import com.ideassoft.bean.Goods;
+import com.ideassoft.bean.House;
+import com.ideassoft.bean.MemberAccount;
+import com.ideassoft.bean.SaleLog;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.SystemConstants;
+import com.ideassoft.core.notifier.SmsSingleSender;
+import com.ideassoft.core.notifier.SmsSingleSenderResult;
+import com.ideassoft.core.notifier.service.impl.NotifyService;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.pmsinhouse.service.HouseCleanService;
+import com.ideassoft.pmsmanage.service.PmsmanageService;
+import com.ideassoft.util.DateUtil;
+import com.ideassoft.util.ReflectUtil;
+import com.ideassoft.util.RequestUtil;
+
+
+
+
+@Controller
+public class HouseCleanController {
+	@Autowired
+	PmsmanageService pmsmanageService;
+	@Autowired
+	NotifyService notifyService;
+	@Autowired
+    HouseCleanService houseCleanService;
+	
+		@RequestMapping("/dealHouseCleanApply.do")
+		@ResponseBody
+		public String dealHouseCleanApply(HttpServletRequest request,HttpServletResponse response) throws Exception {
+			LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+			String applyId = request.getParameter("cleanApplyId");
+			String status = request.getParameter("status");
+			if("1".equalsIgnoreCase(status.trim())){
+				CleanApply cleanApply = (CleanApply)pmsmanageService.findOneByProperties(CleanApply.class, "cleanApplyId", applyId);
+				Goods goods = (Goods) pmsmanageService.findOneByProperties(Goods.class, "goodsId", CommonConstants.GoodsId.GOODSID_CLEAN);
+				Bill costbl = new Bill();
+				Bill paybl = new Bill();
+				SaleLog saleLog = new SaleLog();
+				cleanApply.setStatus("2");
+				String phone = cleanApply.getMobile();
+				String houseId = cleanApply.getBranchId();
+				House cleanHouse = (House)pmsmanageService.findOneByProperties(House.class, "houseId", houseId);
+				String houseName = cleanHouse.getHousename();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+				String cleanTime = sdf.format(cleanApply.getCleanTime());
+				//存消费账单
+				String costId = DateUtil.currentDate("yyMMdd") + houseId
+				+ pmsmanageService.getSequence("SEQ_NEW_BILL");
+				costbl.setBillId(costId);
+				costbl.setBranchId(houseId);
+				costbl.setCheckId(cleanApply.getContractId());
+				costbl.setProjectId(CommonConstants.BillProject.CLEANPRICE_COST);
+				costbl.setProjectName("商品保洁");//参数表获取
+				costbl.setDescribe("商品保洁");
+				costbl.setCost(cleanApply.getCleanPrice());
+				costbl.setPay(0.0);
+				costbl.setPayment("0");
+				costbl.setStatus("1");
+				costbl.setRecordTime(new Date());
+				costbl.setRecordUser(loginUser.getStaff().getStaffId());
+				//存结算账单
+				String payId = DateUtil.currentDate("yyMMdd") + houseId
+				+ pmsmanageService.getSequence("SEQ_NEW_BILL");
+				paybl.setBillId(payId);
+				paybl.setBranchId(houseId);
+				paybl.setCheckId(cleanApply.getContractId());
+				paybl.setProjectId(CommonConstants.BillProject.CLEANPRICE_PAY);
+				paybl.setProjectName("商品保洁");
+				paybl.setDescribe("商品保洁");
+				paybl.setCost(0.0);
+				paybl.setPay(cleanApply.getCleanPrice());
+				paybl.setPayment("0");
+				paybl.setStatus("1");
+				paybl.setRecordTime(new Date());
+				paybl.setRecordUser(loginUser.getStaff().getStaffId());
+				//存销售日志
+				saleLog.setLogId(DateUtil.currentDate("yyMMdd") + houseId + pmsmanageService.getSequence("SEQ_NEW_SALELOG"));
+				saleLog.setBranchId(houseId);
+				saleLog.setCategoryId(goods.getCategoryId());
+				saleLog.setCheckId(cleanApply.getContractId());
+				saleLog.setDebts("2");
+				saleLog.setGoodsName(goods.getGoodsId());
+				saleLog.setAmount(1);
+				String paytype = cleanApply.getPayment();
+				switch(Integer.valueOf(paytype)){
+					case 1 : 
+						paytype = "2";
+						break;
+					case 2 :
+						paytype = "3";
+						break;
+					case 4 : 
+						paytype = "5";
+						break;
+					case 5 :
+						paytype = "4";
+						break;
+				}
+				saleLog.setPayType(paytype);
+				saleLog.setPrice(cleanApply.getCleanPrice());
+				saleLog.setRecordTime(new Date());
+				saleLog.setRecordUser(loginUser.getStaff().getStaffId());
+				pmsmanageService.update(cleanApply);
+				pmsmanageService.save(costbl);
+				pmsmanageService.save(paybl);
+				pmsmanageService.save(saleLog);
+				SmsSingleSender singleSender = new SmsSingleSender(SystemConstants.note.APPID, SystemConstants.note.APPKEY);
+		    	SmsSingleSenderResult singleSenderResult;
+		    	ArrayList<String> params = new ArrayList<String>();
+		    	params.add(houseName);
+		    	params.add(cleanTime);
+		    	params.add("已处理");
+		    	singleSenderResult = singleSender.sendWithParam(SystemConstants.note.COUNTRY, phone, 64662, params, "", "", "");
+		    	houseCleanService.deletecleanapplyrecordfailed((LoginUser) request.getSession(true).getAttribute(
+								RequestUtil.LOGIN_USER_SESSION_KEY), "", "7",request);
+				return String.valueOf(SystemConstants.PortalResultCode.DONE);
+			}else if("2".equalsIgnoreCase(status.trim())){//撤销
+				CleanApply cleanApply = (CleanApply)pmsmanageService.findOneByProperties(CleanApply.class, "cleanApplyId", applyId);
+				cleanApply.setStatus("0");
+				String phone = cleanApply.getMobile(); 
+				String houseId = cleanApply.getBranchId();
+				double cleanprice = cleanApply.getCleanPrice();
+				
+				//退款,暂时先转余额
+//				RefundDetail refundDetail = (RefundDetail) pmsmanageService.findOneByProperties(RefundDetail.class, "orderId", applyId);
+//				if(refundDetail != null){
+//					if(refundDetail.getSource().equals("7")){
+//						String Smoney = String.format("%.2f", cleanprice * 100);
+//						Smoney = Smoney.substring(0, Smoney.indexOf("."));
+//						String Refund = String.valueOf(refundDetail.getRefundMoney() * 100);
+//						Refund = Refund.substring(0, Refund.indexOf("."));
+//						WeChatRefundReqModel a = new WeChatRefundReqModel();
+//						a.setOutTradeNo(refundDetail.getBussinessId().trim());
+//						a.setTotalFee(Integer.parseInt(Smoney));
+//						a.setRefundFee(Integer.parseInt(Smoney));
+//						weChatPayServiceImpl.weChatRefund(a);
+//					}
+//				}
+				
+				House cleanHouse = (House)pmsmanageService.findOneByProperties(House.class, "houseId", houseId);
+				String houseName = cleanHouse.getHousename();
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+				String cleanTime = sdf.format(cleanApply.getCleanTime());
+				MemberAccount account = (MemberAccount) pmsmanageService.findOneByProperties(MemberAccount.class, "memberId", cleanApply.getReservedPerson());//转余额
+				account.setCurrBalance(account.getCurrBalance()+cleanApply.getCleanPrice());
+				pmsmanageService.update(account);
+				pmsmanageService.update(cleanApply);
+				SmsSingleSender singleSender = new SmsSingleSender(SystemConstants.note.APPID, SystemConstants.note.APPKEY);
+		    	SmsSingleSenderResult singleSenderResult;
+		    	
+		    	ArrayList<String> params = new ArrayList<String>();
+		    	params.add(houseName);
+		    	params.add(cleanTime);
+		    	params.add("已撤销");
+		    	singleSenderResult = singleSender.sendWithParam(SystemConstants.note.COUNTRY, phone, 64662, params, "", "", "");
+		    	houseCleanService.deletecleanapplyrecordfailed((LoginUser) request.getSession(true).getAttribute(
+								RequestUtil.LOGIN_USER_SESSION_KEY), "", "7",request);
+				return String.valueOf(SystemConstants.PortalResultCode.NULL);
+			}
+			return null;
+		}
+	//民宿保洁页面跳转
+		@RequestMapping("/dealHouseCleanInfo.do")
+		public ModelAndView dealHouseCleanInfo(HttpServletRequest request, HttpServletResponse response, String groupId)
+				throws Exception {
+			LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+            String staffid = loginuser.getStaff().getStaffId();
+			String houseId = request.getParameter("houseId");
+			String cleanTime = request.getParameter("cleanTime");
+			String applicationTime = request.getParameter("applicationTime");
+			String dealType = request.getParameter("dealType");
+			if(houseId == null){
+				houseId = "";
+			}
+			if(cleanTime == null){
+				cleanTime = "";
+			}
+			if(applicationTime == null){
+				applicationTime = "";
+			}
+			if(dealType == null){
+				dealType = "";
+			}
+			ModelAndView mv = new ModelAndView("/page/ipmshouse/leftmenu/cleanrecord/houseCleanInfo");
+			Pagination pagination = (Pagination) ReflectUtil.setBeanFromRequest(request, Pagination.class);
+			
+			if (pagination != null && pagination.getPageNum() == null) {
+				pagination.setPageNum(1);
+				pagination.setRows(13);
+			}
+			String houseSubString = "H";
+			List <?> houseCleanApplyList = pmsmanageService.findBySQLWithPagination("queryHouseCleanApply", new String[]{cleanTime,applicationTime,dealType,staffid,houseId,houseId}, pagination, true);
+			mv.addObject("houseCleanApplyList", houseCleanApplyList);
+			mv.addObject("pagination", pagination);
+			return mv;
+		}	
+	
+	//民宿保洁页面跳转
+	@RequestMapping("/dealHouseClean.do")
+	public ModelAndView dealHouseClean(HttpServletRequest request, HttpServletResponse response, String groupId)
+			throws Exception {
+		String houseId = request.getParameter("houseId");
+		String cleanTime = request.getParameter("cleanTime");
+		String applicationTime = request.getParameter("applicationTime");
+		String dealType = request.getParameter("dealType");
+		if(houseId == null){
+			houseId = "";
+		}
+		if(cleanTime == null){
+			cleanTime = "";
+		}
+		if(applicationTime == null){
+			applicationTime = "";
+		}
+		if(dealType == null){
+			dealType = "";
+		}
+		ModelAndView mv = new ModelAndView("/page/ipmshouse/leftmenu/cleanrecord/dealHouseClean");
+		Pagination pagination = (Pagination) ReflectUtil.setBeanFromRequest(request, Pagination.class);
+		
+		if (pagination != null && pagination.getPageNum() == null) {
+			pagination.setPageNum(1);
+			pagination.setRows(17);
+		}
+		String houseSubString = "H";
+		//List <?> houseCleanApplyList = pmsmanageService.findBySQLWithPagination("queryHouseCleanApply", new String[]{cleanTime,applicationTime,dealType,houseId}, pagination, true);
+		//mv.addObject("houseCleanApplyList", houseCleanApplyList);
+		mv.addObject("pagination", pagination);
+		return mv;
+	}	
+	
+
+	
+
+	
+	
+
+	
+	
+}

@@ -1,0 +1,41 @@
+
+.c_loading {
+    filter: progid : DXImageTransform.Microsoft.Shadow ( color = #666666,
+		direction = 120, strength = 3 );
+	background-color:#FFFFFF;
+	border: 1px solid #996600;
+    display:none;
+    height:30px;
+    left:45%;
+    margin:-100px 0 0 -100px;
+    padding:12px;
+    position:fixed !important;
+    position:absolute;
+    top:60%;
+    width:320px;
+    z-index:50;
+	line-height: 30px;
+}
+
+.c_overlay {
+	opacity: 0.5;
+	width: 100%;
+	filter: Alpha(opacity = 50);
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+.fullbackground {
+	width: 100%;
+	height: 100%;
+    background-color: silver;
+    left:0px;
+    opacity:0.5;
+    position:absolute;
+    top:0px;
+    z-index:3;
+    filter:alpha(opacity=50); /* IE6 */
+    -moz-opacity:0.5; /* Mozilla */
+    -khtml-opacity:0.5; /* Safari */
+}

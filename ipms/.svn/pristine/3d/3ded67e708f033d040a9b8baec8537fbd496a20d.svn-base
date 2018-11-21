@@ -1,0 +1,99 @@
+@CHARSET "UTF-8";
+
+/* 自定义房间新增，编辑*/
+.rm_tabletop {
+	height: 5px;
+}
+
+.ctdform {
+	width: 500px;
+	height: 354px;
+	overflow-x: hidden;
+	overflow-y: auto;
+	position: relative;
+	margin: 0;
+	padding: 0;
+}
+
+.ptable {
+	height: 61px;
+	font-size: 14px;
+	width: 100%;
+	margin-bottom: 0;
+}
+.ptable input,.ptable select,.ptable textarea{
+	margin:1px !important;
+}
+.ctdtitle {
+	vertical-align: middle;
+	border: 0 none;
+	padding: 2px;
+	white-space: nowrap;
+	text-align: center;
+}
+
+.notnull {
+	color: red;
+}
+
+.ptdinput {
+	padding: 0 4px;
+	width: 402px;
+	height: 36px;
+}
+
+.pinputtd {
+	padding: 2px;
+	border: 0 none;
+	vertical-align: top;
+}
+.ctdhr {
+	border: 1px solid #dddddd;
+	background: #f2f5f7
+		url(images/ui-bg_highlight-hard_100_f2f5f7_1x100.png) 50% top repeat-x
+		;
+	color: #362b36;
+	margin: 5px 1px 1px 1px;
+}
+.ptime {
+	width: 402px;
+	height: 36px;
+}
+.room-body .parents-content{
+	width: 100%;
+    text-align: center;
+    margin: 1% 1.7%;
+}
+.parents-content .pdepartsubmit{
+	height: 31px;
+    line-height: 31px;
+    font-size: 14px;
+    text-align: center;
+    width: 72px;
+    background: #5A5D9D;
+    color: #fff;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 2px;
+    margin-right: 10px;
+    border-radius: 4px !important;
+    margin-top: 5px !important;
+    margin: 0 0px;
+}
+.parents-content .pdepartcancle{
+	height: 31px;
+    line-height: 31px;
+    font-size: 14px;
+    text-align: center;
+    width: 72px;
+    background: #FC8A15 ;
+    color: #fff;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 2px;
+    margin-right: 10px;
+    border-radius: 4px !important;
+    margin-top: 5px !important;
+    margin: 0 8px;
+	
+}

@@ -1,0 +1,391 @@
+package com.ideassoft.crm.controller;
+
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+import org.hsqldb.lib.StringUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.basic.service.MarketingBasicService;
+import com.ideassoft.bean.Branch;
+import com.ideassoft.bean.Campaign;
+import com.ideassoft.bean.CampaignRule;
+import com.ideassoft.bean.CouponGroup;
+import com.ideassoft.bean.RoomType;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.SystemConstants;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.crm.service.CampaignService;
+import com.ideassoft.crm.service.InitialService;
+import com.ideassoft.crm.service.LogService;
+import com.ideassoft.crm.service.ManageService;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Controller
+public class CampaignController {
+	@Autowired
+	CampaignService campaignService;
+	
+	@Autowired
+	ManageService manageService;
+	
+	@Autowired
+	InitialService initialService;
+	
+	@Autowired
+	private LogService logService;  
+
+	@Autowired
+	private MarketingBasicService marketingBasicService;
+
+
+	// 优惠券页面的查询功能
+	@RequestMapping("/queryCouponGroupDetail.do")
+	public void queryCouponGroupDetail(HttpServletRequest request, HttpServletResponse response, String groupId)
+			throws Exception {
+		Pagination pagination;
+		Integer pageNum = Integer.parseInt(request.getParameter("page"));
+		Integer rows = Integer.parseInt(request.getParameter("rows"));
+		pagination = new Pagination(pageNum, rows);
+		List<?> result = this.campaignService.queryCouponGroupDetail(groupId, pagination);
+		JSONUtil.responseJSON(response, JSONUtil.buildReportJSONByPagination(result, pagination));
+	}
+
+
+
+
+
+	// 选择归属门店的查询数据方法
+	@RequestMapping("/querybranchIdAndType.do")
+	public void querybranchIdAndType(HttpServletRequest request, HttpServletResponse response, String branchName,
+			String branchType) throws Exception {
+		Pagination pagination;
+		Integer pageNum = Integer.parseInt(request.getParameter("page"));
+		Integer rows = Integer.parseInt(request.getParameter("rows"));
+		pagination = new Pagination(pageNum, rows);
+		branchName = URLDecoder.decode(branchName, "UTF-8");
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		List<?> result = this.campaignService.querybranchNameAndType(loginUser, branchName, branchType, pagination);
+		JSONUtil.responseJSON(response, JSONUtil.buildReportJSONByPagination(result, pagination));
+	}
+
+	// 营销活动修改跳页面
+	//@RequestMapping("/turnAlterCampaignPage.do")
+	public ModelAndView turnAlterCampaignPage(HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		String bigBranchType = "1";
+		String IsMarketCenter = "";
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/crm/campaign/campaignAlter");
+		String campaignId = request.getParameter("campaignId");
+		Campaign campaignInfo = (Campaign) this.campaignService.findOneByProperties(Campaign.class, "dataId",
+				campaignId);
+		/*
+		 * //对开始时间和结束时间进行相应的处理 Date startTime = campaignInfo.getStartTime();
+		 * Date endTime = campaignInfo.getEndTime(); SimpleDateFormat sdf = new
+		 * SimpleDateFormat("yyyy/MM/dd HH:mm"); String startTimeStr =
+		 * sdf.format(startTime); String endTimeStr = sdf.format(endTime);
+		 * campaignInfo.setStartTime(sdf.parse(startTimeStr));
+		 * campaignInfo.setEndTime(sdf.parse(endTimeStr));
+		 */
+		mv.addObject("campaignInfo", campaignInfo);
+		// 部分数据在campaignInfo，没有翻译成中文，则另外查传递到页面去
+		List<?> usingPersonAndType = this.campaignService.queryUsingPersonAndType(campaignId);
+		JSONObject PersonAndType = JSONUtil.fromObject(usingPersonAndType.get(0));
+		mv.addObject("usingPersonAndType", PersonAndType);
+		// 查找所有的门店传递到页面上去加载到页面上
+		List<?> branchList = this.marketingBasicService.queryAllOfBranch();
+		mv.addObject("branchList", branchList);
+		// 查找营销活动业务
+		List<?> businessList = this.marketingBasicService.queryAllOfBusiness();
+		mv.addObject("businessList", businessList);
+		// 如果是营销活动折上折就要求campaignrule表里查找规则加载到页面5
+		List<?> campaignRuleList = this.campaignService.findByProperties(CampaignRule.class, "campaignId", campaignInfo
+				.getDataId(), "status", "1");
+		JSONArray campaignRules = JSONUtil.fromObject(campaignRuleList);
+		mv.addObject("campaignRuleList", campaignRules);
+		// 营销活动是推荐有礼活动时，要查询优惠劵组合表
+		List<?> couponList = this.campaignService.findByProperties(CouponGroup.class, "dataId", campaignInfo
+				.getCouponGroupId());
+		JSONArray couponLists = JSONUtil.fromObject(couponList);
+		mv.addObject("couponList", couponLists);
+		// 营销活动6查询其数据库里的归属部门，和房型
+		List<?> cambranchList = this.campaignService.findByProperties(Branch.class, "branchId", campaignInfo
+				.getBranchId());
+		JSONArray branchLists = JSONUtil.fromObject(cambranchList);
+		mv.addObject("branchLists", branchLists);
+		List<?> camroomList = this.campaignService.findByProperties(RoomType.class, "roomTypeKey.roomType", campaignInfo
+				.getRoomType());
+		JSONArray camroomLists = JSONUtil.fromObject(camroomList);
+		mv.addObject("camroomLists", camroomLists);
+		//将当前门店的rank传递到前台去 
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Branch branch = (Branch) campaignService.findById(Branch.class, loginUser.getStaff().getBranchId());
+		mv.addObject("branchRank", branch);
+		Branch bigBranch = marketingBasicService.queryLoginUserBType(loginUser.getStaff().getBranchId());
+		if (bigBranch != null){
+			bigBranchType = bigBranch.getRank();
+		} 
+		if(CommonConstants.SystemLevel.MarketCenter.equals(bigBranchType) || loginUser.getStaff().getStaffId().equals(SystemConstants.User.ADMIN_ID)){
+			 businessList = this.marketingBasicService.queryAllOfBusiness();
+			 IsMarketCenter = "IsMarketCenter";
+		}
+		mv.addObject("IsMarketCenter", IsMarketCenter);
+		return mv;
+	}
+
+	// 营销活动修改保存数据
+	//@RequestMapping("/campaignsAlter.do")
+	public void campaignsAlter(HttpServletRequest request, HttpServletResponse response, Campaign campaign)
+			throws Exception {
+		//数据上传或下载到本地的数据库
+		boolean currExist = false;
+		String intNumberInCam = "";
+		String intNumber = "";
+		Map<String, Object> map = new HashMap<String, Object>();
+		String businessId = request.getParameter("businessId");
+		String usingPerson = request.getParameter("usingPerson_CUSTOM_VALUE");
+		String usingType = request.getParameter("usingType_CUSTOM_VALUE");
+		String dataId = request.getParameter("dataId");
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String recordUser = loginUser.getStaff().getStaffId();
+		// campaign.setDataId(dataId);
+		campaign.setRecordUser(recordUser);
+		campaign.setUsingPerson(usingPerson);
+		campaign.setUsingType(usingType);
+		campaign.setStatus("1");
+		campaign.setRecordTime(new Date());
+		// 修改的过程中：时间加载到前台时会改变形式，再次保存时作修改(没有了时分秒)
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+		String startTime = request.getParameter("realStartTime");
+		Date startDate = sdf.parse(startTime.toString());
+		String endTime = request.getParameter("realEndTime");
+		Date endDate = sdf.parse(endTime.toString());
+		String effectTime = request.getParameter("realEffectTime");
+		Date effectDate = sdf.parse(effectTime.toString());
+		campaign.setStartTime(startDate);
+		campaign.setEndTime(endDate);
+		campaign.setEffectiveTime(effectDate);
+		if ((CommonConstants.CampaignsType.CampaignSix).equals(businessId)) {
+			String branchId = request.getParameter("branchId_CUSTOM_VALUE");
+			campaign.setBranchId(branchId);
+			String roomType = request.getParameter("roomType_CUSTOM_VALUE");
+			campaign.setRoomType(roomType);
+		}
+		
+		// save之前要先来数据库检重一遍
+		// 将时间进行处理，endTime 加1天
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(campaign.getEndTime());
+		cal.add(Calendar.DATE, 1);
+
+		if (!(CommonConstants.CampaignsType.CampaignThree).equals(businessId) && 
+				!(CommonConstants.CampaignsType.CampaignTwo).equals(businessId) && 
+				!(CommonConstants.CampaignsType.CampaignSix).equals(businessId) &&
+				!(CommonConstants.CampaignsType.CampaignSeven).equals(businessId)) {
+			currExist = this.marketingBasicService.isCurrExist(businessId, sdf.format(campaign.getStartTime()), sdf.format(cal.getTime()), null, campaign.getDataId());
+		} else if ((CommonConstants.CampaignsType.CampaignTwo).equals(businessId) || (CommonConstants.CampaignsType.CampaignSeven).equals(businessId)) {
+			int count = 0;
+			String[] usindPersonArray = campaign.getUsingPerson().split(",");
+			for (int i = 0; i < usindPersonArray.length; i++) {
+				currExist = this.marketingBasicService.isCurrExist(businessId, sdf.format(campaign.getStartTime()), sdf.format(cal.getTime()), usindPersonArray[i], campaign.getDataId());
+				if (currExist) {
+					count++;
+				}
+			}
+
+			if (count != 0) {
+				currExist = true;
+			}
+
+		} else if ((CommonConstants.CampaignsType.CampaignThree).equals(businessId)) {
+				String[] usindPersonArray = campaign.getUsingPerson().split(",");
+				List<?> allOfCampaignThree =  this.marketingBasicService.findCampaignIsControl(businessId, sdf.format(campaign.getStartTime()), sdf.format(cal.getTime()), null, campaign.getDataId());
+				if (allOfCampaignThree != null && allOfCampaignThree.size() > 0 ){
+					for(int k = 0; k < allOfCampaignThree.size(); k++){						
+						int count = 0;
+						String usingPersonTemp = ((Map<?,?>)(allOfCampaignThree.get(k))).get("USING_PERSON").toString();
+						for (int i = 0; i < usindPersonArray.length; i++) {
+							if (usingPersonTemp.contains(usindPersonArray[i]) == true) {
+								count++;
+							}
+						}
+						String operMoneyTemp = ((Map<?,?>)(allOfCampaignThree.get(k))).get("OPER_MONEY").toString();
+						if(operMoneyTemp.indexOf(".") != -1){
+							intNumberInCam = operMoneyTemp.substring(0,operMoneyTemp.indexOf("."));
+						} else {
+							intNumberInCam = operMoneyTemp;
+						}
+						String currCampaign = campaign.getOperMoney().toString();
+						if(currCampaign.indexOf(".") != -1){
+							intNumber = currCampaign.substring(0,currCampaign.indexOf("."));
+						} else {
+							intNumber = currCampaign;
+						}
+						if (count == usindPersonArray.length && usindPersonArray.length == usingPersonTemp.split(",").length 
+								&& !intNumberInCam.equals(intNumber)) {
+							continue;
+						} else if (count == 0 ){
+							continue;
+						} else {
+							currExist = true;
+						}	
+					}	
+				}
+			} else {
+			// 营销活动6
+			String branchId = campaign.getBranchId();
+			String roomType = campaign.getRoomType();
+			currExist = this.marketingBasicService.isDiscountRoomExist(branchId, sdf.format(campaign.getStartTime()), sdf.format(cal.getTime()),
+					roomType, campaign.getDataId());
+		}
+		
+		if (currExist) {
+			JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt("2"), null));
+		} else {
+			this.campaignService.update(campaign);
+			marketingBasicService.campaignLog((LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY), campaign, "3",request);
+			List<Campaign> CampaignList = new ArrayList();
+			CampaignList.add(campaign);
+			map.put("Campaign", CampaignList);
+			//将此营销活动相关的优惠券组合的数据下传
+			List<CouponGroup> ConponGroupList = new ArrayList();
+			CouponGroup oneCouponGroup = (CouponGroup)this.campaignService.findOneByProperties(CouponGroup.class, "dataId", campaign.getCouponGroupId());
+			ConponGroupList.add(oneCouponGroup);
+			map.put("CouponGroup", ConponGroupList);
+	
+			if ((CommonConstants.CampaignsType.CampaignFifth).equals(businessId)) {
+				// 根据活动的campaignId找到辅表将相应的数据删除
+				this.campaignService.deleteCampaignRules(dataId);
+				// 新增该活动的活动规则表
+				String liveDay = request.getParameter("liveDay");
+				List<CampaignRule> camRuleList = new ArrayList();
+				for (int j = 0; j < Integer.parseInt(liveDay); j++) {
+					CampaignRule camRule = new CampaignRule();
+					String camRuleDataId = initialService.getCloudOrLocalSequence("SEQ_CAMPAIGNRULE_ID");
+					String discountTemp = request.getParameter("dayCount" + String.valueOf((j + 1)));
+					camRule.setCampaignId(dataId);
+					camRule.setDataId(camRuleDataId);
+					camRule.setLiveDay(liveDay);
+					camRule.setCurrentDay(String.valueOf(j + 1));
+					camRule.setDayCount(discountTemp);
+					camRule.setStatus("1");
+					camRule.setRecordUser(recordUser);
+					this.campaignService.save(camRule);
+					camRuleList.add(camRule);
+				}
+				map.put("CampaignRule", camRuleList);
+			}
+			Branch loginBranch = (Branch)initialService.findOneByProperties(Branch.class, "branchId", loginUser.getStaff().getBranchId());
+			marketingBasicService.dataUpDownForCampaign(loginUser.getStaff().getBranchId(),1, loginBranch.getBranchIp(), "campaignAlter", map, campaign);
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, null));
+		}
+	}
+
+	/*
+	 * //转换前台传递过来的字符串型的date,（在以对象传递过来时）
+	 * 
+	 * @InitBinder public void init(WebDataBinder binder) {
+	 * binder.registerCustomEditor(Date.class, new CustomDateEditor(new
+	 * SimpleDateFormat("yyyy-MM-dd"), true)); }
+	 */
+
+	// 删除当前营销活动的记录（改为逻辑删除改状态为0）
+//	@RequestMapping("/campaignsDelete.do")
+	public void campaignsDelete(HttpServletRequest request, HttpServletResponse response, Campaign campaign)
+			throws Exception {
+		String businessId = request.getParameter("businessId");
+		String dataId = request.getParameter("dataId");
+		//campaign.setStatus("0");
+		//this.campaignService.update(campaign);
+		campaignService.updateCampaignStatus(dataId);
+		marketingBasicService.campaignLog((LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY), campaign, "2",request);
+		
+		if (businessId.equals((CommonConstants.CampaignsType.CampaignFifth))) {
+			//// 根据活动的campaignId找到辅表将相应的数据删除。 删除是逻辑删除
+			this.campaignService.deleteCampaignRules(dataId);
+		}
+		JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, null));
+	}
+
+	// 每一个加载条件点击跳dialog的框体
+	// 多选营销活动使用对象
+	@RequestMapping("/pageConditionOpenJDialog.do")
+	public ModelAndView pageConditionOpenJDialog(HttpServletRequest request, HttpServletResponse response,
+			String inputId, String javaBeanName, String colsName, String queryConditions) {
+		ModelAndView mv = new ModelAndView();
+		String[] arr;
+		boolean qc = queryConditions.contains(",");
+		 String queryCondition = "";
+		 String queryConditionnew = "";
+		// 多条件查询
+		if(qc){
+		  arr = queryConditions.split(",");
+		  for(int i = 0; i < arr.length; i++){
+			  String arri = arr[i];
+			  String[] arrj = arri.split("=");
+			  arrj[1] = "\'" + arrj[1] + "\'";
+			  queryCondition = arrj[0] + "=" + arrj[1];
+			  if(i == 0){
+			  queryConditionnew = queryConditionnew+queryCondition;
+			  }else{
+			  queryConditionnew = queryConditionnew+ " and "+queryCondition;  
+			  }
+		  }
+		  queryConditions = queryConditionnew;
+		}
+		// 单条件查询
+		else{
+		  arr = queryConditions.split("=");
+		  arr[1] = "\'" + arr[1] + "\'";
+		  queryConditions = arr[0] + "=" + arr[1];
+		}
+		mv.setViewName("page/dialog/customDialog");
+		mv.addObject("dialogColumns", colsName);
+		mv.addObject("dialogTarget", javaBeanName);
+		mv.addObject("dialogConditions", queryConditions);
+		mv.addObject("dialogQuickAdd", null);
+		mv.addObject("selectType", "dialog-radio");
+		mv.addObject("colName", inputId);
+		return mv;
+	}
+	
+	
+	@RequestMapping("/pageConditionOpenJDialogTwo.do")
+	public ModelAndView pageConditionOpenJDialogTwo(HttpServletRequest request, HttpServletResponse response,
+			String inputId, String javaBeanName, String colsName, String queryConditions) {
+		ModelAndView mv = new ModelAndView();
+		if(queryConditions != null){
+			queryConditions = queryConditions.replace("[]", "'");
+		}
+		
+		mv.setViewName("page/dialog/customDialog");
+		mv.addObject("dialogColumns", colsName);
+		mv.addObject("dialogTarget", javaBeanName);
+		mv.addObject("dialogConditions", queryConditions);
+		mv.addObject("dialogQuickAdd", null);
+		mv.addObject("selectType", "dialog-radio");
+		mv.addObject("colName", inputId);
+		return mv;
+	}
+
+}

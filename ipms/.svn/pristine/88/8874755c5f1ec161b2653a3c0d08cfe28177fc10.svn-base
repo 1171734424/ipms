@@ -1,0 +1,170 @@
+package com.ideassoft.pms.controller;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+
+
+import com.ideassoft.apartment.service.ApartmentCheckInService;
+import com.ideassoft.bean.Member;
+import com.ideassoft.bean.WxOpenId;
+import com.ideassoft.bean.WxUser;
+import com.ideassoft.core.annotation.interfaces.AlpMethodControl;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.annotation.interfaces.AlpModelControl;
+import com.ideassoft.core.annotation.interfaces.WcMethodControl;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.ReflectUtil;
+import com.ideassoft.wxPay.SignatureUtil;
+import com.ideassoft.wxPay.WxPayUtil;
+
+
+@Transactional
+@Controller
+@AlpModelControl
+public class WxPayController {
+	
+	@Autowired
+	private ApartmentCheckInService apartmentCheckInService;
+
+    @RequestMapping("/wxPay.do")
+    @WcMethodControl
+    public void wxPay(HttpServletRequest request, HttpServletResponse response, String openId, String total_fee) throws Exception{
+    	
+    	String nonce_str = WxPayUtil.getRandomString(32);
+    	String out_trade_no = WxPayUtil.getRandomNumber(9);
+    	Map<String, String> map = new HashMap<String, String>();
+    	map.put("appid", CommonConstants.WXPAY.APPID);
+    	map.put("body", CommonConstants.WXPAY.BODY);
+    	map.put("mch_id", CommonConstants.WXPAY.MACH_ID);
+    	map.put("nonce_str", nonce_str);
+    	map.put("notify_url", CommonConstants.WXPAY.NOTIFY_URL);
+    	map.put("openid", openId);
+    	map.put("out_trade_no", out_trade_no);
+    	map.put("spbill_create_ip", CommonConstants.WXPAY.SPBIL_CREATE_IP);
+    	map.put("total_fee", total_fee);
+    	map.put("trade_type", CommonConstants.WXPAY.TRADE_TYPE);
+    	
+    	String sign = SignatureUtil.signature(map, CommonConstants.WXPAY.KEY);
+    	
+    	String formData = "<xml>";
+	    formData += "<appid>" + CommonConstants.WXPAY.APPID + "</appid>";
+	    formData += "<body>" + CommonConstants.WXPAY.BODY + "</body>";
+	    formData += "<mch_id>" + CommonConstants.WXPAY.MACH_ID + "</mch_id>";
+	    formData += "<nonce_str>" + nonce_str + "</nonce_str>";
+	    formData += "<notify_url>" + CommonConstants.WXPAY.NOTIFY_URL + "</notify_url>";
+	    formData += "<openid>" + openId + "</openid>";
+	    formData += "<out_trade_no>" + out_trade_no + "</out_trade_no>";
+	    formData += "<spbill_create_ip>" + CommonConstants.WXPAY.SPBIL_CREATE_IP + "</spbill_create_ip>";
+	    formData += "<total_fee>" + total_fee + "</total_fee>";
+	    formData += "<trade_type>" + CommonConstants.WXPAY.TRADE_TYPE + "</trade_type>";
+	    formData += "<sign>" + sign + "</sign>";
+	    formData += "</xml>";
+	    
+    	CloseableHttpClient httpClient = HttpClients.createDefault();
+		HttpPost httpPost = new HttpPost("https://api.mch.weixin.qq.com/pay/unifiedorder");
+		try {
+			httpPost.setEntity(new StringEntity(formData, "UTF-8"));
+			HttpResponse responses = httpClient.execute(httpPost);
+			String result = EntityUtils.toString(responses.getEntity(), "UTF-8");
+			JSONUtil.responseJSON(response, new AjaxResult(0, result));
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				httpClient.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+    }
+    
+    public static String filterEmoji(String source) {
+    	if (source != null && source.length() > 0) {
+    		return source.replaceAll("[\ud800\udc00-\udbff\udfff\ud800-\udfff]", "");
+		} else {
+			return source;
+		}  
+    }
+	/**
+	 * 
+	 * 获取当前小程序登录人的openId
+	 * @param request
+	 * @param response
+	 * @param appid
+	 * @param secret
+	 * @param js_code
+	 */
+    @RequestMapping("/getOpenId.do")
+    @AlpMethodControl
+    public void getOpenId(HttpServletRequest request, HttpServletResponse response, String appid, String secret, String js_code){
+    	String grant_type = "authorization_code";
+    	String url = "https://api.weixin.qq.com/sns/jscode2session?appid=" + appid + "&secret=" + secret + "&js_code=" + js_code + "&grant_type=" + grant_type;
+    	try {
+		    URL urlGet = new URL(url);
+            HttpURLConnection http = (HttpURLConnection) urlGet.openConnection();
+            http.setRequestMethod("GET"); // 必须是get方式请求
+            http.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+            http.setDoOutput(true);
+            http.setDoInput(true);
+            System.setProperty("sun.net.client.defaultConnectTimeout", "30000");// 连接超时30秒
+            System.setProperty("sun.net.client.defaultReadTimeout", "30000"); // 读取超时30秒
+            http.connect();
+            InputStream is = http.getInputStream();
+            int size = is.available();
+            byte[] jsonBytes = new byte[size];
+            is.read(jsonBytes);
+            String result = new String(jsonBytes, "UTF-8");
+            WxOpenId wxOpenId = (WxOpenId) ReflectUtil.setBean(new JSONObject(result), "WxOpenId");
+            JSONUtil.responseJSON(response, wxOpenId);
+        } catch (Exception e) {
+
+        }
+    }
+    
+    @RequestMapping("/memberUser.do")
+    @AlpMethodControl
+    public void saveUser(HttpServletRequest request, HttpServletResponse response, String userInfo, String user) throws Exception {
+    	WxUser wxuser = (WxUser) ReflectUtil.setBean(new JSONObject(userInfo), "WxUser");
+    	WxOpenId wxOpenId = (WxOpenId) ReflectUtil.setBean(new JSONObject(user), "WxOpenId");
+    	Member member = (Member) apartmentCheckInService.findOneByProperties(Member.class, "openId", wxOpenId.getOpenid());
+    	if(null == member){
+    		member = new Member();
+        	member.setGendor(wxuser.getGender());
+        	member.setMemberId(apartmentCheckInService.getSequence("SEQ_MEMBER_ID"));
+        	member.setMemberName(filterEmoji(wxuser.getNickName()));
+        	member.setOpenId(wxOpenId.getOpenid());
+        	member.setStatus("1");
+        	member.setRecordTime(new Date());
+        	member.setRegisterTime(new Date());
+        	member.setPhotos(wxuser.getAvatarUrl());
+    	}
+    	try {
+    		apartmentCheckInService.getHibernateTemplate().saveOrUpdate(member);
+    		JSONUtil.responseJSON(response, new AjaxResult(1, "成功"));
+		} catch (Exception e) {
+			JSONUtil.responseJSON(response, new AjaxResult(0, "失败"));
+		}
+    }
+}

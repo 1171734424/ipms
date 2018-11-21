@@ -1,0 +1,11 @@
+system.manage.login=Login
+system.manage.username=Username
+system.manage.password=Password
+system.manage.alertmsg.username=Enter Username
+system.manage.register=Register
+system.manage.alertmsg.password=Enter Password
+system.manage.password.forget=Forget
+system.manage.allrights.reserved=ALL RIGHTS RESERVED
+system.manage.help=Help
+system.manage.recommended=Recommended
+system.manage.mainframe.frontpage=Front Page

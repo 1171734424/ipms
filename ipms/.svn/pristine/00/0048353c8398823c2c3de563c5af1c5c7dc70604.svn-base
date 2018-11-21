@@ -1,0 +1,45 @@
+@CHARSET "UTF-8";
+
+.leftfloat{
+ float:left;
+}
+
+.paddingInput{
+ margin-left: 10px;
+ margin-top: -4px;
+}
+
+.form-horizontal .help-block {
+    margin-bottom: 13px;
+    margin-top: -32px;
+    margin-left: 405px;
+}
+
+ .form-horizontal input,.form-horizontal select{
+ 	margin-left: 10px;
+    margin-bottom: 25px;
+    border: 1px solid #ddd;
+ }
+ 
+.addFloatStyle{
+	width: 100px;
+    float: left;
+}
+
+.ui-jqdialog {
+    height: 122px !important;
+}
+
+.formInput {
+	width: 461px;
+    float: left;
+}
+
+.col-sm-10 select {
+	width: 289px;
+    height: 45px;
+}
+	
+	
+	
+	

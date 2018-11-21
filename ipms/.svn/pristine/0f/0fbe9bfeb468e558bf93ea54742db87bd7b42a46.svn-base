@@ -1,0 +1,464 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ include file="../../../common/taglib.jsp"%>
+<%@ include file="../../../common/script.jsp"%>
+<%
+	request.setAttribute("basePath", request.getContextPath());
+	request.setAttribute("roomtype", request.getAttribute("roomtype"));
+	request.setAttribute("theme", request.getAttribute("theme"));
+	request.setAttribute("roomprice", request.getAttribute("roomprice"));
+	request.setAttribute("guarantee", request.getAttribute("guarantee"));
+	request.setAttribute("rpsetup", request.getAttribute("rpsetup"));
+	request.setAttribute("outlineroomprice", request.getAttribute("outlineroomprice"));
+	request.setAttribute("discount", request.getAttribute("discount"));
+%>
+
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>预订页面</title>
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="expires" content="0">
+		<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+		<meta http-equiv="description" content="This is my page">
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/css/order/order_details.css" />
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/css/fonticon.css" />
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/common/tipInfo.css" />
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/common/jquery-dialog.css"/>
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/common/jquery.mloading.css"/>
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/css/leftmenu/leftmenu.css" />
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/css/select/jquery.mCustomScrollbar.min.css" />
+	 	<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/css/select/select.css" />
+	 	<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/need/laydate.css"/>
+		<link rel="stylesheet"  href="<%=request.getContextPath()%>/css/ipms/skins/molv/laydate.css"/>
+		<link rel="stylesheet" id="style"  href="<%=request.getContextPath()%>/css/fontawesome/css/font-awesome.min.css" />
+		<style type="text/css">
+		#addnewtab {
+		    top: 26.4%;
+			}
+		.unclickable{
+		  //  padding: 3px;
+  			font-size: 0.75rem;
+		    background: darkgrey;
+		    color: #fff;
+		  //  height: 30px;
+		  //  width: 55px;
+		}
+		.aaa{
+			margin-left: 710px !important;
+    		margin-right: 0px !important;
+		}
+		
+		.magin_label_top{
+			margin-top: 0.9%;
+		}
+		#housememberselect{
+		    position: absolute !important;
+		    top: 152px !important;
+		    left: 232px !important;
+		}
+		#querymember{
+			position: absolute !important;
+		    top: 152px !important;
+		    left: 412px !important;
+		}
+		</style>
+	</head>
+	<body>
+		<div class="walk_margin" style="padding:0;background:#fff;border:none;">
+			<input id="roomprice" name="roomprice" type="hidden" />
+			<input id="memberId" name="memberId" type="hidden" />
+			<input id="memberrank" name="memberRank" type="hidden" />
+		    <input id="rooprice_msj" name="rooprice_msj" type="hidden" value="${roomprice}"/>
+		    <input id="guarantee_msj" name="guarantee_msj" type="hidden" value="${guarantee}"/>
+		    <input id="outlineroomprice" name="outlineroomprice" type="hidden" value="${outlineroomprice}"/>
+		    <input id="discount" name="discount" type="hidden" value="${discount}"/>
+			<!--<h3></h3>
+			<span class="close_span">
+				<i class="imooc left_imooc_order" style="color:#3B3E40;" onclick=window.parent.JDialog.close();>&#xe900;</i>
+			</span>
+			--><div class="walk_form" style="height:780px;">
+				<form action="" method="post" class="order_form order_form_later" >
+					<!-- <section class="detail_one sonepa">
+					<label class="label_title">
+						查会员信息
+					</label>
+					<input id="memberselect" name="memberselect" type="text" value=""
+						class="check check_one" placeholder="手机号/公司编号" onKeyUp=this.value = this.value.replace(/\D/g, ''); onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="11">
+					<span role="button" class="button_margin submitbutton_order"onclick=selectmember();>查询</span>
+					<input id="corporationIdSelect" name="corporationIdSelect" type="text" value="" class="check check_one" style="margin-left: 112px;" placeholder="公司会员编号" />
+					<span role="button" class="button_margin" onclick="changePrice()" style="margin-right: 40%">公司会员</span>
+					<span role="button" class="button_margin addmember_order orange" onclick=addmember();>注册会员</span>
+					</section> -->
+					<section class="detail_one">
+					<label class="label_title">
+						预订单信息
+					</label>
+					<ul class="clearfix">
+						<%-- <li class="payscore">
+							<label class="orlabel_name">
+								场景
+							</label>
+							<select id="theme" name="theme" class="check order_input"
+								 disabled>
+								<c:forEach var="th" items="${theme}">
+									<option value="${th.content}">
+										${th.paramname}
+									</option>
+								</c:forEach>
+							</select>
+						</li> --%>
+						<li>
+							<label class="orlabel_name" id="arrive">
+								抵店日期
+							</label>
+							<input id="arrivedate" name="arrivedate" type="text" value=""
+								class="check date order_input">
+						</li>
+						<li>
+							<label class="orlabel_name" id="leave">
+								离店日期
+							</label>
+							<input id="leavedate" name="leavedate" type="text" value=""
+								class="check ldate order_input">
+						</li>
+						<li>
+							<label class="orlabel_name">
+								民宿名称
+							</label>
+							<input id="houseName" name="houseName" type="text" value="" class="check ldate order_input" onclick="showHouseList()">
+							<input id="houseName_CUSTOM_VALUE" name="houseId" type="hidden">
+						</li>						
+						<li>
+							<label class="orlabel_name">
+								总房价
+							</label>
+							<input id="price" name="price" type="text" value="" class="check order_input"
+								disabled>
+						</li>
+						<li>
+							<label class="orlabel_name">
+								来源
+							</label>
+							<select id="source" name="source" class="check order_input">
+										<c:forEach items="${source}" var="re">
+<%--  											<c:if test="${re['MEMBERID'] ==9 || re['MEMBERID'] ==2}">
+ --%> 												<option value="${re['MEMBERID']}">
+													${re['SOURCENAME']}
+												</option>	
+<%-- 											</c:if>
+ --%>										</c:forEach>
+							 </select>
+						</li>
+						<li>
+							<span id="checkinFree" class="tab_select tabli addcheckperson button_margin button_add aaa" onclick="checkinByFree()">零元入住</span>
+						</li>
+				</ul>
+				 <label class="label_title ">入住人信息</label>
+		            <div id="tab" class="xx_wrap">
+		              <span id="addnewtab" class="tab_select tabli addcheckperson button_margin button_add">新增</span>
+					  <input id="housememberselect" name="housememberselect" type="text" value="" 
+						  class="check check_one" placeholder="手机号/身份证号" onKeyUp="this.value = this.value.replace(/\D/g, '')" onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="19">
+					  <span id="querymember" role="button" class="button_margin submitbutton_order"onclick=houseOrderMember();>查询</span>
+		              <ul  id="tabtitlenew" class="nav">
+			             <li class="tabli active" id="tabtabtitle_0" onclick="changeTab('0')">入住人</li>
+		              </ul>
+			        </div>
+		        <div id="tabCon">
+			     <div id="tabCon_0" class="showuser" style="display:block">
+			        <ul id="tabcontent" class="clearfix magin_label_top">
+					   <li><label class="orlabel_name orlabel_red">姓名</label><input id= "user" name="check_user" type="text" value="" class="check order_input" maxlength="10"></li>
+					   <li><label class="orlabel_name orlabel_red">性别</label><select id= "gender" name="check_gender" class="check order_input">
+										<option value="0">
+											女
+										</option>
+										<option value="1">
+											男
+										</option>
+								</select></li>
+					   <li><label class="orlabel_name orlabel_red">手机号</label><input id= "mobile" name="check_mobile" type="text" value="" class="check order_input" maxlength="11" onKeyUp="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')"></li>
+					   <li><label class="orlabel_name orlabel_red">身份证</label><input id= "idcard" name="check_idcard" type="text" value="" class="check order_input" maxlength="18" onKeyUp="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')"></li>
+						<input type="hidden" class = "OrdermemberId" name="OrdermemberId">
+					</ul>
+				 </div>
+		        </div>
+<!-- 		         <label class="label_title ">备注</label>
+ -->					<ul>
+						<li>
+							<label class="orlabel_name">
+								接待备注
+							</label>
+							<textarea id="receptionremark" name="receptionremark" type="text"
+								value="" class="check orderta_height order_textarea"></textarea>
+						</li>
+						<li>
+							<label class="orlabel_name">
+								客房备注
+							</label>
+							<textarea id="roomremark" name="roomremark" type="text" value=""
+								class="check order_textarea"></textarea>
+						</li>
+					</ul>
+					</section>
+					<section class="">
+						<span id="order-button" class="button_margin_new" onclick="orderstart()">预订</span>
+					</section>
+				</form>
+			</div>
+		</div>
+		<script src="<%=request.getContextPath()%>/script/ipmsinhouse/laydate.dev.js"></script>
+	    <script src="<%=request.getContextPath()%>/script/ipmsinhouse/selectjs/jquery.select.js"></script>
+        <script src="<%=request.getContextPath()%>/script/ipmsinhouse/selectjs/jquery.mCustomScrollbar.concat.min.js"></script> 
+		<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+		<script src="<%=request.getContextPath()%>/script/ipmsinhouse/leftmenu/houseOrder/houseOrder.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/jquery.mloading.js"></script>
+		<script>
+		      var base_path = "<%=request.getContextPath()%>";
+		</script>
+		<script>
+			var startTime,endTime,checkinFree=false;
+			function  ObjStory2(name,gender,idcard,mobile,memberId)
+			{
+			   this.name = name;
+			   this.gender= gender;
+			   this.idcard= idcard;
+			   this.mobile = mobile; 
+			   this.memberId = memberId;
+			}
+			
+			function adtimejudge(){
+				startTime = $("#arrivedate").val();
+				endTime = $("#leavedate").val();
+				var starttime = new Date(startTime).getTime();
+				var endtime = new Date(endTime).getTime();
+				if(endtime <= starttime){
+					return true;
+				}
+				return false;
+			}
+			
+			function showHouseList(){
+				$("#price").val("");//先清空
+				$("#houseName_CUSTOM_VALUE").val("");
+				$("#houseName").val("");
+				startTime = $("#arrivedate").val();
+				endTime = $("#leavedate").val();
+				var starttime = new Date(startTime).getTime();
+				var endtime = new Date(endTime).getTime();
+				if(endtime <= starttime){
+					showMsg("请选择正确的日期");
+					return;
+				}
+				JDialog.open("民宿名称", base_path+ "/allhouse.do?startTime="+ startTime+"&endTime=" + endTime, 450, 350);
+			}
+			/*手机号和身份证号查询会员*/
+			function houseOrderMember(){
+				var memberMsg = $("#housememberselect").val();
+				$.ajax({
+					url : base_path + "/housememberselect.do",
+					type : "post",
+					data : {
+						'memberMsg' : memberMsg
+					},
+					success : function(json) {
+						if(json.result == "1"){
+
+							var showdiv = $("#tabCon").find("div:visible");
+							
+							//所有的客人信息
+							var idcardlist  =document.getElementsByName("check_idcard");
+							for(var i=0; i<idcardlist.length; i++ ){
+								if(json.data.idcard != ""){
+									if(idcardlist[i].value == json.data[0].idcard){
+										showMsg("客人信息重复!");
+										return false;
+									}	
+								}
+							}
+							$(showdiv).find(".order_input").eq(0).val("");
+							$(showdiv).find(".order_input").eq(1).val("");
+							$(showdiv).find(".order_input").eq(2).val("");
+							$(showdiv).find(".order_input").eq(3).attr('disabled',false).val("");
+							//获取显示的客人信息
+							//1.入住人
+							$(".tabli.active").html(json.data[0].memberName);
+							//2.入住人身份信息
+							//var showdiv = $("#tabCon").find("div:visible");
+							$(showdiv).find(".order_input").eq(0).val(json.data[0].memberName);
+							$(showdiv).find(".order_input").eq(1).val(json.data[0].gendor);
+							$(showdiv).find(".order_input").eq(2).val(json.data[0].mobile);
+						/* 	if(json.data.idcard == ""){
+								$(showdiv).find(".order_input").eq(3).attr('disabled',true);
+							}else{ */
+								$(showdiv).find(".order_input").eq(3).val(json.data[0].idcard);
+							//}
+							$(showdiv).find(".OrdermemberId").val(json.data[0].memberId);
+						}
+						if(json.result == "2"){
+							showMsg(json.message);
+						}
+					},
+					error : function(json) {
+						
+					}
+				});
+			}
+			
+			
+			
+			
+			
+			function orderstart(){//开始预订
+				if($("#order-button").hasClass("unclickable")){
+					showMsg("操作过快!");					
+					return false;
+				}
+				var orderarrivedate = $("#arrivedate").val();
+				var orderleavedate = $("#leavedate").val();
+				var houseId = $("#houseName_CUSTOM_VALUE").val();
+				var source = $("#source").val();
+				var orderprice = $("#price").val();		
+				var roomremark = $("#roomremark").val();
+				var receptionremark = $("#receptionremark").val();
+				
+				if(orderarrivedate ==""){
+					showMsg("请选择抵店日期!");
+					return false;
+				}else if(orderleavedate == ""){
+					showMsg("请选择离店日期!");	
+					return false;
+				}else if(adtimejudge()){
+					showMsg("抵店时间不得晚于离店时间！");
+					return false;
+				}else if(houseId == ""){
+					showMsg("请选择入住的民宿!");	
+					return false;
+				}else if(orderprice == ""){
+					showMsg("请重新选择入住的民宿!");	
+					return false;
+				}
+				var map = [];   
+				var userlist =document.getElementsByName("check_user");
+				var genderlist =document.getElementsByName("check_gender");
+				var idcardlist  =document.getElementsByName("check_idcard");
+				var mobilelist =document.getElementsByName("check_mobile");
+				var checkArray2 = [];
+				for (var int = 0; int < mobilelist.length; int++) {
+					checkArray2.push(mobilelist[int].value);
+					
+				}
+				var sort2 = checkArray2.sort();
+				for (var int3 = 0; int3 < sort2.length; int3++) {
+					if(sort2[int3] == sort2[int3 + 1]){
+						showMsg("手机号重复");
+						return;
+					}
+				}
+				var checkArray1 = [];
+				for (var int = 0; int < idcardlist.length; int++) {
+					checkArray1.push(idcardlist[int].value);
+					
+				}
+				var sort1 = checkArray1.sort();
+				for (var int2 = 0; int2 < sort1.length; int2++) {
+					if(sort1[int2] == sort1[int2 + 1]){
+						showMsg("身份证号重复");
+						return;
+					}
+				}
+				var memberIdlist = document.getElementsByName("OrdermemberId");
+				for(var i=0; i<userlist.length; i++ ){
+					  if((userlist[i].value==null)||(userlist[i].value=="")||(userlist[i].value=="%")){
+							$("#order-button").removeClass("unclickable");
+						  showMsg("请输入入住人信息!");
+						  return false;
+					  }else{
+				            var re = /^(1[358][0-9]{9})$/;
+				            if (re.test(mobilelist[i].value)==false) {
+				            	showMsg(userlist[i].value+"手机号码输入为空或输入不合法，请重新输入");
+				                return; 
+				            }
+							  if((idcardlist[i].value=="")){
+								 showMsg("身份证号码不能为空!");
+								 return;
+							 } 
+							  var reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+					            if (!reg.test( idcardlist[i].value) && (idcardlist[i].value!="")) {
+					            	showMsg(userlist[i].value+"身份证输入不合法，请重新输入");
+					                return;
+					             }			            
+						  
+					   var namedata = userlist[i].value;
+					   var genderdata = genderlist[i].value;
+					   var idcarddata = idcardlist[i].value;
+					   var mobiledata = mobilelist[i].value;
+					   var memberIddata = memberIdlist[i].value;
+					   map.push(new ObjStory2(namedata,genderdata,idcarddata,mobiledata,memberIddata));
+					  }
+					   }
+				var checkuserarray = JSON.stringify(map);
+				$("#order-button").addClass("unclickable");
+				loading();
+				//实名校验
+				$.ajax({
+					url : base_path + "/orderHouse.do",
+					type : "post",
+					data : {
+						'orderarrivedate' : orderarrivedate,
+						'orderleavedate' : orderleavedate,
+						'orderprice' : orderprice,
+						'roomremark' : roomremark,
+						'checkuserarray' :checkuserarray,
+						'houseId' : houseId,
+						'source' : source,
+						'receptionremark': receptionremark,
+						'checkinFree' : checkinFree
+					},
+					success : function(json) {
+						if (0 == json.result) {
+							showMsg("预订成功!");
+							window.setTimeout("window.parent.location.reload(true)",
+									2500);
+
+						} else {
+							$("#order-button").removeClass("unclickable");
+							showMsg(json.message);
+							setTimeout(function() {
+						        $("body").mLoading("hide");
+						    }, 3000);
+						}
+					},
+					error : function(json) {
+						$("#order-button").removeClass("unclickable");
+						showMsg("操作失败，请重新操作！");
+						setTimeout(function() {
+					        $("body").mLoading("hide");
+					    }, 3000);
+					}
+				});
+				
+			}  
+			
+			function loading(){
+				console.log(1);
+				$("body").mLoading({
+				    text:"正在提交订单...",//加载文字，默认值：加载中...
+				    //icon:"",//加载图标，默认值：一个小型的base64的gif图片
+				    html:false,//设置加载内容是否是html格式，默认值是false
+				    content:"",//忽略icon和text的值，直接在加载框中显示此值
+				    mask:true//是否显示遮罩效果，默认显示
+				});
+			}
+			
+			/*零元入住*/
+			function checkinByFree(){
+				$("#price").val("0.0");
+				checkinFree = true;
+			}
+			
+			
+		</script>
+	</body>
+</html>

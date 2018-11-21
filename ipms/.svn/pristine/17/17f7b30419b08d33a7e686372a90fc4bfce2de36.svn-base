@@ -1,0 +1,179 @@
+@CHARSET "UTF-8";
+
+.checkuser_wrapper{
+	height: 261px;
+    line-height: 45px;
+    padding-right: 26px;
+   	background-color: white;
+}
+
+.checkuser_button_left{
+	height: 50px;
+    line-height: 50px;
+}
+
+/*包含按钮的大盒子*/
+.checkuser_bt{
+}
+.checkuser_info_write{
+	width: 100%;
+    margin-top: 7px;
+    background: #FFFFFF;
+}
+.checkuser_wrapper .button_margin {
+    float: right;
+    text-align: center;
+    margin-right: 10px;
+    margin-top: 10px;
+    border: none;
+    /*background-color: #5A5D9D;*/
+    color: #fff;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    transition: all 0.15s ease-in-out;
+}
+
+.checkuser_wrapper .checkuser_info_write .check_ul li.check_name{
+	cursor:pointer;
+}
+
+.checkuser_wrapper .checkuser_info_write .check_ul li.check_name{
+    border-top: 1px solid #5A5D9D;
+    border-left: 1px solid #5A5D9D;
+    border-right: 1px solid #5A5D9D;
+    width: 102px;
+    text-align: center;
+    margin: 0;
+    height: 36px;
+    line-height: 36px;
+    color: #323456;
+    background: #fff;
+}
+
+.checkuser_wrapper .checkuser_info_write .check_ul .check_name.active{
+	color: #fff;
+    background: #5A5D9D;
+}
+
+.checkuser_wrapper .checkuser_info_write .check_ul{
+	margin: 0 0 0 36px;
+    border-bottom: 2px solid #5A5D9D;
+    clear: both;
+    display: flex;
+    width: 95.2%;
+}
+
+.checkuser_wrapper .customer_info {
+	/*display: flex;*/
+}
+.checkuser_wrapper .customer_info li.cols_li textarea{
+	width:420px;
+}
+label.order_search {
+    font-weight: bold;
+    line-height: 50px;
+    width: 106px;
+}
+.checkuser_wrapper .customer_info li {
+	float: left;
+    margin: 4px;
+    line-height: 38px;
+}
+
+.checkuser_wrapper .check {
+	padding: 8px 5px;
+    width: 150px;
+    margin-left:10px;
+}
+.checkuser_wrapper .checkuser_bt .check {
+    padding: 8px 5px;
+    width: 150px;
+    margin-left: 12px;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+/*住址以及备注重写开始*/
+
+label.label_title{
+    margin: 2px 49px;
+    font-size: 0.95rem;
+    font-weight: bold;
+}
+.checkuser_wrapper ul li.address{
+	float: none;
+}
+.checkuser_wrapper ul li.address label{
+    line-height: 46px;
+    margin-left: 4px;
+}
+.checkuser_wrapper ul li.address textarea{
+	width: 704px;
+    margin-left: 10px;
+    margin-top: 5px;
+}
+.checkuser_wrapper  li.cols_address #address{
+	width: 692px;
+}
+.checkuser_wrapper .customer_info textarea{
+	width: 920px;
+    float: left;
+    padding: 2px 5px;
+    margin-left: 10px;
+    text-align: left;
+}
+.checkuser_wrapper ul li.record{
+	width:100%;
+}
+.checkuser_wrapper ul li.record textarea{
+	width: 88.2%;
+}
+.checkuser_wrapper ul li.cols_record textarea.te_height{
+	width: 88%;
+}
+
+.checkuser_wrapper .customer_info li .label_name{
+	float: left;
+    width: 109px;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+
+.checkuser_wrapper .checkuser_button_right .addhand {
+	display: none;
+}
+.checkuser_button_right{
+	margin-right:5px;
+}
+/*over*/
+section.cols_margin{
+	padding-right: 5px;
+}
+.button_color{
+    background: #5A5D9D;
+    color: #fff;
+}
+
+.button_color_cancel{
+    background: #a5a3a3;
+    color: #fff;
+}
+
+.dl_status {
+	background-color: #6c6969 !important;
+	border: none;
+	color: #fff !important;
+	border-right: 1px solid #a0a0a0 !important;
+}
+
+.checkuser_button_box .addhand{
+	display: none;
+}
+
+.handleguest{
+	display: none;	
+}
+.checkuser_button_left label{
+}

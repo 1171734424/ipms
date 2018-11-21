@@ -1,0 +1,115 @@
+package com.ideassoft.pms.task;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+
+import com.ideassoft.bean.Aptorder;
+import com.ideassoft.bean.Bill;
+import com.ideassoft.bean.Contrart;
+import com.ideassoft.bean.RefundDetail;
+import com.ideassoft.core.constants.SystemConstants.ProjectName;
+import com.ideassoft.core.factory.ServiceFactory;
+import com.ideassoft.core.task.ScheduledTask;
+//import com.ideassoft.pms.service.AliPayServiceImpl;
+import com.ideassoft.pms.service.DailyService;
+import com.ideassoft.wechatrefund.WeChatPayServiceImpl;
+import com.ideassoft.wechatrefund.WeChatRefundReqModel;
+
+public class ApartmentRefundTask extends ScheduledTask implements ProjectName {
+
+	private final Logger logger = Logger.getLogger(ApartmentRefundTask.class);
+
+	private static DailyService dailyService = null;
+	
+	private static WeChatPayServiceImpl weChatPayServiceImpl = null;
+	
+	//private static AliPayServiceImpl aliPayServiceImpl = null;
+
+	public ApartmentRefundTask(String name) {
+		super(name);
+	}
+	
+	public void initScheduledData() {
+		dailyService = (DailyService) ServiceFactory.getService("dailyService");
+		weChatPayServiceImpl = (WeChatPayServiceImpl) ServiceFactory.getService("weChatPayServiceImpl");
+	//	aliPayServiceImpl = (AliPayServiceImpl) ServiceFactory.getService("aliPayServiceImpl");
+		logger.debug("schedule task [test1111] init...............");
+	}
+
+	@SuppressWarnings("unchecked")
+	public void run() {
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+			Calendar dayTime = Calendar.getInstance();
+			dayTime.add(Calendar.DAY_OF_MONTH, -2);
+			List<Contrart> contracts = dailyService.findByProperties(Contrart.class, "status", "3", "autoRefund", "0");
+			List<Aptorder> aptOrders = dailyService.findByProperties(Aptorder.class, "status", "0");
+			for (Contrart contract : contracts) {
+				if (sdf.format(dayTime.getTime()).equals(sdf.format(contract.getCheckOutTime()))) {
+					Double cost = 0D;
+					Double pay = 0D;
+					List<Bill> bills = dailyService.findByProperties(Bill.class, "checkId", contract.getContrartId());
+					for (Bill bill : bills) {
+						cost += bill.getCost();
+						pay += bill.getPay();
+					}
+					RefundDetail refundDetail = (RefundDetail) dailyService.findByPropertiesWithSort(RefundDetail.class, "recordTime", "desc", "orderId", contract.getContrartId(), "refundType", "");
+					Double money = (pay - cost) * 100;
+					if(refundDetail != null && refundDetail.getStatus().equals("1")){
+						if(refundDetail.getSource().equals("7")){
+							String Smoney = String.valueOf(money);
+							Smoney = Smoney.substring(0, Smoney.indexOf("."));
+							String Refund = String.valueOf(refundDetail.getRefundMoney() * 100);
+							Refund = Refund.substring(0, Refund.indexOf("."));
+							WeChatRefundReqModel a = new WeChatRefundReqModel();
+							a.setOutTradeNo(refundDetail.getBussinessId());
+							a.setTotalFee(Integer.parseInt(Refund));
+							a.setRefundFee(Integer.parseInt(Smoney));
+							weChatPayServiceImpl.weChatRefund(a);
+						}
+						if(refundDetail.getSource().equals("1")){
+					//		aliPayServiceImpl.alipayReFund(refundDetail.getBussinessId(), refundDetail.getTradeId(), String.valueOf(money / 100));
+						}
+						refundDetail.setStatus("0");
+						dailyService.update(refundDetail);
+					}
+				}
+				contract.setStatus("2");
+				contract.setCheckOutTime(new Date());
+				dailyService.update(contract);
+			}
+			for (Aptorder aptorder : aptOrders) {
+				if (sdf.format(dayTime.getTime()).equals(sdf.format(aptorder.getReFundTime()))) {
+					RefundDetail refundDetail = (RefundDetail) dailyService.findOneByProperties(RefundDetail.class, "orderId", aptorder.getOrderId(), "refundType", "");
+					if(refundDetail != null && refundDetail.getStatus().equals("1")){
+						Bill bill = (Bill) dailyService.findOneByProperties(Bill.class, "branchId", aptorder.getBranchId(), "checkId", aptorder.getOrderId() ,"projectId", "2004");
+						if(refundDetail.getSource().equals("7")){
+							String Refund = String.valueOf(refundDetail.getRefundMoney() * 100);
+							Refund = Refund.substring(0, Refund.indexOf("."));
+							String money = String.valueOf(bill.getPay() * 100);
+							money = money.substring(0, money.indexOf("."));
+							WeChatRefundReqModel a = new WeChatRefundReqModel();
+							a.setOutTradeNo(refundDetail.getBussinessId().trim());
+							a.setTotalFee(Integer.parseInt(Refund));
+							a.setRefundFee(Integer.parseInt(money));
+							weChatPayServiceImpl.weChatRefund(a);
+						}
+						if(refundDetail.getSource().equals("1")){
+							if(bill != null){
+							//	aliPayServiceImpl.alipayReFund(refundDetail.getBussinessId(), refundDetail.getTradeId(), String.valueOf(bill.getPay()));
+							}
+						}
+						refundDetail.setStatus("0");
+						dailyService.update(refundDetail);
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}

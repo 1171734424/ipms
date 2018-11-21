@@ -1,0 +1,333 @@
+
+body {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+a{
+	color:#333;
+}
+/*定义滚动条轨道 内阴影+圆角*/
+/*定义滑块 内阴影+圆角*/  
+::-webkit-scrollbar-thumb:horizontal {
+	width: 5px;
+	background-color: #ccc;
+	-webkit-border-radius: 3px;
+}
+
+p {
+	font-size: 15px;
+	font-family: Microsoft YaHei;
+    color: #535474;
+}
+
+.form {
+	width: 100%;
+	height: 100%;
+}
+
+.reportData {
+	width: 100%;
+	height: 94%;
+	float: left;
+}
+
+.ul {
+	margin: 0px;
+	padding: 0px;
+}
+.ul li{
+	-webkit-transition: all 0.12s ease, 0.12s ease;
+	transition: all 0.12s ease, 0.12s ease;
+}
+.li {
+	float: left;
+	list-style-type: none;
+}
+
+.b_button_org .b_query {
+	font-size: 13px;
+	font-family: Microsoft YaHei;
+	padding-left: 19px;
+	line-height: 14px;
+	display: inline-block;
+	margin-top: 5px;
+	background: url(../images/button/btn_query_s.png) no-repeat;
+}
+
+.b_button .b_print {
+	width: 40px;
+	font-size: 13px;
+	font-family: Microsoft YaHei;
+	padding-left: 20px;
+	line-height: 16px;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 5px;
+	background: url(../images/button/btn_print1.png) no-repeat;
+}
+
+.b_button .b_excel {
+	width: 40px;
+	font-size: 13px;
+	font-family: Microsoft YaHei;
+	padding-left: 20px;
+	line-height: 16px;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 3px;
+	background: url(../images/button/btn_excel1.png) no-repeat;
+}
+
+.b_button .b_add {
+	width: 40px;
+	font-size: 13px;
+	font-family: Microsoft YaHei;
+	padding-left: 20px;
+	line-height: 16px;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 5px;
+	background: url(../images/button/btn_add2.png) no-repeat;
+}
+
+.b_button .b_delete {
+	width: 40px;
+	font-size: 13px;
+	font-family: Microsoft YaHei;
+	padding-left: 20px;
+	line-height: 16px;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 5px;
+	background: url(../images/button/btn_close1.png) no-repeat;
+}
+
+.b_button .b_save {
+	width: 40px;
+	font-size: 13px;
+	font-family: Microsoft YaHei;
+	padding-left: 20px;
+	line-height: 16px;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 5px;
+	background: url(../images/button/btn_save.png) no-repeat;
+}
+
+.b_button .b_refresh {
+	width: 40px;
+	font-size: 14px;
+	font-family: Microsoft YaHei;
+	padding-left: 20px;
+	line-height: 18px;
+	display: inline-block;
+	margin-top: 4px;
+	margin-left: 5px;
+	background: url(../images/button/btn_refresh2.png) no-repeat;
+}
+
+.b_button .b_select {
+	width: 40px;
+	font-size: 13px;
+	font-family: Microsoft YaHei;
+	padding-left: 20px;
+	line-height: 16px;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 5px;
+	background: url(../images/button/btn_unselect.png) no-repeat;
+}
+
+.b_button .b_import {
+	width: 40px;
+	font-size: 13px;
+	font-family: Microsoft YaHei;
+	padding-left: 20px;
+	line-height: 16px;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 5px;
+	background: url(../images/button/btn_import.png) no-repeat;
+}
+
+.b_button_cell .b_minus {
+	width: 25px;
+	display: inline-block;
+	margin-top: 5px;
+	font-size: 16px;
+	line-height: 6px;
+}
+
+.b_button_cell .b_plus {
+	width: 25px;
+	display: inline-block;
+	margin-top: 5px;
+	font-size: 16px;
+	line-height: 6px;
+}
+
+.btn_pie {
+	height: 22px;
+	padding-left: 20px;
+	display: inline-block;
+	margin-top: 3px;
+	margin-left: 5px;
+	background: url(../images/button/btn_pie.png) no-repeat;
+	filter: "progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='scale')";
+	-moz-background-size: 100% 100%;
+	background-size: 100% 100%;
+}
+
+.btn_column {
+	height: 21px;
+	padding-left: 20px;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 5px;
+	background: url(../images/button/btn_column.png) no-repeat;
+	filter:
+		"progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='scale')"
+		;
+	-moz-background-size: 100% 100%;
+	background-size: 100% 100%;
+}
+
+.btn_line {
+	height: 20px;
+	padding-left: 20px;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 5px;
+	background: url(../images/button/btn_line.png) no-repeat;
+	filter:
+		"progid:DXImageTransform.Microsoft.AlphaImageLoader(sizingMethod='scale')"
+		;
+	-moz-background-size: 100% 100%;
+	background-size: 100% 100%;
+}
+
+.b_cellButton {
+	height: 26px !important;
+	width: 26px !important;
+	cursor: pointer;
+	background: transparent;
+	background-color: black !important;
+}
+
+.b_multiSelect {
+	background: url(../images/button/btn_unselect.png) no-repeat;
+}
+
+.fontspan {
+    width: 93px;
+    height: 30px;
+    font-size: 14px;
+    float: right;
+    line-height: 19px;
+    padding-top: 11px;
+    color: #333;
+}
+
+.btn {
+    width: 264px;
+	height: 30px;
+	float: right;
+	margin-right: 5px;
+}
+
+.b_btn {
+    width: 39px;
+    height: 29px;
+    line-height: 27px;
+    cursor: pointer;
+    display: inline-block;
+    white-space: nowrap;
+    border: solid 1px #33425B;
+    margin-left: 5px;
+    margin-top: 7px;
+    text-align: center;
+    border-radius: 3px;
+    transition:all 0.3s ease-in-out;
+}
+
+.b_btn:hover {
+	background:#535474;
+}
+
+.pageRegion {
+	height: 42px;
+    line-height: 36px;
+    width: 100%;
+    margin-top: 15px;
+}
+#pagerForm .pageRegion {
+	position: absolute;
+    bottom: 0;
+}
+
+.b_btn .b_first {
+	padding: 4px 18px;
+	margin-top: 4px;
+	background: url(../../../images/button/first-page.png) center;
+	background-repeat: no-repeat;
+}
+.b_btn .b_first:hover{
+	background: url(../../../images/button/first-pagetwo.png) center;
+	background-repeat: no-repeat;
+}
+.b_btn .b_preview {
+	padding: 4px 18px;
+	margin-top: 4px;
+	background: url(../../../images/button/up-page.png) center;
+	background-repeat: no-repeat;
+}
+.b_btn .b_preview:hover{
+	background: url(../../../images/button/up-pagetwo.png) center;
+	background-repeat: no-repeat;
+}
+.b_btn .b_looking {
+	padding: 4px 18px;
+	margin-top: 6px;
+	background: url(../../../images/button/refresh-page.png) center;
+	background-repeat: no-repeat;
+}
+.b_btn .b_looking:hover{
+	background: url(../../../images/button/refresh-pagetwo.png) center;
+	background-repeat: no-repeat;
+}
+.b_btn .b_next {
+	padding: 4px 18px;
+	margin-top: 4px;
+	background: url(../../../images/button/next-page.png) center;
+	background-repeat: no-repeat;
+}
+.b_btn .b_next:hover {
+	background: url(../../../images/button/next-pagetwo.png) center;
+	background-repeat: no-repeat;
+}
+.b_btn .b_last {
+	padding: 4px 18px;
+	margin-top: 4px;
+	background: url(../../../images/button/last-page.png) center;	
+	background-repeat: no-repeat;
+}
+
+.b_btn .b_last:hover {
+	background: url(../../../images/button/last-pagetwo.png) center;
+	background-repeat: no-repeat;
+}
+
+.btn input {
+    width: 39px;
+    height: 29px;
+    border: solid 1px #33425B;
+    text-align: center;
+    margin-top: 7px;
+    margin-left: 4px;
+    border-radius: 3px;
+}
+.btn input:hover {
+    background:#535474;
+    color:#fff;
+}

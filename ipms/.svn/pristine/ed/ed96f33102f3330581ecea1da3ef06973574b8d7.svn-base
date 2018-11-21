@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M903" name="权限管理" show="true" icon="audit" subSystem="UPMS">
+				<page pageId="R90301" name="权限管理" role="*">
+					<tabs>R9030101,R9030102</tabs>
+				</page>
+								
+				<page pageId="R9030101" name="用户角色管理" tab="true" containerId="R90301" editing="form" loadOnRender="true" role="*">
+					<conditions>STAFFUSERNAME,ROLENAME</conditions>
+					<functions>EDIT</functions>
+					<target>UserRole</target> 
+					<rowNum>50</rowNum>
+					<query type="hql"> 
+						<sql>
+							select new UserRole(ur.dataId, ur.userId, ur.roleId, ur.recordTime, ur.remark, ur.branchId)  
+							  from UserRole as ur, Role as r, Staff s
+							 where ur.roleId = r.roleId
+							   and ur.userId = s.staffId
+							   and ur.status = 1
+							   and ur.branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID)
+							   and (s.staffName like '%' || :STAFFUSERNAME || '%'
+							    or s.loginName like '%' || :STAFFUSERNAME || '%')
+							   and r.roleName like '%' || :ROLENAME || '%'
+						</sql>
+					</query>
+					<columns>
+						<column columnId="DATAID" name="数据编号"  hidden="true" primaryKey="true" sequenceSource = "cloud" sequence="SEQ_NEW_USERROLE"/>
+						<column columnId="USERID" name="用户姓名" editable="true" editType="dialog-radio" 
+							dialogTarget="Staff" dialogColumns="staffId,staffName" dialogConditions="status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))"  validateRule="NOTNULL"/>
+						<column columnId="ROLEID" name="角色名称" editable="true" editType="dialog-radio" dialogTarget="Role" dialogColumns="roleId,roleName"
+						dialogConditions="status != '0' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))"
+							 validateRule="NOTNULL"/>
+						<column columnId="BRANCHID" name="归属门店" editable="false" width="100" align="center" editType="dialog-radio" 
+							dialogTarget="Branch" dialogColumns="branchId,branchName" dialogConditions="status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))" initValue="BRANCHNAME" validateRule="NOTNULL"/>
+						<column columnId="REMARK" name="备注" editable="true" editType="textarea" align="left"/>
+						
+					</columns>
+				</page>
+				
+				<page pageId="R9030102" name="角色管理" tab="true" containerId="R90301" editing="other" loadOnRender="true" role="*">
+					<conditions>ROLENAME</conditions>
+					<target>Role</target>
+					<functions>EDIT</functions>
+					<editFunc>roleRightEdit</editFunc>
+					<delFunc>roleRightDelete</delFunc>
+					<query type="hql">
+						<sql>
+							from Role where roleName like '%' || :ROLENAME || '%' and status = 1 and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID)) 
+						</sql>
+					</query>
+					<columns>
+						<column columnId="ROLEID" name="角色编号" hidden="true" primaryKey="true"/>
+						<column columnId="ROLENAME" name="角色名称" width="80"/>
+						<column columnId="BRANCHID" name="归属门店" width="100"  editType="dialog-radio" align="center"
+							dialogTarget="Branch" dialogColumns="branchId,branchName" dialogConditions="status = '1' and ( branchId like decode($BRANCHID,'100001','%',$BRANCHID) or
+								branchId like decode($BRANCHID,(select c.branchId from Branch c where c.rank = '0'),'%',$BRANCHID))" initValue="BRANCHNAME" validateRule="NOTNULL"/>
+						<column columnId="REMARK" name="备注" width="320" align="left"/>
+					</columns>
+				</page>
+				</model>
+		</models>
+	</config>
+</configs>

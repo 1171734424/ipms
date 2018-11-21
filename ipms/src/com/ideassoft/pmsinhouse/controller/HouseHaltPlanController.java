@@ -1,0 +1,776 @@
+package com.ideassoft.pmsinhouse.controller;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.bean.Branch;
+import com.ideassoft.bean.HaltPlan;
+import com.ideassoft.bean.House;
+import com.ideassoft.bean.OperateLog;
+import com.ideassoft.bean.RepairApply;
+import com.ideassoft.bean.Room;
+import com.ideassoft.bean.RoomStatus;
+import com.ideassoft.bean.Staff;
+import com.ideassoft.bean.wrapper.MultiQueryHalt;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.annotation.interfaces.RightModelControl;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.RightConstants;
+import com.ideassoft.core.constants.SystemConstants;
+import com.ideassoft.core.jdbc.SqlBuilder;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.pms.service.RoomService;
+import com.ideassoft.pmsinhouse.service.HouseHaltPlanService;
+import com.ideassoft.util.DateUtil;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Transactional
+@Controller
+@RightModelControl(rightModel = RightConstants.RightModel.SELL_CONTROL)
+public class HouseHaltPlanController {
+	@Autowired
+	private HouseHaltPlanService houseHaltPlanService;
+	
+	@Autowired
+	private RoomService roomService;
+	
+	@Autowired
+	private HouseOrderController houseOrderController;
+	
+	@RequestMapping("/showstophouseNew.do")
+	public ModelAndView showgetAvailableRoom(HttpServletRequest request, MultiQueryHalt multiqueryhalt)
+			throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchId = staff.getBranchId();
+		String staffid = staff.getStaffId();
+		ModelAndView mv = new ModelAndView();
+		String sql2 = "loadhaltroomforhouse";
+		List<?> result = null;
+		Pagination pagination = SqlBuilder.buildPagination(request);
+		//pagination.setRows(15);
+		if(null != multiqueryhalt.getType() && multiqueryhalt.getType().equals("3")){
+			 result = houseHaltPlanService.findBySQLWithPagination(sql2, new String[] { multiqueryhalt.getLogid(), staffid, //staffid,
+					multiqueryhalt.getRoomid(), multiqueryhalt.getHalttype(), multiqueryhalt.getHaltreason(),
+					multiqueryhalt.getStarttime(), multiqueryhalt.getEndtime(), multiqueryhalt.getStatus() }, pagination,
+					true);
+		}
+		mv.addObject("result", JSONUtil.fromObject(result));
+		mv.addObject("multiqueryhalt", multiqueryhalt);
+		mv.addObject("pagination", pagination);
+		mv.setViewName("page/ipmshouse/stophouse/stopHousedata");
+		return mv;
+		
+	}
+	
+	@RequestMapping("/submithaltpanOnHouse.do")
+	public void submithaltpan(HttpServletRequest request, HttpServletResponse response, String roomId, String haltType,
+			String haltReason, String startTime, String endTime, String remark, String rangeTime) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		if(roomId.startsWith("H")){
+			submithaltplanhouse(request, response, roomId, haltType,
+					haltReason, startTime, endTime, remark, rangeTime, loginuser);
+		}
+		
+	}
+	
+	
+	public void submithaltplanhouse(HttpServletRequest request, HttpServletResponse response, String roomId, String haltType,
+			String haltReason, String startTime, String endTime, String remark, String rangeTime, LoginUser loginuser) throws UnknownHostException{	
+		Staff staff = loginuser.getStaff();
+		House house = null;
+		String branchId = roomId;
+		String logId = DateUtil.currentDate("yyMMdd") + branchId + houseHaltPlanService.getSequence("SEQ_NEW_HALTPLAN");
+		String[] arrTime = rangeTime.split(" - ");
+		HaltPlan haltplan = new HaltPlan();
+		haltplan.setLogId(logId);
+		haltplan.setBranchId(branchId);
+		haltplan.setRoomId(roomId);
+		haltplan.setHaltType(haltType);
+		haltplan.setHaltReason(haltReason);
+		haltplan.setStartTime(DateUtil.s2d(arrTime[0], "yyyy/MM/dd"));
+		haltplan.setEndTime(DateUtil.s2d(arrTime[1], "yyyy/MM/dd"));
+		haltplan.setStatus(CommonConstants.HaltPlanStatus.VALID);
+		haltplan.setRecordUser(staff.getStaffId());
+		haltplan.setRemark(remark);
+		
+		//如果停售房的开始时间就是今天，那么停售的就开始执行，将状态设为3正在执行
+		Calendar current = Calendar.getInstance();
+		Calendar starttimeCalendar = Calendar.getInstance();
+		starttimeCalendar.setTime(haltplan.getStartTime());
+		if(DateUtil.isSameDay(current, starttimeCalendar)){
+			haltplan.setStatus(CommonConstants.HaltPlanStatus.EXCUTING);
+		}
+		
+		//如果申请的是维修房，则要添加维修计划
+		RepairApply ra = new RepairApply();
+		String id = DateUtil.currentDate("yyMMdd") + roomId + "3"
+			+ houseHaltPlanService.getSequence("SEQ_REPAIRAPPLY_ID");
+		ra.setRepairApplyId(id);
+		ra.setBranchId(roomId);
+		//House house = (House) houseHaltPlanService.findOneByProperties(House.class, "houseId", roomId, "staffId", staff.getStaffId());
+		//List<?> houses3 = houseHaltPlanService.findBySQL("fHouseRoomStafid",new String[]{roomId,staff.getStaffId()}, true);
+		List<?> houses3 = houseHaltPlanService.findBySQL("fHousetwo",new String[]{roomId,staff.getStaffId()}, true);
+		if(houses3.size() != 0){
+			ra.setRoomId(((Map<?,?>)(houses3.get(0))).get("HOUSE_NO").toString());
+			ra.setRoomType(((Map<?,?>)(houses3.get(0))).get("HOUSE_TYPE").toString());
+		}
+			
+
+		//添加维修申请，方便查看
+		//ra.setContractId(orderId);
+		//ra.setRoomId(houseNo);
+		ra.setApplicationDate(DateUtil.s2d(arrTime[0], "yyyy/MM/dd"));
+		ra.setReservedPerson(staff.getStaffId());
+		ra.setMobile(staff.getMobile());
+		ra.setStatus("3");
+		ra.setAuditDescription("");
+		ra.setRecordTime(new Date());
+		ra.setRecordUser(staff.getStaffId());
+		//ra.setRemark(remark);
+		ra.setRepairTime(new Date());
+		ra.setEquipment("6");
+		ra.setEmergent("2");
+		ra.setPost("*");
+		//ra.setAuditRemark("待审核");
+		
+		//MaintenanceLog mlog = new MaintenanceLog();
+		//String mlogid = DateUtil.currentDate("yyMMdd") + ra.getBranchId() +"3"
+		//		+ houseHaltPlanService.getSequence("SEQ_MAINTENANCELOG_ID");
+		//mlog.setLogId(mlogid);
+		//mlog.setBranchId(ra.getBranchId());
+		//mlog.setEquipment(ra.getEquipment());
+		//mlog.setProblemTag("2");
+		//mlog.setDescribe("");
+		//mlog.setRecordUser(staff.getStaffId());
+		//mlog.setRecordTime(new Date());
+		//mlog.setStatus("1");
+		//mlog.setRemark(repairLogRemark);
+		//mlog.setRoomId(ra.getRoomId());
+		//mlog.setApplicationSource("2");
+		//mlog.setRepairPerson(repairPerson);
+		//mlog.setApplicationDate(ra.getApplicationDate());
+		//mlog.setRepairTimearea(timearea);
+		//mlog.setRepairTime(ra.getRepairTime());
+		//mlog.setRepairApplyId(ra.getRepairApplyId());
+		//mlog.setAcrepairTime(sdf.parse(repairTime));
+		
+		//将所有的停售房计划循环一遍，如果时间有重叠则开始退出来
+		if(ishaltplanoverlap(haltplan.getStartTime(), haltplan.getEndTime(), roomId)){
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.FALSE, "与已有停售计划时间重叠!"));
+			return;
+			
+		}
+		
+		//记录操作日志
+		String operid = InetAddress.getLocalHost().toString();// IP地址
+		operid = (String) operid.subSequence(operid.indexOf("/") + 1, operid.length());
+		String logid = DateUtil.currentDate("yyMMdd") + branchId + houseHaltPlanService.getSequence("SEQ_OPERATELOG_ID");
+		OperateLog operatelog = new OperateLog();
+		operatelog.setLogId(logid);
+		operatelog.setOperType("1");
+		operatelog.setOperModule(CommonConstants.SystemFunctions.ADD + "停售计划");
+		if("1".equals(haltplan.getHaltType())){
+			operatelog.setContent("房号：" + roomId + "已列为" + SystemConstants.LogModule.SELLHOUSE + "!");
+		}
+		else if("2".equals(haltplan.getHaltType())){
+			operatelog.setContent("房号：" + roomId + "已列为" + SystemConstants.LogModule.REPAIRHOUSE + "!");
+		}
+		operatelog.setRecordUser(staff.getStaffId());
+		operatelog.setRecordTime(new Date());
+		operatelog.setOperIp(operid);
+		//operatelog.setRemark(bean.getRemark());
+		operatelog.setBranchId(branchId);
+		
+		//List<?> listrepairapplay = roomService.findByPropertiesWithSort(MaintenanceLog.class, "applicationDate", "desc", "branchId", branchId, "roomId", roomId);
+		//List<?> listrepairapplay = roomService.findBySQL("queryRoomStatus",new String[]{roomId,re.getRoomId()},true);
+		//int listrepairapplay1 = houseHaltPlanService.find
+		Branch branch = (Branch) houseHaltPlanService.findOneByProperties(Branch.class, "branchId", branchId, "status", "1");
+		//String bigBranchType = branch.getRank();
+		//List<?> houses = houseHaltPlanService.findByProperties(House.class, "staffId", staff.getStaffId());
+		List<?> houses = houseHaltPlanService.findBySQL("fHouseonlyStaffid",new String[]{staff.getStaffId()}, true);
+			
+		//House house = (House) houseHaltPlanService.findOneByProperties(House.class, "houseId", roomId, "staffId", staff.getStaffId());
+		//List<Object> houses2 = houseHaltPlanService.findBySQL("fHouseRoomStafid",new String[]{roomId,staff.getStaffId()}, true);
+	/*	if (houses2.size() == 0) {
+			houses2 = houseHaltPlanService.findByProperties(House.class, "houseId", roomId, "recordUser", staff.getStaffId());
+		}*/
+		//System.out.println(((Map<?,?>)(houses2.get(0))).get("STATUS"));
+		List<?> houses2 = houseHaltPlanService.findBySQL("fHousetwo",new String[]{roomId,staff.getStaffId()}, true);
+		if(houses2 ==null || houses2.isEmpty()){ //判断是否有这个民宿
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.FALSE, "未查到此民宿!"));
+			return;
+		}
+		if(houses2.size() != 0){
+			ra.setRoomId(((Map<?,?>)(houses2.get(0))).get("HOUSE_NO").toString());
+			ra.setRoomType(((Map<?,?>)(houses2.get(0))).get("HOUSE_TYPE").toString());
+		}
+		if(CommonConstants.HouseStatus.HouseOrder.equals(((Map<?,?>)(houses2.get(0))).get("STATUS").toString()) 
+				|| CommonConstants.HouseStatus.HouseChecked.equals(((Map<?,?>)(houses2.get(0))).get("STATUS").toString())){
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.FALSE, "民宿正在使用!"));
+			return;
+		}
+		/*if(CommonConstants.HouseStatus.HouseStop.equals(house.getStatus()) 
+				|| CommonConstants.HouseStatus.HouseRepair.equals(house.getStatus())){
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.FALSE, house.getHouseId() + "号民宿已列入停售计划!"));
+			return;
+		}*/	
+		try{
+			houseHaltPlanService.save(haltplan);
+			houseHaltPlanService.save(operatelog);
+			if("2".equals(haltType)){
+				houseHaltPlanService.save(ra);
+//					houseHaltPlanService.save(mlog);
+			}
+			//判断设停售房是否是今天，如果是今天house要改状态
+			if(DateUtil.isSameDay(current, starttimeCalendar)){
+				haltplan.setStatus(CommonConstants.HaltPlanStatus.EXCUTING);
+				house = (House) houseHaltPlanService.findOneByProperties(House.class, "houseId", ((Map<?,?>)(houses2.get(0))).get("HOUSE_ID"));
+				house.setStatus("1".equals(haltType) ? 
+						CommonConstants.HouseStatus.HouseStop : CommonConstants.HouseStatus.HouseRepair);
+				house.setRecordTime(new Date());
+				roomService.update(house);
+			}
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, "添加成功!"));
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void submithaltplanroom(HttpServletRequest request, HttpServletResponse response, String roomId, String haltType,
+			String haltReason, String startTime, String endTime, String remark, String rangeTime, LoginUser loginuser) throws UnknownHostException{
+		Staff staff = loginuser.getStaff();
+		String branchId = staff.getBranchId();
+		Room room = (Room) houseHaltPlanService.findOneByProperties(Room.class, "roomKey.branchId", branchId, "roomKey.roomId", roomId);
+		
+		String logId = DateUtil.currentDate("yyMMdd") + branchId + houseHaltPlanService.getSequence("SEQ_NEW_HALTPLAN");
+		String[] arrTime = rangeTime.split(" - ");
+		HaltPlan haltplan = new HaltPlan();
+		haltplan.setLogId(logId);
+		haltplan.setBranchId(branchId);
+		haltplan.setRoomId(roomId);
+		haltplan.setHaltType(haltType);
+		haltplan.setHaltReason(haltReason);
+		haltplan.setStartTime(DateUtil.s2d(arrTime[0], "yyyy/MM/dd"));
+		haltplan.setEndTime(DateUtil.s2d(arrTime[1], "yyyy/MM/dd"));
+		haltplan.setStatus(CommonConstants.HaltPlanStatus.VALID);
+		haltplan.setRecordUser(staff.getStaffId());
+		haltplan.setRemark(remark);
+		
+		//如果停售房的开始时间就是今天，那么停售的就开始执行，将状态设为3正在执行
+		Calendar current = Calendar.getInstance();
+		Calendar starttimeCalendar = Calendar.getInstance();
+		starttimeCalendar.setTime(haltplan.getStartTime());
+		if(DateUtil.isSameDay(current, starttimeCalendar)){
+			haltplan.setStatus(CommonConstants.HaltPlanStatus.EXCUTING);
+		}
+		
+		//如果申请的是维修房，则要添加维修计划
+		RepairApply ra = new RepairApply();
+		String id = DateUtil.currentDate("yyMMdd") + branchId + "3"
+		+ houseHaltPlanService.getSequence("SEQ_REPAIRAPPLY_ID");
+		ra.setRepairApplyId(id);
+		ra.setBranchId(branchId);
+		ra.setRoomId(roomId);
+		
+		if(room != null){
+			ra.setRoomType(room.getRoomType());				
+		}
+		//添加维修申请，方便查看
+		//ra.setContractId(orderId);
+		//ra.setRoomId(houseNo);
+		ra.setApplicationDate(DateUtil.s2d(arrTime[0], "yyyy/MM/dd"));
+		ra.setReservedPerson(staff.getStaffId());
+		ra.setMobile(staff.getMobile());
+		ra.setStatus("3");
+		ra.setAuditDescription("");
+		ra.setRecordTime(new Date());
+		ra.setRecordUser(staff.getStaffId());
+		//ra.setRemark(remark);
+		ra.setRepairTime(new Date());
+		ra.setEquipment("6");
+		ra.setEmergent("2");
+		ra.setPost("*");
+		//ra.setAuditRemark("待审核");
+		
+		//MaintenanceLog mlog = new MaintenanceLog();
+		//String mlogid = DateUtil.currentDate("yyMMdd") + ra.getBranchId() +"3"
+		//		+ houseHaltPlanService.getSequence("SEQ_MAINTENANCELOG_ID");
+		//mlog.setLogId(mlogid);
+		//mlog.setBranchId(ra.getBranchId());
+		//mlog.setEquipment(ra.getEquipment());
+		//mlog.setProblemTag("2");
+		//mlog.setDescribe("");
+		//mlog.setRecordUser(staff.getStaffId());
+		//mlog.setRecordTime(new Date());
+		//mlog.setStatus("1");
+		//mlog.setRemark(repairLogRemark);
+		//mlog.setRoomId(ra.getRoomId());
+		//mlog.setApplicationSource("2");
+		//mlog.setRepairPerson(repairPerson);
+		//mlog.setApplicationDate(ra.getApplicationDate());
+		//mlog.setRepairTimearea(timearea);
+		//mlog.setRepairTime(ra.getRepairTime());
+		//mlog.setRepairApplyId(ra.getRepairApplyId());
+		//mlog.setAcrepairTime(sdf.parse(repairTime));
+		
+		//将所有的停售房计划循环一遍，如果时间有重叠则开始退出来
+
+		if(ishaltplanoverlap(haltplan.getStartTime(), haltplan.getEndTime(), roomId)){
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.FALSE, "与已有停售计划时间重叠!"));
+			return;
+		}
+		
+		//记录操作日志
+		String operid = InetAddress.getLocalHost().toString();// IP地址
+		operid = (String) operid.subSequence(operid.indexOf("/") + 1, operid.length());
+		String logid = DateUtil.currentDate("yyMMdd") + branchId + houseHaltPlanService.getSequence("SEQ_OPERATELOG_ID");
+		OperateLog operatelog = new OperateLog();
+		operatelog.setLogId(logid);
+		operatelog.setOperType("1");
+		operatelog.setOperModule(CommonConstants.SystemFunctions.ADD + "停售计划");
+		if("1".equals(haltplan.getHaltType())){
+			operatelog.setContent("房号：" + roomId + "已列为" + SystemConstants.LogModule.SELLHOUSE + "!");
+		}
+		else if("2".equals(haltplan.getHaltType())){
+			operatelog.setContent("房号：" + roomId + "已列为" + SystemConstants.LogModule.REPAIRHOUSE + "!");
+		}
+		operatelog.setRecordUser(staff.getStaffId());
+		operatelog.setRecordTime(new Date());
+		operatelog.setOperIp(operid);
+		//operatelog.setRemark(bean.getRemark());
+		operatelog.setBranchId(branchId);
+		
+		//List<?> listrepairapplay = roomService.findByPropertiesWithSort(MaintenanceLog.class, "applicationDate", "desc", "branchId", branchId, "roomId", roomId);
+		//List<?> listrepairapplay = roomService.findBySQL("queryRoomStatus",new String[]{roomId,re.getRoomId()},true);
+		//int listrepairapplay1 = houseHaltPlanService.find
+		Branch branch = (Branch) houseHaltPlanService.findOneByProperties(Branch.class, "branchId", branchId, "status", "1");
+		String bigBranchType = branch.getRank();
+		
+		List<?> counts =  houseHaltPlanService.queryroomcounts(roomId, branchId);
+		try {
+			if (counts == null || counts.isEmpty()) {// 判断是否有这个房间
+				JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.FALSE, "无此房号!"));
+				return;
+			}
+			// Room room = roomService.selectroomstatus(branchId, roomId);
+			
+			if (CommonConstants.RoomStatus.RoomOrder.equals(room.getStatus()) || CommonConstants.RoomStatus.RoomChecked.equals(room.getStatus())) {
+				JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.FALSE, "房间正在使用!"));
+				return;
+			}
+			// 更改房间状态
+			/*if (CommonConstants.RoomStatus.RoomStop.equals(status) 
+					|| CommonConstants.RoomStatus.RoomRepair.equals(status)) {
+				JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.FALSE, roomId + "号已列入停售计划!"));
+				return;
+			}*/
+			
+			houseHaltPlanService.save(haltplan);
+			houseHaltPlanService.save(operatelog);
+			//针对维修房保存维修数据
+			if("2".equals(haltType)){
+				houseHaltPlanService.save(ra);
+//				houseHaltPlanService.save(mlog);
+			}
+			//判断停售房是否是今天，如果是今天的则需要将房间设置为停售
+			if(DateUtil.isSameDay(current, starttimeCalendar)){
+				Room roomt = (Room) houseHaltPlanService.findOneByProperties(Room.class, "roomKey.roomId", roomId, "roomKey.branchId", branchId);
+				RoomStatus roomstatus = (RoomStatus) houseHaltPlanService.findOneByProperties(RoomStatus.class, "branchId", branchId, "roomType", roomt.getRoomType());
+				if(roomstatus != null){
+					roomstatus.setStopnum(roomstatus.getStopnum() + 1);
+					roomstatus.setSellnum(roomstatus.getSellnum() - 1);
+					houseHaltPlanService.update(roomstatus);
+				}
+				roomService.upateroomstatus(branchId, roomId, "1".equals(haltType) ? 
+						CommonConstants.RoomStatus.RoomStop : CommonConstants.RoomStatus.RoomRepair);						
+			}
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, "添加成功!"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public boolean ishaltplanoverlap(Date startDate, Date endDate, String roomId){
+		List<?> listhaltplan = houseHaltPlanService.findBySQL("getvalidhaltplan", new String[]{roomId}, true);
+		Map<?, ?> data;
+		boolean flag = false;
+		for( int i = 0; i < listhaltplan.size(); i++){
+			data = (Map<?, ?>) listhaltplan.get(i);
+			if(data.get("STARTTIME") != null && data.get("ENDTIME") != null){
+				if(DateUtil.isOverlap(new Date[]{(Date) data.get("STARTTIME"), (Date) data.get("ENDTIME")}, 
+						new Date[]{startDate, endDate})){
+					flag = true;
+					break;
+				}
+			}
+		}
+		return flag;
+	}
+
+	@RequestMapping("/cancelhaltplanHouse.do")
+	public void cancelhaltplan(HttpServletRequest request, HttpServletResponse response, String logid) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String branchId = staff.getBranchId();
+		HaltPlan haltplan = (HaltPlan) roomService.findOneByProperties(HaltPlan.class, "logId", logid);
+		String roomid = haltplan.getRoomId();
+		String branchid = haltplan.getBranchId();
+		haltplan.setStatus(CommonConstants.HaltPlanStatus.CANCEL);
+		
+		String operid = InetAddress.getLocalHost().toString();// IP地址
+		operid = (String) operid.subSequence(operid.indexOf("/") + 1, operid.length());
+		//String logidseq = DateUtil.currentDate("yyMMdd") + branchId + houseHaltPlanService.getSequence("SEQ_OPERATELOG_ID");
+		OperateLog operatelog = new OperateLog();
+		//operatelog.setLogId(logidseq);
+		operatelog.setOperType("2");
+		operatelog.setOperModule(CommonConstants.SystemFunctions.DELETE + "停售计划");
+		operatelog.setContent("房号：" + haltplan.getRoomId() + "已取消停售计划!");
+		operatelog.setRecordUser(staff.getStaffId());
+		operatelog.setRecordTime(new Date());
+		operatelog.setOperIp(operid);
+		//operatelog.setRemark(bean.getRemark());
+		operatelog.setBranchId(branchId);
+		
+		try {
+			
+			Branch branch = (Branch) houseHaltPlanService.findOneByProperties(Branch.class, "branchId", branchId, "status", "1");
+			String bigBranchType = branch.getRank();
+			//List<?> houses = houseHaltPlanService.findByProperties(House.class, "staffId", staff.getStaffId());
+			List<?> houses = houseHaltPlanService.findBySQL("fHouseonlyStaffid",new String[]{staff.getStaffId()}, true);
+
+			if ( houses.size() > 0 && CommonConstants.SystemLevel.MarketCenter.equals(bigBranchType)) {//更改民宿的代码块
+				House house = (House) houseHaltPlanService.findOneByProperties(House.class, "houseId", branchid);
+				house.setStatus(CommonConstants.HouseStatus.HouseNull);
+				houseHaltPlanService.update(house);
+				String logidseq = DateUtil.currentDate("yyMMdd") + house.getHouseId() + houseHaltPlanService.getSequence("SEQ_OPERATELOG_ID");
+				operatelog.setLogId(logidseq);
+				operatelog.setBranchId(house.getHouseId());
+				roomService.save(operatelog);
+			}
+			else{
+				String logidseq = DateUtil.currentDate("yyMMdd") + branchId + houseHaltPlanService.getSequence("SEQ_OPERATELOG_ID");
+				operatelog.setLogId(logidseq);
+				roomService.upateroomstatus(branchid, roomid, CommonConstants.RoomStatus.RoomNull);
+				roomService.save(operatelog);
+			}
+			roomService.update(haltplan);
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, "取消成功!"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@RequestMapping("/updatehaltpanHouse.do")
+	public void updatehaltpan(HttpServletRequest request, HttpServletResponse response, HaltPlan haltplan,
+			String rangeTime, String strrecordTime) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchid = haltplan.getBranchId();
+		if(branchid.startsWith("H")){
+			updatehouse(request, response, haltplan,
+				 rangeTime, strrecordTime, loginuser);
+		}else{
+			updateroom(request, response, haltplan,
+					 rangeTime, strrecordTime, loginuser);
+		}
+	}
+	
+	/**
+	 * 正对酒店和公寓的停售房修改
+	 * @param request
+	 * @param response
+	 * @param haltplan
+	 * @param rangeTime
+	 * @param strrecordTime
+	 * @param loginuser
+	 * @throws UnknownHostException
+	 */
+	public void updateroom(HttpServletRequest request, HttpServletResponse response, HaltPlan haltplan,
+			String rangeTime, String strrecordTime, LoginUser loginuser) throws UnknownHostException{
+		Staff staff = loginuser.getStaff();
+		String branchId = staff.getBranchId();
+		// HaltPlan haltplandata = (HaltPlan)
+		// roomService.findOneByProperties(HaltPlan.class, "logId",
+		// haltplan.getLogId());
+		String[] arrTime = rangeTime.split(" - ");
+		haltplan = (HaltPlan) houseHaltPlanService.findOneByProperties(HaltPlan.class, "logId", haltplan.getLogId());
+		Date stdate = haltplan.getStartTime();
+		haltplan.setStartTime(DateUtil.s2d(arrTime[0], "yyyy/MM/dd"));
+		haltplan.setEndTime(DateUtil.s2d(arrTime[1], "yyyy/MM/dd"));
+		haltplan.setRecordTime(DateUtil.s2d(strrecordTime, "yyyy-MM-dd HH:mm:ss"));
+		
+		
+		//保存操作日志
+		String operid = InetAddress.getLocalHost().toString();// IP地址
+		operid = (String) operid.subSequence(operid.indexOf("/") + 1, operid.length());
+		String logid = DateUtil.currentDate("yyMMdd") + branchId + houseHaltPlanService.getSequence("SEQ_OPERATELOG_ID");
+		OperateLog operatelog = new OperateLog();
+		operatelog.setLogId(logid);
+		operatelog.setOperType("3");
+		operatelog.setBranchId(branchId);
+		operatelog.setOperModule(CommonConstants.SystemFunctions.EDIT + "停售计划");
+		operatelog.setContent("房号：" + haltplan.getRoomId() + "已编辑");
+		operatelog.setRecordUser(staff.getStaffId());
+		operatelog.setRecordTime(new Date());
+		operatelog.setOperIp(operid);
+		//operatelog.setRemark(bean.getRemark());
+		
+		try {
+			//如果停售房的开始时间就是今天，那么停售的就开始执行，将状态设为3正在执行
+			Calendar current = Calendar.getInstance();
+			Calendar starttimeCalendar = Calendar.getInstance();
+			starttimeCalendar.setTime(haltplan.getStartTime());
+			String branchid = haltplan.getBranchId();
+			String haltType = haltplan.getHaltType();
+			
+			//判断curren是否是当前日期，如果是则执行isSameDay中的内容，并将房间状态
+			if(DateUtil.isSameDay(current, starttimeCalendar)){
+				haltplan.setStatus(CommonConstants.HaltPlanStatus.EXCUTING);
+					Room roomt = (Room) houseHaltPlanService.findOneByProperties(Room.class, "roomKey.roomId", haltplan.getRoomId(), "roomKey.branchId", branchId);
+					RoomStatus roomstatus = (RoomStatus) houseHaltPlanService.findOneByProperties(RoomStatus.class, "branchId", branchId, "roomType", roomt.getRoomType());
+					if(roomstatus != null){
+						roomstatus.setStopnum(roomstatus.getStopnum() + 1);
+						roomstatus.setSellnum(roomstatus.getSellnum() - 1);
+						houseHaltPlanService.update(roomstatus);
+					}
+					roomService.upateroomstatus(branchid, haltplan.getRoomId(), "1".equals(haltType) ? 
+							CommonConstants.RoomStatus.RoomStop : CommonConstants.RoomStatus.RoomRepair);
+			}
+			//针对维修房的操作
+			if("2".equals(haltplan.getHaltType())){
+				RepairApply repairapply = null;
+				roomService.upateroomstatus(branchid, haltplan.getRoomId(), "1".equals(haltType) ? 
+						CommonConstants.RoomStatus.RoomStop : CommonConstants.RoomStatus.RoomRepair);
+				//更改停售记录的时间之后，还要跟新申请维修中的申请日期
+				//Date applyDate = ((HaltPlan) houseHaltPlanService.findOneByProperties(HaltPlan.class, "logId", haltplan.getLogId())).getStartTime();
+				repairapply = (RepairApply) houseHaltPlanService.findOneByProperties(RepairApply.class, 
+						"branchId", haltplan.getBranchId(), "roomId", haltplan.getRoomId(), "applicationDate", stdate);
+				repairapply.setApplicationDate(haltplan.getStartTime());
+				houseHaltPlanService.update(repairapply);				
+			}
+			
+			roomService.save(operatelog);
+			roomService.update(haltplan);
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, "修改成功!"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void updatehouse(HttpServletRequest request, HttpServletResponse response, HaltPlan haltplan,
+			String rangeTime, String strrecordTime, LoginUser loginuser) throws UnknownHostException{
+		Staff staff = loginuser.getStaff();
+		String branchId = staff.getBranchId();
+		String[] arrTime = rangeTime.split(" - ");
+		haltplan = (HaltPlan) houseHaltPlanService.findOneByProperties(HaltPlan.class, "logId", haltplan.getLogId());
+		Date stdate = haltplan.getStartTime();
+		haltplan.setStartTime(DateUtil.s2d(arrTime[0], "yyyy/MM/dd"));
+		haltplan.setEndTime(DateUtil.s2d(arrTime[1], "yyyy/MM/dd"));
+		haltplan.setRecordTime(DateUtil.s2d(strrecordTime, "yyyy-MM-dd HH:mm:ss"));
+		
+		//保存操作日志
+		String operid = InetAddress.getLocalHost().toString();// IP地址
+		operid = (String) operid.subSequence(operid.indexOf("/") + 1, operid.length());
+		String logid = DateUtil.currentDate("yyMMdd") + branchId + houseHaltPlanService.getSequence("SEQ_OPERATELOG_ID");
+		OperateLog operatelog = new OperateLog();
+		operatelog.setLogId(logid);
+		operatelog.setOperType("3");
+		operatelog.setBranchId(branchId);
+		operatelog.setOperModule(CommonConstants.SystemFunctions.EDIT + "停售计划");
+		operatelog.setContent("民宿编号：" + haltplan.getRoomId() + "已编辑");
+		operatelog.setRecordUser(staff.getStaffId());
+		operatelog.setRecordTime(new Date());
+		operatelog.setOperIp(operid);
+		//operatelog.setRemark(bean.getRemark());
+		
+		try {
+			//如果停售房的开始时间就是今天，那么停售的就开始执行，将状态设为3正在执行
+			Calendar current = Calendar.getInstance();
+			Calendar starttimeCalendar = Calendar.getInstance();
+			starttimeCalendar.setTime(haltplan.getStartTime());
+			String branchid = haltplan.getBranchId();
+			String haltType = haltplan.getHaltType();
+			
+			//判断curren是否是当前日期，如果是则执行isSameDay中的内容，并将房间状态
+			if(DateUtil.isSameDay(current, starttimeCalendar)){
+				haltplan.setStatus(CommonConstants.HaltPlanStatus.EXCUTING);
+				//保存操作日志不同的公寓和民宿之间的branchID不一样，改变公寓和民宿状态，两者bean不一样一个是house一个room
+				House house = (House) roomService.findOneByProperties(House.class, "houseId", branchid);
+				house.setStatus("1".equals(haltType) ? 
+						CommonConstants.HouseStatus.HouseStop : CommonConstants.HouseStatus.HouseRepair);
+				house.setRecordTime(new Date());
+				roomService.update(house);
+			}
+			House house = (House) roomService.findOneByProperties(House.class, "houseId", branchid);
+			house.setStatus("1".equals(haltType) ? 
+					CommonConstants.HouseStatus.HouseStop : CommonConstants.HouseStatus.HouseRepair);
+			house.setRecordTime(new Date());
+			roomService.update(house);
+			
+			//更改停售记录的时间之后，还要跟新申请维修中的申请日期
+			
+			//Date applyDate = ((HaltPlan) houseHaltPlanService.findOneByProperties(HaltPlan.class, "logId", haltplan.getLogId())).getStartTime();
+			//针对维修房的操作
+			if("2".equals(haltplan.getHaltType())){
+				RepairApply repairapply = null;
+				repairapply = (RepairApply) houseHaltPlanService.findOneByProperties(RepairApply.class, 
+						"branchId", haltplan.getBranchId(), "applicationDate", stdate);
+				repairapply.setApplicationDate(haltplan.getStartTime());
+				houseHaltPlanService.update(repairapply);
+			}
+			
+			roomService.save(operatelog);
+			roomService.update(haltplan);
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, "修改成功!"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**
+	 * 完成停售房计划
+	 * @param request
+	 * @param response
+	 * @param haltplan
+	 * @param rangeTime
+	 * @param strrecordTime
+	 * @throws Exception
+	 */
+	@RequestMapping("/finishhaltplanHouse.do")
+	public void finishhaltplan(HttpServletRequest request, HttpServletResponse response, HaltPlan haltplan,
+			String rangeTime, String strrecordTime) throws Exception {
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String remark = haltplan.getRemark();
+		haltplan = (HaltPlan) roomService.findOneByProperties(HaltPlan.class, "logId", haltplan.getLogId());
+		haltplan.setRemark(remark);
+		String branchid = haltplan.getBranchId();
+		String roomid = haltplan.getRoomId();
+		haltplan.setStatus(CommonConstants.HaltPlanStatus.DONE);
+		String operid = InetAddress.getLocalHost().toString();// IP地址
+		operid = (String) operid.subSequence(operid.indexOf("/") + 1, operid.length());
+		//String logid = DateUtil.currentDate("yyMMdd") + branchId + houseHaltPlanService.getSequence("SEQ_OPERATELOG_ID");
+		OperateLog operatelog = new OperateLog();
+		//operatelog.setLogId(logid);
+		operatelog.setOperType("3");
+		operatelog.setOperModule("完成" + "停售计划");
+		if (branchid.startsWith("H")) {
+			operatelog.setContent("民宿编号：" + haltplan.getRoomId() + "已完成停售计划!");
+		} else {
+			operatelog.setContent("房号：" + haltplan.getRoomId() + "已完成停售计划!");
+		}
+		operatelog.setRecordUser(staff.getStaffId());
+		operatelog.setRecordTime(new Date());
+		operatelog.setOperIp(operid);
+		//operatelog.setRemark(bean.getRemark());
+		operatelog.setBranchId(haltplan.getBranchId());
+		String logid = DateUtil.currentDate("yyMMdd") + haltplan.getBranchId() + houseHaltPlanService.getSequence("SEQ_OPERATELOG_ID");
+		operatelog.setLogId(logid);
+		List<?> listrepairapplay = new ArrayList<Object>();
+		
+		//找到该停售维修记录下的所有维修记录，然后将其全部改为已修复，就是这么粗暴
+		if(branchid.startsWith("H")){
+			listrepairapplay = houseHaltPlanService.findByProperties(RepairApply.class, "branchId", branchid);			
+		}
+		else{
+			listrepairapplay = houseHaltPlanService.findByProperties(RepairApply.class, "branchId", branchid, "roomId", roomid);
+		}
+		
+		try{
+			//开始保存改过之后的维修申请记录
+			if(listrepairapplay != null && !listrepairapplay.isEmpty()){
+				for (Object object : listrepairapplay) {
+					RepairApply repairapply = (RepairApply) object;
+					repairapply.setStatus("4");
+					houseHaltPlanService.update(repairapply);
+				}
+			}
+			
+			roomService.save(operatelog);
+			roomService.update(haltplan);
+			if(branchid.startsWith("H")){
+				House house = (House) roomService.findOneByProperties(House.class, "houseId", branchid);
+				house.setStatus(CommonConstants.HouseStatus.HouseNull);
+				house.setRecordTime(new Date());
+				roomService.update(house);
+			}
+			else{
+				Room roomt = (Room) houseHaltPlanService.findOneByProperties(Room.class, "roomKey.roomId", haltplan.getRoomId(), "roomKey.branchId", haltplan.getBranchId());
+				RoomStatus roomstatus = (RoomStatus) houseHaltPlanService.findOneByProperties(RoomStatus.class, "branchId", haltplan.getBranchId(), "roomType", roomt.getRoomType());
+				if(roomstatus != null){
+					roomstatus.setStopnum(roomstatus.getStopnum()- 1);
+					roomstatus.setSellnum(roomstatus.getSellnum() + 1);					
+					houseHaltPlanService.update(roomstatus);
+				}
+				roomService.upateroomstatus(branchid, roomid, CommonConstants.RoomStatus.RoomNull);
+			}
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, "完成停售!"));
+		}
+		catch(Exception e){
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.SUCESS, "完成停售失败!"));
+		}
+	}
+	
+	@RequestMapping("/autosavestophouseRemarkNew.do")
+	public void autosavestophouseRemark(HttpServletRequest request, HttpServletResponse response,
+			String logid, String remark){
+		HaltPlan haltplan = (HaltPlan) houseHaltPlanService.findOneByProperties(HaltPlan.class, "logId", logid);
+		haltplan.setRemark(remark);
+		try{
+			houseHaltPlanService.update(haltplan);
+		}
+		catch(Exception e){
+			e.printStackTrace();
+			JSONUtil.responseJSON(response, new AjaxResult(CommonConstants.AJAXRESULT.FALSE, "备注丢失!"));
+		}
+	}
+	
+	/**
+	 * 停售房管理弹出选择民宿
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/queryStopHouseId.do")
+	public ModelAndView queryStopHouseId(HttpServletRequest request) {
+		ModelAndView mv = new ModelAndView();
+		// 查询操作人信息
+		LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginuser.getStaff();
+		String staffId = staff.getStaffId();
+		// 根据操作人ID查询所管理的所有民宿
+		List<Map<String,String>> allHouseId = houseHaltPlanService.findBySQL("queryStopHouseId", new String[]{staffId}, true);
+		StringBuilder sb = new StringBuilder();
+		for(Map<String,String> houses: allHouseId){
+			sb.append(houses.get("''''||H.HOUSE_ID||''''")).append(",");
+		}
+		// 将查询的条件拼接起来
+		String status = "houseId in (" + sb.substring(0, sb.length()-1) + ")";
+		mv.setViewName("page/ipmshouse/room_status/customDialog");
+		mv.addObject("dialogColumns", "houseId,housename");
+		mv.addObject("dialogTarget", "House");
+		mv.addObject("dialogConditions", status);
+		mv.addObject("dialogQuickAdd", null);
+		mv.addObject("selectType", "dialog");
+		mv.addObject("colName", "roomId");
+		return mv;
+	}
+}

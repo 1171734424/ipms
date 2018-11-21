@@ -1,0 +1,389 @@
+package com.ideassoft.bean;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import com.ideassoft.core.annotation.interfaces.ColumnDefaultValue;
+
+/**
+ * Equipment entity. @author MyEclipse Persistence Tools
+ */
+@Entity
+@Table(name = "TB_E_EQUIPMENT", schema = "UCR_PMS")
+public class Equipment implements java.io.Serializable {
+
+	private static final long serialVersionUID = 1L;
+	private String dataId;
+	private String serialNo;
+	private String branchId;
+	private String superKind;
+	private String equipCategory;
+	private String floorId;
+	private String roomId;
+	private String equipDesc;
+	private String equipFile;
+	private Date validStart;
+	private Date validEnd;
+	private String supplierId;
+	private String concentratorId;
+	private String equipIp;
+	private String route;
+	private String maintPerson;
+	private String isOpen;
+	private Date recordTime;
+	private String recordUser;
+	private String status;
+	private String remark;
+	private String gatewayLocation;
+	private String gateWayName;
+	private String gateWayCode;
+	private String gateWayStatus;
+	private String lockLocation;
+	private String lockComment;
+	private String lockPower;
+	private String gateWayComment;
+	private String lockName;
+	
+	// Constructors
+
+	/** default constructor */
+	public Equipment() {
+	}
+
+	/** minimal constructor */
+	public Equipment(String dataId, String serialNo, String branchId, String equipCategory,
+			String floorId, String maintPerson, String recordUser, String status) {
+		this.dataId = dataId;
+		this.serialNo = serialNo;
+		this.branchId = branchId;
+		this.equipCategory = equipCategory;
+		this.floorId = floorId;
+		this.maintPerson = maintPerson;
+		this.recordUser = recordUser;
+		this.status = status;
+	}
+
+	/** full constructor */
+	public Equipment(String dataId, String serialNo, String branchId,
+			String superKind, String equipCategory, String floorId,
+			String roomId, String equipDesc, String equipFile, Date validStart,
+			Date validEnd, String supplierId, String concentratorId,
+			String equipIp, String route, String maintPerson, String isOpen,
+			Date recordTime, String recordUser, String status, String remark,
+			String gatewayLocation, String gateWayName, String gateWayCode,
+			String gateWayStatus, String lockLocation, String lockComment,
+			String lockPower, String gateWayComment, String lockName) {
+		this.dataId = dataId;
+		this.serialNo = serialNo;
+		this.branchId = branchId;
+		this.superKind = superKind;
+		this.equipCategory = equipCategory;
+		this.floorId = floorId;
+		this.roomId = roomId;
+		this.equipDesc = equipDesc;
+		this.equipFile = equipFile;
+		this.validStart = validStart;
+		this.validEnd = validEnd;
+		this.supplierId = supplierId;
+		this.concentratorId = concentratorId;
+		this.equipIp = equipIp;
+		this.route = route;
+		this.maintPerson = maintPerson;
+		this.isOpen = isOpen;
+		this.recordTime = recordTime;
+		this.recordUser = recordUser;
+		this.status = status;
+		this.remark = remark;
+		this.gatewayLocation = gatewayLocation;
+		this.gateWayName = gateWayName;
+		this.gateWayCode = gateWayCode;
+		this.gateWayStatus = gateWayStatus;
+		this.lockLocation = lockLocation;
+		this.lockComment = lockComment;
+		this.lockPower = lockPower;
+		this.gateWayComment = gateWayComment;
+		this.lockName = lockName;
+	}
+
+	// Property accessors
+	@Id
+	@Column(name = "DATA_ID", unique = true, nullable = false, length = 12)
+	public String getDataId() {
+		return dataId;
+	}
+
+	public void setDataId(String dataId) {
+		this.dataId = dataId;
+	}
+
+	@Column(name = "SERIAL_NO", nullable = false, unique = true, length = 20)
+	public String getSerialNo() {
+		return this.serialNo;
+	}
+
+	public void setSerialNo(String serialNo) {
+		this.serialNo = serialNo;
+	}
+
+	@Column(name = "BRANCH_ID", nullable = false, length = 6)
+	public String getBranchId() {
+		return this.branchId;
+	}
+
+	public void setBranchId(String branchId) {
+		this.branchId = branchId;
+	}
+
+	@Column(name = "EQUIP_CATEGORY",  length = 8)
+	public String getEquipCategory() {
+		return this.equipCategory;
+	}
+
+	public void setEquipCategory(String equipCategory) {
+		this.equipCategory = equipCategory;
+	}
+
+	@Column(name = "FLOOR_ID",  length = 6)
+	public String getFloorId() {
+		return this.floorId;
+	}
+
+	public void setFloorId(String floorId) {
+		this.floorId = floorId;
+	}
+
+	@Column(name = "ROOM_ID", length = 6)
+	public String getRoomId() {
+		return this.roomId;
+	}
+
+	public void setRoomId(String roomId) {
+		this.roomId = roomId;
+	}
+
+	@Column(name = "EQUIP_DESC", length = 100)
+	public String getEquipDesc() {
+		return this.equipDesc;
+	}
+
+	public void setEquipDesc(String equipDesc) {
+		this.equipDesc = equipDesc;
+	}
+
+	@Column(name = "EQUIP_FILE", length = 30)
+	public String getEquipFile() {
+		return this.equipFile;
+	}
+
+	public void setEquipFile(String equipFile) {
+		this.equipFile = equipFile;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "VALID_START")
+	public Date getValidStart() {
+		return this.validStart;
+	}
+
+	public void setValidStart(Date validStart) {
+		this.validStart = validStart;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "VALID_END")
+	public Date getValidEnd() {
+		return this.validEnd;
+	}
+
+	public void setValidEnd(Date validEnd) {
+		this.validEnd = validEnd;
+	}
+
+	@Column(name = "SUPPLIER_ID", length = 8)
+	public String getSupplierId() {
+		return this.supplierId;
+	}
+
+	public void setSupplierId(String supplierId) {
+		this.supplierId = supplierId;
+	}
+
+	@Column(name = "CONCENTRATOR_ID", length = 10)
+	public String getConcentratorId() {
+		return this.concentratorId;
+	}
+
+	public void setConcentratorId(String concentratorId) {
+		this.concentratorId = concentratorId;
+	}
+
+	@Column(name = "EQUIP_IP", length = 15)
+	public String getEquipIp() {
+		return this.equipIp;
+	}
+
+	public void setEquipIp(String equipIp) {
+		this.equipIp = equipIp;
+	}
+
+	@Column(name = "ROUTE", length = 10)
+	public String getRoute() {
+		return this.route;
+	}
+
+	public void setRoute(String route) {
+		this.route = route;
+	}
+
+	@Column(name = "MAINT_PERSON", length = 8)
+	public String getMaintPerson() {
+		return this.maintPerson;
+	}
+
+	public void setMaintPerson(String maintPerson) {
+		this.maintPerson = maintPerson;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "RECORD_TIME", insertable = false, updatable = true)
+	@ColumnDefaultValue(value = "sysdate", insertable = false)
+	public Date getRecordTime() {
+		return this.recordTime;
+	}
+
+	public void setRecordTime(Date recordTime) {
+		this.recordTime = recordTime;
+	}
+
+	@Column(name = "RECORD_USER", nullable = false, length = 8)
+	public String getRecordUser() {
+		return this.recordUser;
+	}
+
+	public void setRecordUser(String recordUser) {
+		this.recordUser = recordUser;
+	}
+
+	@Column(name = "STATUS", nullable = false, length = 2)
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	@Column(name = "REMARK", length = 200)
+	public String getRemark() {
+		return this.remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	@Column(name = "IS_OPEN", length = 2)
+	public String getIsOpen() {
+		return isOpen;
+	}
+
+	public void setIsOpen(String isOpen) {
+		this.isOpen = isOpen;
+	}
+	
+	@Column(name = "SUPER_KIND", length = 2 ,nullable = false)
+	public String getSuperKind() {
+		return superKind;
+	}
+
+	public void setSuperKind(String superKind) {
+		this.superKind = superKind;
+	}
+	
+	@Column(name = "GATEWAY_LOCATION", length = 40 )
+	public String getGatewayLocation() {
+		return gatewayLocation;
+	}
+
+	public void setGatewayLocation(String gatewayLocation) {
+		this.gatewayLocation = gatewayLocation;
+	}
+
+	@Column(name = "GATEWAY_NAME", length = 20 )
+	public String getGateWayName() {
+		return gateWayName;
+	}
+	
+	public void setGateWayName(String gateWayName) {
+		this.gateWayName = gateWayName;
+	}
+
+	@Column(name = "GATEWAY_CODE", length = 40 )
+	public String getGateWayCode() {
+		return gateWayCode;
+	}
+
+	public void setGateWayCode(String gateWayCode) {
+		this.gateWayCode = gateWayCode;
+	}
+
+	@Column(name = "GATEWAY_STATUS", length = 4 )
+	public String getGateWayStatus() {
+		return gateWayStatus;
+	}
+
+	public void setGateWayStatus(String gateWayStatus) {
+		this.gateWayStatus = gateWayStatus;
+	}
+
+	@Column(name = "LOCK_LOCATION", length = 40 )
+	public String getLockLocation() {
+		return lockLocation;
+	}
+
+	public void setLockLocation(String lockLocation) {
+		this.lockLocation = lockLocation;
+	}
+
+	@Column(name = "LOCK_COMMENT", length = 200 )
+	public String getLockComment() {
+		return lockComment;
+	}
+
+	public void setLockComment(String lockComment) {
+		this.lockComment = lockComment;
+	}
+
+	@Column(name = "LOCK_POWER", length = 4 )
+	public String getLockPower() {
+		return lockPower;
+	}
+
+	public void setLockPower(String lockPower) {
+		this.lockPower = lockPower;
+	}
+
+	@Column(name = "GATEWAY_COMMENT", length = 200 )
+	public String getGateWayComment() {
+		return gateWayComment;
+	}
+
+	public void setGateWayComment(String gateWayComment) {
+		this.gateWayComment = gateWayComment;
+	}
+
+	@Column(name = "LOCK_NAME", length = 30 )
+	public String getLockName() {
+		return lockName;
+	}
+
+	public void setLockName(String lockName) {
+		this.lockName = lockName;
+	}
+}

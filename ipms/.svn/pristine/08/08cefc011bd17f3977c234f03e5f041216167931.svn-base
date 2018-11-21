@@ -1,0 +1,82 @@
+package com.ideassoft.util;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import org.apache.log4j.Logger;
+
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.core.dao.GenericDAOImpl;
+
+public class HeartBeatClient {
+	private static Logger log = Logger.getLogger(HeartBeatClient.class);
+	
+	private static GenericDAOImpl gdhimpl = (GenericDAOImpl) SpringUtil.getBean("genericDAOImpl");
+
+	public static volatile boolean heartbeat = false;
+
+	private static HeartBeatClient heartBeatClient;
+
+	private HeartBeatClientThread heartBeatClientThreadService;
+	
+	private static String remotePath;
+
+	public static interface ObjectAction {
+		void doAction(Object obj, HeartBeatClient heartBeatClient);
+	}
+
+	public static void setBeatStatus(boolean status) {
+		heartbeat = status;
+	}
+
+	public HeartBeatClient() {
+		
+	}
+	
+	public static HeartBeatClient getInstance() {
+		if (heartBeatClient == null) {
+			heartBeatClient = new HeartBeatClient();
+		}
+		return heartBeatClient;
+	}
+
+	public void init() {
+		SysParam sp = (SysParam) gdhimpl.findOneByProperties(SysParam.class, "paramType", "IPMSADDRESS");
+		remotePath = sp.getContent();
+		if(heartBeatClientThreadService == null || !heartBeatClientThreadService.isAlive()) {
+			heartBeatClientThreadService = new HeartBeatClientThread();
+			heartBeatClientThreadService.start();
+		}
+	}
+
+	class HeartBeatClientThread extends Thread {
+		public void run() {
+			while(true) {
+				try {
+						String testUrl = remotePath + "/reciveNet.do";
+						URL url = new URL(testUrl);
+						HttpURLConnection connect = (HttpURLConnection) url.openConnection();
+						//connect.setDoInput(true);
+						//connect.setConnectTimeout(30000);
+						//connect.setReadTimeout(30000);
+						if (connect.getResponseCode() == 200) {
+							setBeatStatus(true);
+						} else {
+							setBeatStatus(false);
+						}
+						
+					} catch (IOException e) {
+						log.error("heart visit exception");
+					}
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e1) {
+						log.error("heart visit exception");
+					}
+			}
+		}
+
+	}
+
+}

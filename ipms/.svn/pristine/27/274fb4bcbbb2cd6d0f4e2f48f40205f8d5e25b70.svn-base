@@ -1,0 +1,210 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ page import="net.sf.json.JSONObject"%>
+<%@ page import="com.ideassoft.core.page.Pagination"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%
+	JSONObject pagination = JSONObject.fromObject(request.getAttribute("pagination"));	
+%>
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <link rel="stylesheet" id="style"  href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+	<link rel="stylesheet" id="style"  href="<%=request.getContextPath()%>/css/ipms/css/commom_table.css" />
+	<link rel="stylesheet" href="<%=request.getContextPath()%>/css/ipms/css/roomlistfont.css" />
+	<link rel="stylesheet" href="<%=request.getContextPath()%>/css/ipms/pagination.css" />
+	<link rel="stylesheet" href="<%=request.getContextPath()%>/css/ipms/css/pagenation.css" />
+	<link rel="stylesheet" href="<%=request.getContextPath()%>/css/ipms/css/roomlist/roomlist.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>	
+	<style type="text/css">
+		.dealandcancle_button {
+		    font-size: 0.75rem;
+		    background: #FC8A15;
+		    color: #fff;
+		    height: 25px;
+		    line-height:25px;
+		    width: 45px;
+		    border:none;
+	    }
+	    #myTable tr td{
+	    	padding:7px;
+	    }
+	</style>
+  </head>
+  <body>
+  	<form id="pagerForm" name="pagerForm" action="${action }" target="_self" method="post">
+		<div >
+			<input id="memberName" name="memberName" type="hidden" value="${memberName }">
+			<input id="mobile" name="mobile" type="hidden" value="${mobile}">
+		</div>
+	    <div>
+	    	<table id="myTable" class="myTable" border="0" width="100">
+				<thead id="log">
+					<tr>
+<%--						<th class="header">合同编号</th>--%>
+						<th class="header">预订人</th>
+						<th class="header">手机号</th>
+						<th class="header">房间号</th>
+						<th class="header">房型</th>
+						<th class="header">租赁方式</th>
+						<th class="header">单价</th>
+						<th class="header">开始时间</th>
+						<th class="header">结束时间</th>
+						<th class="header">交租时间</th>
+						<th class="header">状态</th>
+						<%--<th class="header">自动退租</th>
+						--%><th class="header">查看合同</th>
+						<th class="header">续费</th>
+						<th class="header">换房</th>
+						<th class="header">水电费</th>
+					</tr>
+				</thead>
+				<tbody id="info">
+					<c:forEach items="${list}" var="list" varStatus="status">
+						<tr ondblclick="apartmentcheckin(this)">
+							<td style="display:none;">${list["CONTRARTID"] }</td>
+							<td>${list["MEMBERID"] }</td>
+							<td>${list["MOBILE"] }</td>
+							<td>${list["ROOMID"] }</td>
+							<td>${list["ROOMTYPENAME"] }</td>
+							<td>${list["TYPEOFPAYMENT"] }</td>
+							<td>${list["UNITPRICE"] }</td>
+							<td>${list["STARTTIME"] }</td>
+							<td>${list["ENDTIME"] }</td>
+							<td>${list["CONTRARTENDTIME"] }</td>
+							<td>${list["STATUSNAME"] }</td>
+							<td><input name="deal" type="button" class="dealandcancle_button" value="查看" onclick="querycontract('${list['CONTRARTID'] }','${list['STATUS'] }')"/></td>
+							<td><input name="deal" type="button" class="dealandcancle_button" value="续费" onclick="rentRenewal('${list['CONTRARTID'] }','${list['STATUS'] }','${list['ENDTIME'] }','${list['CONTRARTENDTIME'] }')"/></td>
+							<td><input name="deal" type="button" class="dealandcancle_button" value="换房" onclick="aptRenew('${list['CONTRARTID'] }','${list['STATUS'] }')"/></td>
+							<td><input name="deal" type="button" class="dealandcancle_button" value="水电费" onclick="queryCost('${list['CONTRARTID'] }','${list['STATUS'] }')"/></td>
+						</tr>
+					</c:forEach>
+				</tbody>
+			</table>
+		</div>
+		<div id="pager"></div>
+	</form>
+	<%@ include file="../../../common/script.jsp"%>
+	<script src="<%=request.getContextPath()%>/script/common/pager.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+	<script>
+		Pager.renderPager(<%=pagination%>);
+	</script>
+	<script type="text/javascript">
+		function showMsg(msg, fn) {
+			if (!fn) {
+				TipInfo.Msg.alert(msg);
+			} else {
+				TipInfo.Msg.confirm(msg, fn);
+			}
+		}
+		var path = "<%=request.getContextPath()%>";
+		function apartmentcheckin(e) {
+			var contractid = $(e.children[0]).html();
+			window.parent.JDialog.openWithNoTitle("", path + "/page/apartment/apartmentmainmenu/apartmentcontract/apartment_details.jsp?contractid=" + contractid,1179,640);
+		}
+
+		//合同查看
+		function querycontract(contract,status){
+			if(status == '3' || status == '2' || status == '0'){
+				showMsg("当前合同已退租或已取消!");
+			} else{
+				window.parent.parent.JDialog.openWithNoTitle("合同查看", path + "/queryContract.do?contract="+contract,1000,600);
+			}
+		}
+
+		//房租续约
+		function rentRenewal(contractId,status,startTime,contractEndTime){
+			var starttime = new Date(startTime);
+			var endtime = new Date(contractEndTime);
+			if(status == '3' || status == '2' || status == '0'){
+				showMsg("当前合同已退租或已取消!");
+			} else if(Date.parse(starttime) == Date.parse(endtime)) {
+				showMsg("房租费已交全!");
+			} else {
+				window.parent.parent.JDialog.openWithNoTitle("房租续约", path + "/rentRenewal.do?contractId="+contractId,600,350);
+			}
+		}
+		
+		/*
+			点击“换房”按钮，显示换房页面
+		*/
+		function aptRenew(contractId,status){
+			// 当状态为：退租、已退未结、取消等时无法点击弹出"当前合同已退租或已取消!"提示
+			if(status == '3' || status == '2' || status == '0'){
+				showMsg("当前合同已退租或已取消!");
+			// 当状态为：在住时，可以点击此按钮
+			} else{
+				 $.ajax({
+			         url: path + "/queryApartmentCost.do",
+					 type: "post",
+					 dataType: "json",
+					 data : { contractId: contractId },
+					// 在日常水电费用跑批表中是否有未结数据
+					 success: function(json) {
+						 // 如果结果显示合计金额为 0，或-400，或-1 代表工作无未结水电费用可以直接跳转至换房页面
+						 if(json["amount"] == 0 || "-400" == json.result || "-1" == json.result){ 
+							 window.parent.parent.JDialog.openWithNoTitle("换房", path + "/HouseRenew.do?contractId="+contractId,600,400);
+						 // 否则直接弹出"请结清水电费!"提示
+						 } else {
+							 showMsg("请结清水电费!");
+						 }
+					 }
+				});
+			}
+		}
+		
+		/*
+			点击“水电费”按钮，显示所欠水电费用金额
+		*/
+		function queryCost(contractId,status){
+			// 当状态为：退租、已退未结、取消等时无法点击弹出"当前合同已退租或已取消!"提示
+			if(status == '3' || status == '2' || status == '0'){
+				showMsg("当前合同已退租或已取消!");
+			// 当状态为：在住时，可以点击此按钮 
+			} else{
+				$.ajax({
+					url : path + "/queryApartmentCost.do",
+					dataType : "json",
+					type : "post",
+					data : {
+						'contractId' : contractId
+					},
+					// 在日常水电费用跑批表中是否有未结数据
+					success : function(json) {
+						// 如果没有数据则提示"当前合同已退租或已取消!"
+						if (json["amount"] == 0 || -400 == json.result || -1 == json.result) {
+							showMsg("当前合同无未结费用!");
+						// 如果有数据返回，则弹出水电费支付页面
+						} else {
+							window.parent.parent.JDialog.open("水电费", path + "/queryCost.do?contractId=" + contractId, 750, 430);
+						}
+					}
+				});
+			}
+		}
+
+		function changeAuto(btn, status) {
+			var contrartid = $(btn).parent().parent().children("td").eq(0)
+					.html();
+			$.ajax({
+				url : path + "/changeAutorefund.do",
+				dataType : "json",
+				type : "post",
+				data : {
+					'contrartid' : contrartid,
+					'status' : status
+				},
+				success : function(json) {
+					window.parent.showMsg(json.message);
+					window.setTimeout("window.parent.location.reload(true)",
+							1800);
+				},
+				error : function(json) {
+
+				}
+			});
+		}
+	</script>
+  </body>
+</html>

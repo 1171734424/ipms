@@ -1,0 +1,5 @@
+
+jdbc.url=jdbc:oracle:thin:@127.0.0.1:1521:orcl
+jdbc.username=ucr_pms
+jdbc.password=ucr_pms
+jdbc.dialect=com.ideassoft.core.jdbc.dialect.HibernateOracleDialect

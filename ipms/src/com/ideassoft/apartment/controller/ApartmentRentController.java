@@ -1,0 +1,85 @@
+package com.ideassoft.apartment.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.apartment.service.ApartmentRentService;
+import com.ideassoft.core.annotation.interfaces.RightMethodControl;
+import com.ideassoft.core.annotation.interfaces.RightModelControl;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.RightConstants;
+import com.ideassoft.core.page.Pagination;
+import com.ideassoft.util.ReflectUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Transactional
+@Controller
+@RightModelControl(rightModel = RightConstants.RightModel.APARTMENT_CONTROL)
+public class ApartmentRentController {
+
+	@Autowired
+	private ApartmentRentService apartmentRentService;
+
+	/**
+	 * 房租到期提醒(公寓)-显示房租到期提醒页面
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/apartmentRent.do")
+	@RightMethodControl(rightType = RightConstants.RightType.APA_RENT)
+	public ModelAndView apartmentRent(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrent/apartmentrent");
+		return mv;
+	}
+	
+	/**
+	 * 房租到期提醒(公寓)-查询所有有效合同的开始时间,到期时间
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping("/queryApartmentRent.do")
+	public ModelAndView queryApartmentRent(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		String branchId = loginUser.getStaff().getBranchId();
+		Pagination pagination = (Pagination) ReflectUtil.setBeanFromRequest(request, Pagination.class);
+		if (pagination != null && pagination.getPageNum() == null) {
+			pagination.setPageNum(1);
+			pagination.setRows(17);
+		}
+		String memberName = request.getParameter("memberName");
+		String roomId = request.getParameter("roomId");
+		String typeofpayment = request.getParameter("typeofpayment");
+		String startTime = request.getParameter("startTime");
+		String endTime = request.getParameter("endTime");
+		List<Object> list = apartmentRentService.findBySQLWithPagination("contractRent", new String[] { startTime, endTime, branchId, roomId, memberName,
+						typeofpayment}, pagination, true);
+		mv.addObject("list", list);
+		mv.addObject("memberName", memberName);
+		mv.addObject("roomId", roomId);
+		mv.addObject("typeofpayment", typeofpayment);
+		mv.addObject("startTime", startTime);
+		mv.addObject("endTime", endTime);
+		mv.addObject("pagination", pagination);
+		mv.setViewName("page/apartment/apartmentLeftmenu/apartmentrent/apartmentrentinfo");
+		return mv;
+	}
+}

@@ -1,0 +1,70 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ include file="../../common/taglib.jsp"%>
+<%@ include file="../../common/script.jsp"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>民宿订单取消</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/order/secpage.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>	
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css"/>
+	<style>
+		
+	</style>
+  </head>
+  
+  <body>
+  	 <div class="update_myorder" style="margin-top: 10%;">	
+ 		<input type="text" id="orderId" value="<%=request.getParameter("orderId")%>" hidden="true"/>
+ 		<input type="text" id="status" value="<%=request.getParameter("status")%>" hidden="true"/>
+  		<div style="font-size: 14px;">
+  			<label class="label_name">取消原因:</label>
+  			<textarea id="remark"></textarea>
+  		</div>
+  		<div class="height-div">
+			<span style="width:88px;" class="add_conroom query" role="button" onclick="dealCleanApply()">确定</span>
+		</div>
+  	</div>
+  </body>
+  <script type="text/javascript" src="<%=request.getContextPath()%>/script/ipms/js/workbillroom/util.js"></script>
+  <script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+  <script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+  <script>
+  	var path = "<%=request.getContextPath() %>";
+  	function dealCleanApply(){
+		$.ajax({
+			url : path + "/agreeOrnot.do",
+			dataType : "json",
+			type : "post",
+			data : {
+				'waitorderid' : $("#orderId").val(),
+				'status':$("#status").val(),
+				'remark':$("#remark").val()
+			},
+			success : function(json) {
+				showMsg("设置成功!");
+				$("#logFrame",window.parent.document).attr("src","waitAgree.do");
+				window.parent.JDialog.close();
+			},
+			error : function(json) {
+				showMsg("设置失败!");
+				$("#logFrame",window.parent.document).attr("src","waitAgree.do");
+				window.parent.JDialog.close();
+			}
+		});
+	}
+  </script>
+</html>

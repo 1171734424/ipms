@@ -1,0 +1,45 @@
+.footer {
+	width: 100%;
+    height: 28px;
+    position: fixed;
+    bottom: 0;
+    background-color: #F1F1F1;
+    /* background-image: url(../images/footbgimg.png); */
+    border-top: 1px solid #cacaca;
+    border-bottom: 3px solid #4A5064;
+    z-index: 1000;
+}
+.footer-box .system-name, .footer-box .copyright-name {
+    margin-left: 8px;
+    font-size: 12px;
+    color: #8b8b8b;
+}
+.footer-box{
+ 	line-height:27px;
+ 	position:relative;	
+}
+.footer-box .system-name{
+	float: left;
+}
+ .footer-box .copyright-name{
+ 	position:absolute;
+ 	left:50%;
+ 	margin-left:-154px;
+}
+.iconfont{
+	position: absolute;
+	top:4px;
+}
+.iconword{
+ 	margin-left:25px;
+}
+.icon_img{
+	position: absolute;
+    top: 4px;
+    right: 2px;
+}
+.icon_img img{
+ 	transform: rotate(-90deg);
+	-ms-transform: rotate(-90deg); /* IE 9 */
+	-webkit-transform: rotate(-90deg); /* Safari and Chrome */
+}

@@ -1,0 +1,79 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ include file="../../../common/script.jsp"%>
+<!DOCTYPE HTML>
+<html class="whitebg">
+  <head>
+    <title>会员注册</title>
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/roomlist/mebregister.css"/>
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/fonticon.css"/>
+	<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/tipInfo.css"/>
+    <link rel="stylesheet"  id="style" type="text/css" href="<%=request.getContextPath()%>/css/common/datetimepicker.css" media="all" />	
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	<style type="text/css">
+		.register_one{
+			padding: 53px 24px;
+		}
+		label{
+			width: 56px;
+		}
+	</style>
+  </head>
+  <body>
+  <div class="register_margin">
+     <form action="" method="post" id="omemberadd" name="omemberadd">
+	      <section class="register_one" style="padding-top:6px; ">
+	        <ul class="clearfix">
+			  <!-- <li><label class="label_name">房价</label><input id="amount" name="amount" value="0.00"  style="width: 250px" class="input_ms" type="number"/></li> -->
+			  <li style="padding-top:5px;"><label>房价</label><input id="amount" name="amount" style="width: 325px;height: 35px;vertical-align:top;"value="${ price }" class="input_ms"  type="number" step="0.01"></input></li>
+			  <!--<li style="padding-top:5px;"><label>待补差价</label><input id="calcamount" name="calcamount" style="width: 325px;height: 35px;vertical-align:top;"value="${ result }" class="input_ms"  type="number" readonly ></input></li>
+			  --><!--<li><label>备注</label><textarea id="remark" name="remark" value="必填项" style="width: 325px;height: 65px;vertical-align:top;" class="input_ms"></textarea></li>
+			  --><!-- <li style="padding-top: 30px;">
+			   	<br><input type="button" class="button_margin ms_re" style="width: 75px;" onclick="resetprice()" value="调整"/></br>
+			  </li> -->
+			  </ul>
+			  <ul>
+			  	<li style=" padding-left: 315px;">
+			  		<input type="button" class="button_margin ms_re" style="width: 75px;" onclick="resetprice(${ price })" value="调整"/>
+			  	</li>
+			  </ul>
+		   </section>
+		 </form>
+   </div>
+	<script src="<%=request.getContextPath()%>/script/common/jquery-ui.min.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/jquery.dialog.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/jquery.jqGrid.src.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/script/ipmsinhouse/workbillroomInHouse/tipInfo-lj.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/datepickerCN.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/script/ipms/js/workbillroom/util.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+	<script type="text/javascript">
+		
+		function resetprice(value){
+			var amount = $("#amount").val();
+			$(window.parent.document).find("#unitprice").val(amount);
+			$(window.parent.document).find("#cash").val(amount);
+			window.parent.Money();
+			refresh();
+		}
+		
+		$("#amount").on("input propertychange",function(){
+			if(/^\d+\.?\d{0,2}$/.test($(this).val())){
+			}else{
+			   $(this).val($(this).val().substring(0,$(this).val().length-1));
+			} 
+		})
+		
+		function refresh(){
+			//$(window.parent.parent.parent.parent.document).find(".header_toggle_ul .active").click();
+	 		window.parent.JDialog.close();
+	 		
+		}	
+	</script>
+  </body>
+</html>

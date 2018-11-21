@@ -1,0 +1,305 @@
+	/*控制盒子的mrgin&&padding*/
+.order_margin{
+	background: #fff;
+    height: 100%;
+}/*订单头部*/
+.header_order{
+	width: 100%;
+    height: 60px;
+    padding-left: 10px;
+}
+.header_order ul{
+		
+}
+.header_order ul .header_order_li{
+	padding:0 6px;
+    height: 38px;
+    float: left;
+    border: 1px solid #ccc;
+    margin: 10px 0 0 10px;
+    text-align: center;
+    border-radius: 4px;
+    color: #535474;
+    font-size: 15px;
+    transition: all 0.3s ease-in-out;
+}
+.header_order ul li p{
+	cursor:pointer;
+	margin-top: -2px;
+}
+.header_order .highsearch{
+   display: inline-block;
+    margin: 10px 20px;
+    padding: 0 10px;
+    height: 37px;
+    line-height: 37px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+    background:#535474;
+    color: #fff;
+    transition:0.3s all ease-in-out;
+}
+.order_margin ul li.active{
+  background:#535474;
+  border:none;
+}
+.order_margin ul li.active p{
+	color:#fff;	
+	transition:all 0.3s ease-in-out;
+}
+
+/*订单头部结束*/
+/*高级查询*/
+.high_header{
+   	height: 500px;
+    width: 800px;
+    background: #fff;
+    border: 1px solid #f0f0f0;
+    position: absolute;
+    top: 50%;
+    margin-top: -300px;
+    left: 50%;
+    margin-left: -400px;
+    display: none;
+    border-radius: 4px;
+    transition: all 0.3s;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+}
+.high_header h3{
+	padding-left: 10px;
+    width: 100%;
+    height: 34px;
+    line-height: 34px;
+    background: #4A5064;
+    color: #fff;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    font-size: 16px;
+    font-style: normal;
+}
+.high_header .imooc_order:hover{
+	transform:rotate(90deg);
+	-webkit-transform:rotate(90deg);
+	-ms-transform:rotate(90deg);
+}
+/*查询条件*/
+.high_header ul li{
+	float:left;
+	line-height: 38px;
+	margin:4px;
+	position: relative;
+}
+.high_header ul:last-child li{
+	float:right;
+}
+.high_header .margintop{
+	margin-top:10px;
+}
+.high_header .label_name {
+    float: left;
+    width: 70px;
+    line-height:42px;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+input {
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    color: #323232;
+    background-color: #fff;
+    border: 1px solid #DDDDDD;
+    line-height: 1.2;
+    font-size: 0.85rem;
+    -webkit-box-shadow: none!important;
+    box-shadow: none!important;
+    -webkit-transition-duration: .1s;
+    transition-duration: .1s;
+}
+.high_header .text_search {
+    padding: 10px 5px;
+    width: 175px;
+    margin-left: 10px;
+}
+.order_margin .imooc_order{
+	top: 2px;
+    font-size: 30px;
+    left: 95%;
+    transition: all 0.15s ease-in-out;
+}
+.order_margin .fa{
+	position: absolute;
+    z-index: 1;
+    right: 6px;
+    top: 12px;
+    color: #333;	
+}
+.button_margin{
+	 height: 34px;
+    line-height: 30px;
+    width: 85px;
+    border: none;
+    font-size: 14px;
+    margin-right: 8px;
+    margin-left: 7px;
+    margin-top: 6px;
+    float: right;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+    background: #5A5D9C;
+    color: #fff;
+}
+.cancel{
+	margin-right:15px;
+	background: #F6C90E;
+}
+#jd_iframe{
+	border-radius: 4px;
+}
+/*侧边栏快速预定*/
+.box_popup_member_margin {
+    position: relative;
+}
+.box_popup_member {
+    width: 1280px;
+    height: 780px;
+    background: #EFF3F5;
+    box-shadow: 1px 1px 8px rgba(0, 0, 0, .3);
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 9999;
+}
+.search_style{
+	height:60px;
+	width: 100%;
+}
+.box_popup_member h2 {
+    width: 100%;
+    font-size: 1.0rem;
+    height: 2.2rem;
+    color: #333333;
+    line-height: 2.2rem;
+    padding-left: 10px;
+}
+.content_member {
+    position: relative;
+    width: 100%;
+	height: 704px;
+    background: #FFFFFF;
+    border-radius: 4px;
+}
+.content_member .search_member {
+    padding: 0;
+}
+.content_member .search_member li {
+    float: left;
+    height: 50px;
+    line-height: 50px;
+    margin-top: 5px;
+}
+.content_member .search_member .label_name {
+    float: left;
+    width: 70px;
+    text-align: right;
+    font-weight: normal;
+}
+.box_popup_member_margin .search_text{
+    padding: 7px 5px;
+    width: 140px;
+    margin-left: 10px;
+}
+.content_member_show{
+	padding: 50px 15px 0 15px;
+}
+
+.highsearchNB{
+   display: inline-block;
+    margin: 10px 20px;
+    padding: 0 10px;
+    height: 37px;
+    line-height: 37px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 4px;
+    background:#535474;
+    color: #fff;
+    transition:0.3s all ease-in-out;
+}
+
+.high_headerNB{
+   	height: 500px;
+    width: 800px;
+    background: #fff;
+    border: 1px solid #f0f0f0;
+    position: absolute;
+    top: 50%;
+    margin-top: -300px;
+    left: 50%;
+    margin-left: -400px;
+    display: none;
+    border-radius: 4px;
+    transition: all 0.3s;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+}
+
+.margintopNB{
+	margin-top:1px;
+}
+
+.high_headerNB h3{
+	padding-left: 10px;
+    width: 100%;
+    height: 34px;
+    line-height: 34px;
+    background: #4A5064;
+    color: #fff;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    font-size: 16px;
+    font-style: normal;
+}
+
+.high_headerNB .imooc_orderNB:hover{
+	transform:rotate(90deg);
+	-webkit-transform:rotate(90deg);
+	-ms-transform:rotate(90deg);
+}
+
+/*查询条件*/
+.high_headerNB ul li{
+	float:left;
+	line-height: 38px;
+	margin:4px;
+	position: relative;
+}
+
+.high_headerNB ul:last-child li{
+	float:right;
+}
+.high_headerNB .margintop{
+	margin-top:10px;
+}
+.high_headerNB .label_name {
+    float: left;
+    width: 70px;
+    line-height:42px;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+
+.high_headerNB .text_search {
+    padding: 10px 5px;
+    width: 175px;
+    margin-left: 10px;
+}
+
+.order_margin .imooc_orderNB{
+	top: 2px;
+    font-size: 30px;
+    left: 95%;
+    transition: all 0.15s ease-in-out;
+}

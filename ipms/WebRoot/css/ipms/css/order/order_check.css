@@ -1,0 +1,196 @@
+/*容器*/
+.check_wrap_margin{
+	position: relative;
+    padding: 0px 20px 20px 20px;
+}
+.check_color{
+	width: 1179px;
+    height: 733px;
+    background: #EFF3F5;
+    box-shadow: 1px 1px 50px rgba(0, 0, 0, .3);
+    border-radius: 3px;
+    overflow: hidden;
+    z-index: 100;
+    color: #333;
+}
+/*头部tab选择区域*/
+.top_check{
+	height: 70px;
+}
+.left_check{
+	line-height:80px;
+}
+.left_check .cn{
+	font-size:1.1rem;
+}
+.rno,.on{
+    font-size: 1.1rem;
+    color: #31588a;
+    margin-left: 15px;
+}
+/*.cm{
+	margin-left: 25px;
+}*/
+.right_check{
+	width: 81%;
+	line-height:51px;
+    margin-top: 18px;
+    margin-right: -125px;
+}
+.right_check ul li{
+	float:left;
+	width: 14.66%;
+	text-align: center;
+	background: #535474;
+    color: #fff;
+    border-left: 1px solid #CCCCCC;
+}
+.right_check ul li:first-child {
+    border-left: none;
+}
+.right_check ul li span{
+	cursor:pointer;
+}
+.right_check ul li.tab_select{
+	background:#fff;
+	color:#333;
+}
+.top_check .im_top{
+	color: #222;
+    left: 0;
+    top: 0;
+    font-size: 26px;
+    position: relative;
+}
+.top_check .fa {
+    margin-right: 4px;
+}
+.top_icon{
+	display: inline-block;
+    line-height:32px;
+    padding: 5px 10px;
+    border: 1px solid #638CCC;
+    background: #fff;
+    border-radius: 2px;
+    position: absolute;
+	right: 20px;
+    top: 17px;
+}
+
+.content_color{
+	height: 570px;
+    margin-top: -1px;
+	background:#FFFFFF;
+	
+}
+
+.check_one,.check_two{
+	width:100%;
+}
+.check_one ul li,.check_two ul li{
+	float:left;
+	margin:4px;
+	line-height: 38px;
+	
+}
+
+.check_one .label_name,.check_two .label_name{
+    float: left;
+    width: 109px;
+    text-align: right;
+    font-weight: normal;	
+    font-size: 0.85rem;
+}
+input {
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    color: #323232;
+    background-color: #fff;
+    border: 1px solid #DDDDDD;
+    line-height: 1.2;
+    font-size: 0.85rem;
+    -webkit-box-shadow: none!important;
+    box-shadow: none!important;
+    -webkit-transition-duration: .1s;
+    transition-duration: .1s;
+}
+.check_one .check,.check_two .check{
+    padding: 8px 5px;
+    width: 150px;
+    margin-left:10px;
+}
+.check_two .check_ul{
+	margin: 0 20px;
+    border-bottom: 2px solid #5A5D9D;
+}
+
+
+.check_two .getIN{
+	margin: 3% 7.7%;
+    border: none;
+    background: #5A5D9D;
+    color: #fff;
+}
+.check_two ul .check_name{
+    border: 1px solid #5A5D9D;
+    border-bottom: none;
+    width: 102px;
+    background: #fff;
+    text-align: center;
+    margin: 0;
+    color: #333;
+    cursor: pointer; 
+   
+}
+.button_margin{
+	float:right;
+    height: 34px;
+    line-height: 31px;
+    text-align: center;
+    width: 101px;
+    margin-right:10px;
+    margin-top:10px;
+    border: 1px solid #CCCCCC;
+    cursor:pointer;
+}
+
+.check_one .txt_area,.check_two .txt_area{
+	width: 427px;
+    padding: 2px;
+}
+
+.check_two .check_name.active{
+	background-color:#5A5D9D;	
+	color: #fff;
+}
+
+.right_check .hot{
+	position: absolute;
+    background: red;
+    width: 21px;
+    height: 21px;
+    line-height: 18px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 16px;
+    font-family: "Arail";
+    margin-left: 50px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,172 @@
+package com.ideassoft.bean;
+
+import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import com.ideassoft.core.annotation.interfaces.ColumnDefaultValue;
+
+
+/**
+ * WarningLog entity. @author MyEclipse Persistence Tools
+ */
+@Entity
+@Table(name = "TL_E_WARNINGLOG", schema = "UCR_PMS")
+public class WarningLog implements java.io.Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8279369335576370670L;
+	/**
+	 * 
+	 */
+	
+	// Fields
+
+	private String logId;
+	private String branchId;
+	private String roomId;
+	private String serialNo;
+	private String warningType;
+	private Date warningDate;
+	private String status;
+	private Date recordTime;
+	private String recordUser;
+	private String remark;
+
+	// Constructors
+
+	/** default constructor */
+	public WarningLog() {
+	}
+
+	/** minimal constructor */
+	public WarningLog(String logId, String branchId, String serialNo,
+			String warningType, Date warningDate, String status,
+			String recordUser) {
+		this.logId = logId;
+		this.branchId = branchId;
+		this.serialNo = serialNo;
+		this.warningType = warningType;
+		this.warningDate = warningDate;
+		this.status = status;
+		this.recordUser = recordUser;
+	}
+
+	/** full constructor */
+	public WarningLog(String logId, String branchId, String roomId,
+			String serialNo, String warningType, Date warningDate,
+			String status, Date recordTime, String recordUser, String remark) {
+		this.logId = logId;
+		this.branchId = branchId;
+		this.roomId = roomId;
+		this.serialNo = serialNo;
+		this.warningType = warningType;
+		this.warningDate = warningDate;
+		this.status = status;
+		this.recordTime = recordTime;
+		this.recordUser = recordUser;
+		this.remark = remark;
+	}
+
+	// Property accessors
+	@Id
+	@Column(name = "LOG_ID", unique = true, nullable = false, length = 18)
+	public String getLogId() {
+		return this.logId;
+	}
+
+	public void setLogId(String logId) {
+		this.logId = logId;
+	}
+
+	@Column(name = "BRANCH_ID", nullable = true, length = 6)
+	public String getBranchId() {
+		return this.branchId;
+	}
+
+	public void setBranchId(String branchId) {
+		this.branchId = branchId;
+	}
+
+	@Column(name = "ROOM_ID", length = 6)
+	public String getRoomId() {
+		return this.roomId;
+	}
+
+	public void setRoomId(String roomId) {
+		this.roomId = roomId;
+	}
+
+	@Column(name = "SERIAL_NO", nullable = false, length = 50)
+	public String getSerialNo() {
+		return this.serialNo;
+	}
+
+	public void setSerialNo(String serialNo) {
+		this.serialNo = serialNo;
+	}
+
+	@Column(name = "WARNING_TYPE", nullable = false, length = 2)
+	public String getWarningType() {
+		return this.warningType;
+	}
+
+	public void setWarningType(String warningType) {
+		this.warningType = warningType;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "WARNING_DATE", nullable = false)
+	public Date getWarningDate() {
+		return this.warningDate;
+	}
+
+	public void setWarningDate(Date warningDate) {
+		this.warningDate = warningDate;
+	}
+
+	@Column(name = "STATUS", nullable = false, length = 2)
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "RECORD_TIME", insertable = false, updatable = true)
+	@ColumnDefaultValue(value = "sysdate", insertable = false)
+	public Date getRecordTime() {
+		return this.recordTime;
+	}
+
+	public void setRecordTime(Date recordTime) {
+		this.recordTime = recordTime;
+	}
+
+	@Column(name = "RECORD_USER", nullable = false, length = 8)
+	public String getRecordUser() {
+		return this.recordUser;
+	}
+
+	public void setRecordUser(String recordUser) {
+		this.recordUser = recordUser;
+	}
+
+	@Column(name = "REMARK", length = 200)
+	public String getRemark() {
+		return this.remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+}

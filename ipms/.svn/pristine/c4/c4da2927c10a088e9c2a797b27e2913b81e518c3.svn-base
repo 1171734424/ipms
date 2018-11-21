@@ -1,0 +1,335 @@
+@charset "utf-8";
+
+body,ul,li,p,h1,h2,h3,h4,h5,h6,form,fieldset,table,td,img,div,dl,dt,dd,input
+	{
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	font-style: normal;
+	text-decoration: none;
+	border-collapse: collapse; /*为表格设置合并边框模型：*/
+	border-spacing: 0;
+}
+
+/*去除边框的占位--重要*/
+* {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+#jd_iframe {
+	border-radius: 4px !important;
+}
+
+label {
+	display: inline-block;
+	max-width: 100%;
+	margin-bottom: 5px;
+	font-size: 0.85rem;
+}
+
+/*select {
+           appearance:none;
+           -moz-appearance:none;
+           -webkit-appearance:none;
+        	  将背景改为绿色*/ /*留出一点位置，避免被文字覆盖
+}*/ /*清除ie的默认选择框样式清除，隐藏下拉箭头*/
+select::-ms-expand {
+	display: none;
+}
+
+body {
+	font-family: "微软雅黑";
+	font-size: 14px;
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden;
+	overflow: hidden;
+	-webkit-font-smoothing: antialiased;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	-o-user-select: none;
+}
+
+a {
+	blur: expression(this.onFocus = this.blur () )
+}
+
+article,aside,details,figcaption,figure,footer,header,hgroup,nav,section,summary
+	{
+	display: block;
+}
+
+body,html {
+	font-size: 16px;
+	height: 100%;
+}
+
+img {
+	border: none;
+}
+
+li {
+	list-style: none;
+}
+
+input,select,textarea,button {
+	font-family: "微软雅黑";
+	outline: none;
+	border: none;
+	background: none;
+}
+
+a {
+	text-decoration: none;
+}
+
+/*input内置
+::-webkit-input-placeholder {
+	/* WebKit browsers */
+color
+:
+ 
+#555555
+;
+
+	
+font-size
+:
+ 
+14
+px
+;
+
+
+}
+::-moz-input-placeholder { /* Mozilla Firefox 19+ */
+	color: #555555;
+	font-size: 14px;
+}
+
+::-ms-input-placeholder { /* Internet Explorer 10+ */
+	color: #555555;
+	font-size: 14px;
+}
+
+/*设置滚动条样式*/ /*设置滚动条样式*/
+::-webkit-scrollbar {
+	width: 5px;
+	height: 5px;
+	background-color: #f0f0f0;
+}
+
+/*定义滚动条轨道 内阴影+圆角*/
+::-webkit-scrollbar-track {
+	border-radius: 10px;
+	background-color: #f0f0f0;
+}
+
+/*定义滑块 内阴影+圆角*/
+::-webkit-scrollbar-thumb {
+	border-radius: 10px;
+	background-color: #f0f0f0;
+}
+
+/*清浮动，将clearfix引入到要清楚浮动的父级元素*/
+.clearfix:after {
+	content: "";
+	display: block;
+	clear: both;
+}
+
+.clearfix {
+	zoom: 1;
+}
+
+/*左浮动*/
+.fl {
+	float: left;
+}
+
+/*右浮动*/
+.fr {
+	float: right;
+}
+
+/**/
+a:hover,a:active {
+	outline: 0;
+}
+
+a[href],input[type='submit'],input[type='image'],label[for],select,button,.pointer
+	{
+	cursor: pointer; /*鼠标放上去为箭头效果*/
+}
+
+/*input表单样式，引进去就可以了*/
+input,select,textarea {
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	color: #222;
+	background-color: #fff;
+	border: 1px solid #DDDDDD;
+	line-height: 1.2;
+	font-size: 0.85rem;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
+	-webkit-transition-duration: .1s;
+	transition-duration: .1s;
+	resize: none;
+	padding: 0 5px 0;
+}
+
+/*设置表单宽高*/
+.text_search {
+	padding: 8px 5px;
+	width: 175px;
+	margin-left: 10px; /**根据需要设置**/
+}
+
+/*label标签样式展示*/
+.label_name {
+	float: left;
+	width: 70px;
+	text-align: right;
+	font-weight: normal;
+	font-size: 0.85rem;
+}
+
+/*表格展示*/
+table {
+	border: 1px solid #e9e9e9;
+	width: 100%;
+	-khtml-border-radius: 4px;
+	-moz-border-radius: 4px;
+	-ms-border-radius: 4px;
+	-o-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	table-layout: fixed;
+	word-break: break-all;
+}
+
+/*td样式*/
+table td {
+	vertical-align: middle;
+	font-size: 0.85rem;
+	white-space: nowrap;
+}
+
+select[disabled='disabled'] {
+	background-color: #f0f0f0;
+}
+
+input[type="text"]:disabled,select[disabled=disabled],textarea[disabled=disabled],input[readonly=readonly],textarea[readonly=readonly]
+	{
+	background: #f0f0f0;
+}
+
+/**公共按钮样式,设置按钮class="具体的类" 将此样式放进去即可**/
+.
+button {
+	height: 34px;
+	line-height: 34px;
+	text-align: center;
+	width: 100px;
+	border: 1px solid #333;
+	background: #fff;
+	color: #333;
+	cursor: pointer;
+	border-radius: 4px;
+	font-size: 14px;
+}
+
+.button_margin {
+	height: 34px;
+	line-height: 34px;
+	text-align: center;
+	width: 85px;
+	border: none;
+	color: #333;
+	cursor: pointer;
+	border-radius: 4px;
+	font-size: 14px;
+	background: #f0f0f0;
+}
+
+.button_margin.button_add {
+	background-color: #FC8A15;
+}
+
+.button_add {
+	background-color: #FC8A15;
+}
+
+/*重写checkbox样式*/
+.mo-checkbox {
+	padding-left: 1.25rem;
+	position: relative;
+	display: inline;
+	margin: 0;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.mo-checkbox input[type="checkbox"] {
+	position: absolute;
+	z-index: -1;
+	opacity: 0;
+	box-sizing: border-box;
+	padding: 0;
+}
+
+.mo-checkbox input {
+	overflow: visible;
+	font-family: inherit;
+	line-height: inherit;
+	margin: 0;
+}
+
+.mo-checkbox>.icon {
+	border-radius: 0;
+	width: 1.25rem;
+	height: 1.25rem;
+	position: absolute;
+	top: 50%;
+	left: 0;
+	margin: 0;
+	padding: 0;
+	-webkit-transform: translate(0, -50%);
+	transform: translate(0, -50%);
+	border: .0625rem solid transparent;
+	background-color: #fff;
+	border-color: #0275d8;
+}
+
+.mo-checkbox>input[type=checkbox]:checked  ~ .icon:after {
+	-webkit-transition: all 60ms cubic-bezier(.55, .09, .68, .53);
+	transition: all 60ms cubic-bezier(.55, .09, .68, .53);
+	border-left-color: #0275d8;
+	border-bottom-color: #0275d8;
+}
+
+.mo-checkbox>.icon:after {
+	position: absolute;
+	content: '';
+	top: 15.5%;
+	left: 13.2%;
+	width: 53%;
+	height: 15%;
+	-webkit-transform: rotate(-50deg);
+	transform: rotate(-50deg);
+	border: .125rem solid transparent;
+	background-color: transparent;
+}
+
+.mo-checkbox>.icon  ~ span {
+	margin-left: .5rem;
+	margin-right: 0.5rem;
+	cursor: pointer;
+}

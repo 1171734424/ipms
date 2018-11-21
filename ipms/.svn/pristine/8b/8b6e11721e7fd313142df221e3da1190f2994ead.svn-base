@@ -1,0 +1,205 @@
+
+#dvMsgBox {
+    display: none;
+    position: fixed;
+    font-size: 16px;
+    width: 300px;
+    overflow: hidden;
+    z-index: 10000;
+    background-color: #fff;
+    box-shadow: 1px 1px 50px rgba(0, 0, 0, .3);
+    border-radius: 3px;
+    padding-bottom: 10px;
+}
+
+#dvMsgBox .top {
+    height: 38px;
+    line-height: 38px;
+    font-size: 15px;
+    color: #333;
+    padding-left: 16px;
+    vertical-align: middle;
+    width: 100%;
+    border-bottom: 1px solid #eee;
+    background: #F8F8F8;
+}
+#dvMsgBox .body .right .img-tip{
+     display: inline-block;
+     width: 34px;
+     height: 38px;
+	 background: url(../../images/thinking.png) no-repeat center;
+}
+#dvMsgBox .body .right .img-tip,#dvMsgBox .body .right .ct{
+	float:left;
+}
+#dvMsgBox .body .right .img-tip{
+	position: absolute;
+    left: 14%;
+    top: 42%;
+}
+#dvMsgBox  .close-tip{
+	display: inline-block;
+    background: url(../../images/closetip.png) no-repeat center;
+    width: 16px;
+    height: 17px;
+    background-color: transparent;
+}
+.check_wrap_margin  .close-tip{
+	background:url(../../../closetip.png) no-repeat center !important;
+}
+#dvMsgBox .div_padding {
+    position: absolute;
+    width: 23px;
+    height: 23px;
+    line-height: 23px;
+    text-align: center;
+    right: 11px;
+    top: 8px;
+    border-radius:0;
+    padding-top: 3px;
+    border: 0 none;
+    background:#fff;
+    -webkit-transform: rotate(0deg);
+	-moz-transform: rotate(0deg);
+	-ms-transform: rotate(0deg);
+	-o-transform: rotate(0deg);
+	transform: rotate(0deg);
+	-webkit-transition: 0.5s all ease-in-out;
+	-moz-transition: 0.5s all ease-in-out;
+	-o-transition: 0.5s all ease-in-out;
+	transition: 0.5s all ease-in-out;
+}
+#dvMsgBox  .div_padding:hover{
+  background: rgba(0, 0, 0, 0.3);
+  border: 0;
+  border-radius: 50%;
+  /*-webkit-transform: rotate(270deg);
+  -moz-transform: rotate(270deg);
+  -ms-transform: rotate(270deg);
+  -o-transform: rotate(270deg);
+  transform: rotate(270deg);*/
+}
+#dvMsgBox .body .right .ct {
+    vertical-align: middle;
+    margin-left: 94px;
+    margin-top:31px;
+    padding-right: 2px;
+    color: #333;
+    font-size: 14px;
+    white-space: normal;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+
+#dvMsgBox .body {
+	background: #fff;
+	padding-left: 10px;
+	margin-bottom: 15px;
+}
+
+#dvMsgBox .body .right {
+	background: #fff;
+    position: relative;
+    height: 56px;
+}
+
+#dvMsgBox .body .right .ct .pro {
+	width: 280px;
+	border: solid 1px #6593cf;
+	height: 25px;
+	background: #ffffff;
+	line-height: 23px;
+	overflow: hidden;
+}
+
+#dvMsgBox .body .right .ct .pro .bg {
+	width: 0%;
+	height: 100%;
+	background: #c9dffc;
+}
+
+#dvMsgBox .bottom {
+    background: #fff;
+    padding-left: 6px;
+}
+
+#dvMsgBox .bottom .right {
+	height: 100%;
+	padding-right: 6px;
+}
+
+input.infobtn {
+    width: 70px;
+    height: 30px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    color: #fff;
+    border:none;
+    text-align: center;
+    background-color:#5A5D9D;
+    outline: none;
+    transition:all 0.3s ease-in-out;
+}
+
+input.infobtnfocus {
+	cursor: pointer;
+	background:#5A5D9C;
+	text-align:center;
+	width: 70px;
+    height: 30px;
+    border-radius: 4px;
+    font-size: 14px;
+	color:#fff;
+	border: none;
+	outline:none;
+}
+.infobtn input[type="button"]:nth-of-type(2n){
+	background-color:#FC8A15;
+}
+#dvMsgBox .icon {
+	width: 32px;
+	height: 32px;
+	float: left;
+	margin-right: 10px;
+}
+
+#dvMsgBox .error {
+	background: url(icon-error.gif) no-repeat;
+}
+
+#dvMsgBox .info {
+	background: url(icon-info.gif) no-repeat;
+}
+
+#dvMsgBox .warning {
+	background: url(icon-warning.gif) no-repeat;
+}
+
+#dvMsgBox .clear {
+	clear: both;
+}
+
+#dvMsgBox .height {
+	height: 8px;
+	line-height: 8px;
+}
+
+#tipInfolightBox {
+    display: none;
+    -moz-opacity: 0.5;
+    filter: alpha(opacity = 50);
+    opacity: 0.25;
+    background-color: #333;
+    z-index: 9999;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+#dvMsgBtns {
+	text-align: center;
+	width: 100%;
+}

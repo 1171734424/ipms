@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	      http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context.xsd
+          http://www.springframework.org/schema/aop 
+          http://www.springframework.org/schema/aop/spring-aop.xsd
+		  http://www.springframework.org/schema/cache
+          http://www.springframework.org/schema/cache/spring-cache.xsd ">
+
+	<context:annotation-config />
+	
+    <context:component-scan base-package="com.ideassoft" />
+    
+	<cache:annotation-driven/>
+	
+	<aop:aspectj-autoproxy/>
+	
+	<bean id="springUtil" class="com.ideassoft.util.SpringUtil" />
+
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="104857600" />
+		<property name="maxInMemorySize" value="4096" />
+	</bean>
+	
+    <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+    	<property name="configLocation">
+    		<value>classpath:/ehcache.xml</value>
+    	</property>
+    </bean>
+    
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+		<property name="cacheManager" ref="ehcache"/>
+	</bean>
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <bean id="controllerHandlerInterceptor" class="com.ideassoft.core.controller.ControllerHandlerInterceptor">
+    </bean>
+    
+    <bean id="defaultAnnotationHandlerMapping"
+          class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+        <property name="interceptors">
+            <list>
+                <ref bean="controllerHandlerInterceptor"/>
+            </list>
+        </property>
+    </bean>
+	
+	<!--<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>classpath:com/hhsoft/resource/ApplicationResources</value>
+			</list>
+		</property>
+	</bean> -->
+</beans>
+

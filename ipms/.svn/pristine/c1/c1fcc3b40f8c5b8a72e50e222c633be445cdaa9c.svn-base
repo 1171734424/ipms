@@ -1,0 +1,84 @@
+@CHARSET "UTF-8";
+
+.update_order{
+	height: 100%;
+    width: 100%;
+    font-size:14px;
+    color:#333;
+}
+.cols_div{
+	width: 100%;
+	text-align: center;
+	font-size: 14px;
+	padding:10px 0;
+}
+.cols_div input{
+    padding: 8px 5px;
+    width: 180px;
+    margin-left: 10px;
+    font-size: 14px;
+}
+#remark{
+	width:180px;
+	height:70px;
+	margin-left:10px;
+}
+.height-div{
+	height:65px;
+}
+.height-div span:nth-child(2){
+	margin-left:20px;
+}
+.update_order p{
+	padding:10px;
+	font-size:14px;
+	color:#333;
+}
+.update_myorder p{
+	font-size:14px;
+	color:#333;
+	padding-left: 31px;
+    padding-top: 10px;
+}
+.mybutton{
+	padding: 0 0px 0 17%;
+}
+.mybutton_roomtype {
+	padding: 2% 0px 0 32%;
+}
+.add_conroom{
+	display: inline-block;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    width: 70px;
+    padding: 0 10px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+}
+.query{
+    background-color: #5A5D9D;
+}
+.cancel{
+    background-color: #ff9800;
+}
+.update_myorder > div{
+	display: flex;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+}
+
+.myclass {
+	margin-left: 11px;
+}
+
+.buttonclass {
+	padding-left: 11px;
+}
+#money_div2>li{
+	        padding-left: 150px;
+	    }

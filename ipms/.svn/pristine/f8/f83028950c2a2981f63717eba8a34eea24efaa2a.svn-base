@@ -1,0 +1,343 @@
+package com.ideassoft.basic.controller;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.basic.service.GoodsBasicService;
+import com.ideassoft.bean.City;
+import com.ideassoft.bean.Goods;
+import com.ideassoft.bean.GoodsCategory;
+import com.ideassoft.bean.Member;
+import com.ideassoft.bean.MemberAccount;
+import com.ideassoft.bean.Staff;
+import com.ideassoft.bean.SysParam;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.ReflectUtil;
+import com.ideassoft.util.RequestUtil;
+
+@Controller
+public class GoodsManageController {
+	
+	private static final String initialService = null;
+	@Autowired
+	private GoodsBasicService goodsService;
+	
+	
+	@RequestMapping("/addGoodsType.do")
+	public void addGoodsType(HttpServletRequest request,
+			HttpServletResponse response, String PARAMID) throws Exception {
+		SysParam sysParam;
+		if( null != PARAMID){
+			sysParam = (SysParam) ReflectUtil.setBeansFromJsonArray(request, "SysParam").get(0);
+			sysParam.setParamType("SUPERCATEGORY");
+			sysParam.setStatus("1");
+			goodsService.update(sysParam);
+		}else{
+			sysParam = new SysParam();
+			sysParam = (SysParam) ReflectUtil.setBeansFromJsonArray(request, "SysParam").get(0);
+			sysParam.setParamId(goodsService.getSequence("SEQ_SYSPARAM_ID"));
+			sysParam.setParamType("SUPERCATEGORY");
+			sysParam.setStatus("1");
+			goodsService.save(sysParam);
+		}
+	}
+	
+	@RequestMapping("/isUniqueGoodsType.do")
+	public void isUniqueGoodsType(String colValue, String idInfo, HttpServletResponse response)
+			throws Exception {
+		SysParam sysParam = null;
+		if(StringUtils.isEmpty(idInfo)){
+			sysParam = (SysParam) goodsService.findOneByProperties(SysParam.class, "paramType", "SUPERCATEGORY", "content", colValue, "status", "1");
+			if(null != sysParam){
+				response.getWriter().write("{ \"result\":" + (false) + " }");
+			}
+		}else{
+			response.getWriter().write("{ \"result\":" + (true) + " }");
+		}
+	}
+	
+	@RequestMapping("/delGoodsType.do")
+	public void delGoodsType(HttpServletRequest request,
+			HttpServletResponse response, String paramId) throws Exception {
+		String[] paramIds = paramId.split(",");
+		SysParam sysParam;
+		List<Object> list = new ArrayList<Object>();
+		for (int i = 0; i < paramIds.length; i++) {
+			sysParam = (SysParam) goodsService.findById(SysParam.class, paramIds[i]);
+			if (sysParam != null) {
+				sysParam.setStatus("0");
+				list.add(sysParam);
+			}
+		}
+
+		if (!list.isEmpty()) {
+			goodsService.saveOrUpdateAll(list);
+		}
+		
+		String result = "{\"code\":\"1\"}";
+		JSONUtil.responseJSON(response, result);
+	}
+	
+	@RequestMapping("/addGoodsPicMark.do")
+	public ModelAndView addGoodsPicMark(HttpServletRequest request) throws Exception {
+		ModelAndView mv = new ModelAndView("page/basic/goods/loadCityPicMark");//
+		
+		String CATEGORYID = request.getParameter("CATEGORYID");
+		GoodsCategory gc = (GoodsCategory) goodsService.findOneByProperties(GoodsCategory.class, "status", "1", "categoryId", CATEGORYID);
+		String url = "";
+		if (gc.getPicture() != null) {
+		    url = CommonConstants.Domain.DOMAINNAME + gc.getPicture();
+		}
+		mv.addObject("CATEGORYID", CATEGORYID);
+		mv.addObject("url", url);
+		return mv;
+	}
+	
+	
+	@RequestMapping("/addNewCityPictureMark.do")
+	@SuppressWarnings("unchecked")
+	public void addNewCityPictureMark(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String fileName = null;
+		FileOutputStream fos = null;
+		InputStream is = null;
+		//MultipartFile srcFile = multipartRequest.getFile("file");
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
+        if(multipartResolver.isMultipart(request)){
+        	  MultipartHttpServletRequest multiRequest = (MultipartHttpServletRequest) request;
+              String CATEGORYID = multiRequest.getParameter("CATEGORYID");
+      		Iterator<String> iter = multiRequest.getFileNames();
+    		while(iter.hasNext()){
+    			 List<MultipartFile> list = multiRequest.getFiles(iter.next());
+    			 for(MultipartFile file : list){
+    				   String myFileName = file.getOriginalFilename();
+    				   if(myFileName != null && !"".equals(myFileName)){
+    					 
+    					   try{
+    					   
+    						String webPath = RequestUtil.getWebPath(request);
+    						 
+    							fileName = file.getOriginalFilename();
+    							fileName = new Date().getTime() +fileName.substring(fileName.lastIndexOf("."));
+    					 
+    						File srcFolder = new File(webPath + File.separator + "upload");
+    						if (!srcFolder.exists()) {
+    							srcFolder.mkdirs();
+    						}
+    						File tarFile = new File(srcFolder.getAbsolutePath() + File.separator + fileName);
+    						if (!tarFile.exists()) {
+    							tarFile.createNewFile();
+    						}
+    						fos = new FileOutputStream(tarFile);
+    						is = file.getInputStream();
+    						int ln = 0;
+    						byte[] buf = new byte[1024];
+    						while ((ln = is.read(buf)) != -1) {
+    							fos.write(buf, 0, ln);
+    						}
+    						fos.flush();
+    					} catch (IOException e) {
+    						e.printStackTrace();
+    					} finally {
+    						if (fos != null) {
+    							fos.close();
+    						}
+    						if (is != null) {
+    							is.close();
+    						}
+    					}
+    				
+    					   
+    					   if(fileName != null && !"".equals(fileName) ){
+    							GoodsCategory gc = (GoodsCategory) goodsService.findOneByProperties(GoodsCategory.class, "status", "1", "categoryId", CATEGORYID);
+    							if (gc!= null ) {
+    								gc.setPicture(fileName);
+    								goodsService.update(gc);
+    							}
+    					   }
+    					
+    					
+    			 }
+    			 }
+    					
+    				   }
+    		
+    		JSONUtil.responseJSON(response, new AjaxResult(1, "操作成功!"));
+    		
+    			 }
+    		}
+	
+	
+	@RequestMapping("/addGoodsPic.do")
+	@SuppressWarnings("unchecked")
+	public ModelAndView addGoodsPic(HttpServletRequest request) throws Exception {
+		ModelAndView mv = new ModelAndView("page/basic/goods/loadGoodPic");
+		
+		String adminiCode = request.getParameter("adminiCode");
+		Goods goods = (Goods) goodsService.findOneByProperties(Goods.class, "status", "1", "goodsId", adminiCode);
+		
+		List pictures = new ArrayList();
+		if (goods.getPicture() != null) {
+			String[] picturesArray = goods.getPicture().split(",");
+			for (int i = 0; i < picturesArray.length; i++) {
+				//Picture pic = (Picture) manageService.findOneByProperties(Picture.class, "status", "1", "adminiCode", adminiCode);
+				//pictures.add(picturesArray[i]);
+				String url = CommonConstants.Domain.DOMAINNAME + picturesArray[i];
+				pictures.add(url);
+				
+				
+			}
+		}
+		mv.addObject("operateType", "goodspic");
+		mv.addObject("pic_str", goods.getPicture());
+		mv.addObject("adminiCode", adminiCode);
+		mv.addObject("cityInfo", goods);
+		mv.addObject("pictures", pictures);
+		return mv;
+	}
+	
+	
+	// 商品分类删除
+	@RequestMapping("/delCategory.do")
+	public void delCategory(HttpServletRequest request, HttpServletResponse response, String categoryid)
+			throws UnknownHostException {
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginUser.getStaff();
+		String recordUser = staff.getStaffId();
+		String[] categoryids = categoryid.split(",");
+		for (int i = 0; i < categoryids.length; i++) {
+			if (categoryids[i] != null) {
+				GoodsCategory goodscategory = ((GoodsCategory) (goodsService.findOneByProperties(GoodsCategory.class,
+						"categoryId", categoryids[i])));
+				goodscategory.setStatus("0");
+				goodscategory.setRecordUser(recordUser);
+				goodscategory.setRecordTime(new Date());
+			}
+		}
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+	}
+	
+	// 商品删除
+	@RequestMapping("/delGoods.do")
+	public void delGoods(HttpServletRequest request, HttpServletResponse response, String goodsid)
+			throws UnknownHostException {
+		LoginUser loginUser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+		Staff staff = loginUser.getStaff();
+		String recordUser = staff.getStaffId();
+		String[] goodsids = goodsid.split(",");
+		for (int i = 0; i < goodsids.length; i++) {
+			if (goodsids[i] != null) {
+				Goods goods = ((Goods) (goodsService.findOneByProperties(Goods.class, "goodsId", goodsids[i])));
+				goods.setStatus("0");
+				goods.setRecordUser(recordUser);
+				goods.setRecordTime(new Date());
+			}
+		}
+		JSONUtil.responseJSON(response, new AjaxResult(1, null));
+	}
+	@RequestMapping("/addNewGoodPicture.do")
+	@SuppressWarnings("unchecked")
+	public void addNewCityPicture(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		String fileName = null;
+		FileOutputStream fos = null;
+		InputStream is = null;
+		//MultipartFile srcFile = multipartRequest.getFile("file");
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
+        if(multipartResolver.isMultipart(request)){
+        	  MultipartHttpServletRequest multiRequest = (MultipartHttpServletRequest) request;
+              String pic_str = multiRequest.getParameter("pic_str");
+              String adminiCode = multiRequest.getParameter("adminiCode");
+              String operateType = multiRequest.getParameter("operateType");
+      		Iterator<String> iter = multiRequest.getFileNames();
+    		while(iter.hasNext()){
+    			 List<MultipartFile> list = multiRequest.getFiles(iter.next());
+    			 for(MultipartFile file : list){
+    				   String myFileName = file.getOriginalFilename();
+    				   if(myFileName != null && !"".equals(myFileName)){
+    					 
+    					   try{
+    					   
+    						String webPath = RequestUtil.getWebPath(request);
+    						 
+    							fileName = file.getOriginalFilename();
+    							fileName = new Date().getTime() +fileName.substring(fileName.lastIndexOf("."));
+    					 
+    						File srcFolder = new File(webPath + File.separator + "upload");
+    						if (!srcFolder.exists()) {
+    							srcFolder.mkdirs();
+    						}
+    						File tarFile = new File(srcFolder.getAbsolutePath() + File.separator + fileName);
+    						if (!tarFile.exists()) {
+    							tarFile.createNewFile();
+    						}
+    						fos = new FileOutputStream(tarFile);
+    						is = file.getInputStream();
+    						int ln = 0;
+    						byte[] buf = new byte[1024];
+    						while ((ln = is.read(buf)) != -1) {
+    							fos.write(buf, 0, ln);
+    						}
+    						fos.flush();
+    					} catch (IOException e) {
+    						e.printStackTrace();
+    					} finally {
+    						if (fos != null) {
+    							fos.close();
+    						}
+    						if (is != null) {
+    							is.close();
+    						}
+    					}
+    					if("".equals(pic_str)){
+    						pic_str = fileName;
+    					}else{
+     					   pic_str = pic_str + ","+fileName;
+
+    					}
+    					   
+    					
+    					
+    					
+    			 }
+    			 }
+    					
+    				   }
+    		   if( "citypic".equals(operateType)){
+				   City cityInfo = (City) goodsService.findOneByProperties(City.class, "adminiCode", adminiCode, "status", "1");
+					if (cityInfo!= null ) {
+						cityInfo.setPictures(pic_str);
+						goodsService.update(cityInfo);
+					}
+			   }else{
+				   Goods goods = (Goods) goodsService.findOneByProperties(Goods.class, "goodsId", adminiCode, "status", "1");
+					if (goods!= null ) {
+						goods.setPicture(pic_str);
+						goodsService.update(goods);
+					}
+			   }
+    		JSONUtil.responseJSON(response, new AjaxResult(1, "操作成功!"));
+    		
+    			 }
+    		}
+}

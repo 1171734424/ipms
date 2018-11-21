@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+	<config>
+		<models>
+			<model modelId="M907" name="营销管理" show="true" icon="marketing" subSystem="UPMS" >
+				<page pageId="R90701" name="兑换规则" editing="form" loadOnRender="true" showMenu="true" role="4">
+					<url>turnToExchangeScore</url>
+				</page>
+				
+				<page pageId="R90702" name="积分操作" editing="form" loadOnRender="true" showMenu="true" role="4">
+					<conditions>MEMBERNAME,IDCARD,MOBILE</conditions>
+					<functions>FRESH</functions>
+					<target>MemberAccount</target>
+					<strategy>default</strategy>
+				  	<query type="sql">
+						<sql>
+							Integrationmanage
+				    	</sql>
+					</query>
+					<columns>
+						<column columnId="CZ1" name="积分调整" width="90" editable="true"  
+								editType="button" buttonCls="button_first" funcName="调整" callFunc="scoreAdjustment"  downloadable="false"/>
+						<column columnId="ACCOUNTID" name="账户编号" width="120" editable="true" hidden="true"/>
+						<column columnId="MEMBERID" name="会员编号" width="120" editable="true" primaryKey="true" validateRule="NOTNULL"/>
+						<column columnId="LOGINNAME" name="登录名" width="120" editable="true" validateRule="NOTNULL,LENGTH:20,UNIQUE"/>
+						<column columnId="MEMBERNAME" name="会员姓名" width="120" editable="true" validateRule="NOTNULL,LENGTH:20"/>
+						<column columnId="GENDOR" name="性别" width="120" editable="true" editValue="0:女;1:男" editType="select" validateRule="NOTNULL"/>
+						<column columnId="MEMBERRANK" name="会员等级" width="120" editable="true"/>
+						<column columnId="IDCARD" name="身份证" width="120" editable="true" align="left" hidden="true"/>
+						<column columnId="MOBILE" name="手机号" width="120" editable="true" align="left" hidden="true"/>
+						<column columnId="CURRINTEGRATION" name="当前积分" width="120" editable="true"/>
+						<column columnId="TOTALINTEGRATION" name="获取积分" editable="true"/>
+						<column columnId="INGEGRATIONGIFT" name="积分赠送" editable="true"/>
+						<column columnId="TOTALCONSINTEGRATION" name="消费积分" editable="true"/>
+						<column columnId="CURRBALANCE" name="当前余额" width="120" editable="true"/>
+						<column columnId="EMAIL" name="邮件" width="120" editable="true" hidden="true"/>
+						<column columnId="ADDRESS" name="地址" width="120" editable="true" align="left" hidden="true"/>
+					</columns>
+				</page>
+				<page pageId="R90703" name="营销活动" editing="form" loadOnRender="true" showMenu="true" role="*">
+					<functions>FRESH,CAMPAIGHSADD</functions>
+					<conditions>STARTDATE,BUSINESSTYPE,PRIORITY,USINGRANGE,USINGPERSON,USINGTYPE_CUSTOM_VALUE,SUPPILERSTATUS</conditions>
+					<target>Campaign</target>
+					<strategy>branchRank</strategy>
+					<funcCondRate>40,60</funcCondRate>
+					<query type="sql">
+						<sql>
+							campaignShowInPage,campaignShowInPageAt
+						</sql>
+					</query>
+					<columns>
+						<column columnId="CZ1" name="操作" width="100" editType="button" align="center"
+								funcName="查看详情" callFunc="alterCampaign" buttonCls="button_first" downloadable="false"/>
+						<column columnId="DATAID" name="活动编号" width="120" editable="true" align="center" hidden="true" primaryKey="true"/>
+						<column columnId="CAMPAIGNNAME" name="活动名称" width="120" editable="true" align="left"/>
+						<column columnId="CAMPAIGNTYPE" name="活动分类" width="100" editable="true" align="center" editType="select" editValue="1:充值优惠;2:消费优惠;3:其他"/>
+						<column columnId="CAMPAIGNDESC" name="活动描述" width="200" editable="true" align="left"/>
+						<column columnId="USINGRANGE" name="适用范围" width="80" editable="true" align="center" editType="select" editValue="-1:;1,2,3:所有;1:app专享;2:小程序专享;3:公众号专享;1,2:app/小程序专享;1,3:app/公众号专享;2,3:小程序/公众号专享"/>
+						<column columnId="USINGPERSON" name="适用对象" width="180" editable="true" align="left"/>
+						<column columnId="USINGTYPE" name="适用类型" width="100" editable="true" align="center"/>
+						<column columnId="STARTTIME" name="开始时间" width="120" editable="true" align="center" editType="date"/>
+						<column columnId="ENDTIME" name="结束时间" width="120" editable="true" align="center" editType="date"/>
+						<column columnId="CAMPAIGNCYCLE" name="活动周期" width="120" editable="true" align="center" hidden="true"/>
+						<column columnId="BUSINESSID" name="针对业务" width="120" editable="true" align="center" editType="dialog-radio" dialogTarget="SysParam" dialogColumns="content,paramName" dialogConditions="PARAM_TYPE = 'BUSINESS_TYPE' AND STATUS='1'"/>
+						<column columnId="PRIORITY" name="优先级" width="80" editable="true" align="center" editType="select" editValue="0:普通;1:中级;2:高级;3:超高级"/>
+						<column columnId="REMARK" name="备注" width="80" hidden="true" editable="true" align="left" editType="textarea"/>
+						<column columnId="STATUS" name="状态" width="120" hidden="true" align="center"  editType="select" editValue="0:无效;1:有效" />
+					</columns>
+				</page>
+				<page pageId="R90704" name="优惠组合" editing="form" loadOnRender="true" showMenu="true" role="4">
+					<functions>FRESH,EDIT</functions>
+					<conditions>TOTALPRICE,COUPONSTATUS</conditions>
+					<target>CouponGroup</target>
+					<strategy>default</strategy>
+					<query type="sql">
+						<sql>couponGroup</sql>
+					</query>
+					<columns>
+							<column columnId="DATAID" name="数据编号" width="120" align="center" hidden="true" primaryKey="true" sequenceSource = "cloud" sequence="SEQ_COUPONGROUP_ID"/>
+							<column columnId="COUPONNAME" name="优惠劵名称" width="120" editable="true" align="center" validateRule="NOTNULL"/>
+							<column columnId="TOTALPRICE" name="面额" width="120" editable="true" align="center" validateRule="NUMBER,NOTNULL"/>
+							<column columnId="TENCOUPON" name="10元劵" width="120" editable="true" align="center" validateRule="NUMBER"/>
+							<column columnId="TWENTYCOUPON" name="20元劵" width="120" editable="true" align="center" validateRule="NUMBER"/>
+							<column columnId="THIRTYCOUPON" name="30元劵" width="120" editable="true" align="center" validateRule="NUMBER"/>
+							<column columnId="FIFTYCOUPON" name="50元劵" width="120" editable="true" align="center" validateRule="NUMBER"/>
+							<column columnId="HUNDREDCOUPON" name="100元劵" width="120" editable="true" align="center" validateRule="NUMBER"/>
+							<column columnId="STATUS" name="状态" width="120" editType="select" editValue="1:有效;0:已删除 " validateRule="NOTNULL,LENGTH:2" align="center" hidden="true"/>
+							<column columnId="REMARK" name="备注" width="120" editable="true" align="left" editType="textarea"/>	
+					</columns>
+				</page>
+			</model>
+		</models>
+	</config>
+</configs>
+

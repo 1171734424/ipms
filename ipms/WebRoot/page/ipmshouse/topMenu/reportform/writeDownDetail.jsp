@@ -1,0 +1,83 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="../../../common/taglib.jsp"%>
+<%@ page import="net.sf.json.JSONObject"%>
+<%@ page import="com.ideassoft.core.page.Pagination"%>
+<%
+	JSONObject pagination = JSONObject.fromObject(request.getAttribute("pagination"));
+%>
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reset.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/reportform/report_forms.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/ipms/pagination.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/style.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/datetimepicker.css" media="all" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/jquery-ui.css"/>
+		<link rel="stylesheet" id="style" type="text/css" href="<%=request.getContextPath()%>/css/ipms/css/commom_table.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/common/jquery-dialog.css"/>
+		<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/script/ipms/js/layDate-v5.0.5/laydate/theme/default/laydate.css" />
+		<title>冲减明细报表</title>
+	</head>
+	<body style="overflow:hidden;">
+		<div class="shop_search">
+			<form action="cancelOutDetail.do" method="post" id ="myForm">
+				 <div class="form_margin">
+				 	<input type="text" id="branchName" name="branchName" class="date shop_name" value="${branchName }" placeholder="民宿名称"/>
+					<input type="text" id="startTime" name="startTime" class="date shop_name" value="${times}" placeholder="日期范围"/>
+					<input type="text" name="recordUser" id="recordUser" class="shop_name" value="${recordUser}" placeholder="入账人员" />
+					<button type="button" class="btn_style btn_search button_margin" onclick="search();">
+						查询
+					</button>
+					</div>
+					</form>
+				<section class="box-content-section fl">
+				<section class="box_content_widget fl">
+				<div class="content">
+					<iframe name="frame" id="frame" class="myTable" frameborder="0" width="100%" height="100%" ></iframe>
+				</div>
+				<div id="pager"></div>
+				</section>
+				</section>
+		</div>
+		<%@ include file="../../../common/script.jsp"%>
+		<script src="<%=request.getContextPath()%>/script/common/pager.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/datepickerCN.js"></script>
+		<script src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+		<script src="<%=request.getContextPath()%>/script/ipms/js/layDate-v5.0.5/laydate/laydate.js" charset="utf-8"></script>
+		<script>
+			var base_path = '<%=request.getContextPath()%>';
+			Pager.renderPager(<%=pagination%>);
+			$(document).ready(function(){
+				// 初始化时间格式
+				laydate.render({
+				  elem: '#startTime' 
+				  ,type: 'datetime'
+				  ,range: true
+				});
+				// 初始化加载数据
+				search();
+		    });
+			
+			// 跳转数据展示页
+			function search(){
+				// 获取参数
+				var branchName = $("#branchName").val();
+				var startTime = $("#startTime").val();
+				var recordUser = $("#recordUser").val();
+				// 判断初始化时间是否为空，如果不为空分割时间，如果为空直接返回两个空的时间段
+				if (startTime == "") {
+					$("#frame").attr('src',"writeDownDetailData.do?branchName="+branchName+"&startTime="+startTime+"&endTime="+startTime+"&recordUser="+recordUser);
+				} else if (startTime != "") {
+					var times = startTime.split(" - ");
+					$("#frame").attr('src',"writeDownDetailData.do?branchName="+branchName+"&startTime="+times[0]+"&endTime="+times[1]+"&recordUser="+recordUser+"&times="+startTime);
+				}
+			}
+			
+	 	</script>
+	</body>
+</html>

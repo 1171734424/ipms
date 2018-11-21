@@ -1,0 +1,93 @@
+@charset "utf-8";
+
+body{
+	background:rgb(234, 237, 241)
+}
+.exchange_box {
+	padding: 20px 10px;
+	width: 30%;
+	margin: 10px 80px;
+}
+.exchange_box table{
+	
+}
+table{
+	border: 1px solid #ccc;
+    -o-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    table-layout:fixed;
+    word-break:break-all;
+    background:#fff;
+}
+table tr th{
+	border: 1px solid #ccc;
+    background: #f1f1f1	;
+    font-size: 0.9rem;
+}
+table tr td{
+	border: 1px dotted #ccc;
+    text-align: center;
+}
+.exchange_box input,adjust_box input{
+    padding: 9px 5px;
+    width: 100%;
+    background:transparent;
+    border:none;
+    text-align: center;
+}
+label{
+    width: 70px;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+.button{
+    float: right;
+    margin-top: 5px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    width: 80px;
+    margin-left: 5px;
+    color: #FFF;
+    background: #5A5D9D;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.button.submit:hover,.button.cancel:hover{
+ 	 background-color: #4A5064;
+ 	 color:#fff;
+}
+/*积分调整*/
+.div_input{
+    height: 50px;
+    margin-right: 30px;
+    margin-top: 50px;
+}
+.adjust_box {
+	padding:15px;
+}
+.adjust_box table{
+    border: 1px dotted #ccc;
+    width:100%;
+    background: transparent;
+}
+.adjust_box span{
+	font-size:15px;
+}
+.bottom_div{
+    width: 30%;
+    margin: 10px 68px;
+    height: 50px;
+}
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,116 @@
+/*控制盒子的mrgin&&padding*/
+.room_margin{
+	background: #fff;
+    height: 100%;
+    position:relative;
+}
+.header_search{
+	height:54px;
+	line-height:54px;
+	padding-left:20px;
+	font-size:1rem;	
+	position:relative;
+}
+.header_search label{
+	font-size:1rem;
+}
+.header_search input{
+    padding: 6px 4px;
+}
+.header_search i.fa{
+    left: 220px;
+    top: 20px;
+}
+.urban{
+	padding-left: 5px;
+    margin-left: 5px;
+    height: 32px;
+    border:1px solid #dadada;
+    width: 175px;
+}
+/*区域选择*/
+.info_show{
+	position:absolute;
+	height:510px;
+	width:690px;
+	border:1px solid #ccc;
+	z-index:1;
+    background: #f1f6f8;
+    border-radius: 4px;
+    left: 50%;
+    margin-left: -400px;
+    display:none;
+}
+.info_show button{
+    height: 35px;
+    width: 63px;
+    float:right;
+    margin: 0 10px;
+    line-height: 26px;
+    text-align: center;
+    padding-right: 10px;
+    border: 1px solid #f1f1f1;
+    background: #535474;
+    color: #fff;
+}
+.info_show button.close{
+	margin: 0;
+	background: #FC8A15;
+    width: 63px;	
+}
+.top_area ul{
+	display:flex;
+	flex-flow: wrap;
+}
+.top_area ul li{
+    margin: 6px 0 2px 15px;
+    border-radius: 4px;
+    background: #fff;
+}
+.action{
+	
+}
+.top_area{
+	padding: 1% 0;
+    background: #fff;
+    margin: 0 2%;
+    height: 435px;
+}
+.left_area{
+	width: 97%;
+    line-height: 40px;
+    margin: 10px 10px;
+}
+.header_search .left_area label{
+	border: 1px solid #535474;
+    height: 23px;
+    line-height: 23px;
+    border-radius: 4px;
+    padding: 0 2px;
+    vertical-align: sub;
+}
+.header_search .left_area input.labelauty + label > span.labelauty-unchecked,
+.header_search .left_area input.labelauty + label > span.labelauty-checked{
+	margin-top:2px;
+	font-size: 12px;
+}
+
+.header_search .date_txt{
+	width:150px;
+	height:30px;
+	margin-left:10px;
+    padding-left: 5px;
+    position:relative;
+}
+.header_search .fa{
+	position: absolute;
+    z-index: 1;
+    left: 202px;
+    top: 19px;
+    font-size: 14px;
+    color: #333;
+}
+
+
+
+

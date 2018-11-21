@@ -1,0 +1,122 @@
+package com.ideassoft.apartment.service;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.ideassoft.core.dao.GenericDAOImpl;
+import com.ideassoft.core.page.Pagination;
+
+@Service
+public class ApartmentGoodsService extends GenericDAOImpl {
+	
+	/**
+	 * 商品售卖分类条件
+	 * 
+	 * @param branchid
+	 * @return
+	 * @throws Exception
+	 */
+	public List<?> getCategorycondition(String branchid) throws Exception {
+		List<?> result = findBySQL("categorycondition", new String[] { branchid }, true);
+		return result;
+	}
+	
+	/**
+	 * 商品售卖查询条件
+	 * 
+	 * @param goodsid
+	 * @param goodsname
+	 * @param categoryid
+	 * @param branchId
+	 * @param pagination
+	 * @return
+	 * @throws Exception
+	 */
+	public List<?> getGdsalecondition(String goodsid, String goodsname, String categoryid, String branchId,
+			Pagination pagination) throws Exception {
+		List<?> result = findBySQLWithPagination("gdsalecondition", new String[] { goodsid, goodsname, categoryid,
+				branchId }, pagination, true);
+		return result;
+	}
+	
+	/**
+	 * 商品售卖查询项目（消费）
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public List<?> getGdsproject() throws Exception {
+		String sql = "gdsproject";
+		return findBySQL(sql, true);
+	}
+	
+	/**
+	 * 商品售卖查询项目（结算）
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public List<?> getGdsprojectpay() throws Exception {
+		String sql = "gdsprojectpay";
+		return findBySQL(sql, true);
+	}
+	
+	/**
+	 * 商品售卖查询工作账（结算）
+	 * 
+	 * @param branchid
+	 * @param loginstaff
+	 * @return
+	 * @throws Exception
+	 */
+	public List<?> getWorkbill(String branchid,String loginstaff) throws Exception {
+		List<?> result = findBySQL("gdsworkbill", new String[] { branchid }, true);
+		return result;
+	}
+	
+	/**
+	 * 商品售卖选择房间
+	 * 
+	 * @param branchId
+	 * @param theme
+	 * @return
+	 * @throws Exception
+	 */
+	public List<?> getGdsroomid(String branchId,String theme) throws Exception {
+		List<?> result = findBySQL("gdsroomid", new String[] { branchId, branchId, branchId }, true);
+		return result;
+	}
+	
+	/**
+	 * 商品售卖数据查询
+	 * 
+	 * @param pagination
+	 * @param branchId
+	 * @return
+	 * @throws Exception
+	 */
+	public List<?> getGoodssale(Pagination pagination, String branchId) throws Exception {
+		List<?> result = findBySQLWithPagination("goodssaledata", new String[] { branchId }, pagination, true);
+		return result;
+	}
+	
+	/**
+	 * 商品管理查询条件
+	 * 
+	 * @param goodsid
+	 * @param goodsname
+	 * @param categoryid
+	 * @param status
+	 * @param branchId
+	 * @param pagination
+	 * @return
+	 * @throws Exception
+	 */
+	public List<?> getGdmanagecondition(String goodsid, String goodsname, String categoryid, String status,
+			String branchId, Pagination pagination) throws Exception {
+		List<?> result = findBySQLWithPagination("gdmanagecondition", new String[] { goodsid, goodsname, categoryid,
+				status, branchId }, pagination, true);
+		return result;
+	}
+}

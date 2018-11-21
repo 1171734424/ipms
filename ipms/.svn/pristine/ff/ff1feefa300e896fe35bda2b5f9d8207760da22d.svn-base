@@ -1,0 +1,452 @@
+/*容器*/
+.check_wrap_margin{
+	position: relative;
+    padding: 0px 20px 20px 20px;
+}
+.check_color{
+    width: 1179px;
+    height: 733px;
+	background: #f1f6f8;
+    box-shadow: 2px 1px 8px rgba(0, 0, 0, .3), -2px 1px 8px rgba(0, 0, 0, .3);
+    border-radius: 3px;
+    overflow: hidden;
+    z-index: 100;
+}
+/*重新入住&&撤销*/
+.roomdata ul li.li_recheckIn{
+	border:none;
+	background-color: #535474;
+	display: flex;
+    align-items: center;
+}
+.roomdata ul li span.button_margin{
+	display: block;
+    margin: 0 auto;
+    line-height: 49px;
+    width: 280px;
+    font-size: 16px;
+    color: #fff;
+    height: 49px;
+}
+.roomdata ul li span.recheckIn{
+	font-size: 38px;
+	background-color: #535474;
+	text-shadow: 0 0 12px rgba(0,0,0,0.23);
+}
+.roomdata ul li span.repeal{
+    background-color: #F79F24;
+}
+@-webkit-keyframes fadeInDown {
+	0% {
+		opacity: 0;
+		-webkit-transform: translateY(-50px);
+		transform: translateY(-50px)
+	}
+	100% {
+		opacity: 1;
+		-webkit-transform: translateY(0);
+		transform: translateY(0)
+	}
+}
+
+@keyframes fadeInDown {
+	0% {
+		opacity: 0;
+		-webkit-transform: translateY(-50px);
+		-ms-transform: translateY(-50px);
+		transform: translateY(-50px)
+	}
+	100% {
+		opacity: 1;
+		-webkit-transform: translateY(0);
+		-ms-transform: translateY(0);
+		transform: translateY(0)
+	}
+}
+.fadeInDown {
+	-webkit-animation-name: fadeInDown;
+	animation-name: fadeInDown
+}
+.fadeOutUp{
+	-webkit-animation-name: fadeOutUp;
+	animation-name: fadeOutUp;
+	animation-duration: 0.25s;
+}
+@-webkit-keyframes fadeOutUp {
+  0% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+
+  20% {
+    opacity: 1;
+    -webkit-transform: translateY(20px);
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 0;
+    -webkit-transform: translateY(-2000px);
+    transform: translateY(-2000px);
+  }
+}
+
+@keyframes fadeOutUp {
+  0% {
+    -webkit-transform: translateY(0);
+    -ms-transform: translateY(0);
+    transform: translateY(0);
+  }
+
+  20% {
+    opacity: 1;
+    -webkit-transform: translateY(20px);
+    -ms-transform: translateY(20px);
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 0;
+    -webkit-transform: translateY(-2000px);
+    -ms-transform: translateY(-2000px);
+    transform: translateY(-2000px);
+  }
+}
+
+/**/
+.roomdata .roomdata_li{
+	background: #E85B48;
+}
+.roomdata .roomdata_two{
+	background: #31588A;
+}
+.roomdata .roomdata_three{
+	background: #638CCC;
+}
+.roomdata .roomdata_four{
+	background: #535474;
+}	
+.roomdata .roomdata_five{
+	background:#EACF79;
+	display:flex;
+	align-items: center;
+    justify-content: center;
+}
+.roomdata .roomdata_five.active{
+	
+}
+.roomdata_three .connec_room{
+	padding: 0 23px;
+}
+.roomdata_three .connec_room li{
+	float: left;
+    height: 20px;
+    border: none;
+    width: 11%;
+}
+.roomdata_three .connec_room li h4{
+	
+}
+.roomdata .roomdata_three .connec_room li a{
+	float:left;
+	text-decoration: underline;
+	color:#fff;
+	cursor:pointer;
+}
+/*头部tab选择区域*/
+.top_check{
+	height: 70px;
+}
+.left_check{
+	margin-top: 16px;
+}
+.left_check .cn{
+	font-size:1.2rem;
+	margin-left: 23px;
+}
+.rno{
+	font-size:1.1rem;
+	color: #31588a;
+}
+.cm{
+	margin-left: 25px;
+	cursor: pointer;
+}
+.right_check{
+	width: 68%;
+	line-height:51px;
+    margin-top: 18px;
+}
+.right_check ul li{
+	position:relative;
+	float: left;
+    width: 16.66%;
+    text-align: center;
+	background: #535474;
+    color: #fff;
+    border-left: 1px solid #CCCCCC;
+}	
+.right_check ul li:first-child{
+	border-left:none;
+}
+.right_check ul li span{
+	cursor:pointer;
+}
+.right_check .hot{
+	position: absolute;
+    background: red;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 14px;
+    font-family: "Arail";
+    right: 20px;
+    top: 3px;
+}
+.top_check .im_top{
+	color: #222;
+    left: 0;
+    top: 0;
+    font-size: 26px;
+    position: relative;
+}
+.top_icon{
+	display: inline-block;
+    line-height:32px;
+    padding: 5px 10px;
+    border: 1px solid #638CCC;
+    background: #fff;
+    border-radius: 2px;
+}
+/*tab1内容区域*/
+.content_color{
+	height: 643px;	
+	background:#FFFFFF;
+	margin-top: -1px; 
+}
+.tab_select{
+	background-color: #FFFFFF !important;
+    color: #333 !important;
+}
+.top_check .fa{
+    margin-right: 4px;
+}
+/*roomdata*/
+.roomdata{
+	padding: 26px 12px;
+    height: 100%;
+    clear: both;
+}
+.roomdata ul li{
+    width: 31%;
+    height: 268px;
+    float: left;
+    margin: 14px 13px;
+    border-radius: 2px;
+}
+.roomdata ul li p{
+    line-height: 25px;
+    margin: 10px;
+    color: #fff;
+    font-weight: normal;
+}
+.roomdata ul li h4{
+	color:#fff;
+	margin:10px;
+	display:block;
+	height:20px;
+	font-weight:normal;
+}
+.roomdata ul li{
+	
+}
+.roomdata ul li div{
+    font-size: 38px;
+    color: #FFF;
+    cursor: pointer;
+	text-shadow: 0 0 12px rgba(0,0,0,0.23);
+}
+/*入账*/
+.detail_six{
+	background: #fff;
+    height: 318px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    padding-top: 15px;
+}
+.detail_six ul li{
+	line-height: 38px;
+}
+.detail_six .label_name{
+	float:none;
+	width:100px;
+}
+.detail_six .select_edit{
+	border: 1px solid #ddd;
+    width: 39%;
+    font-size: 0.85rem;
+    margin-left: 5px;
+    padding: 8px 5px;
+}
+.detail_six .text_edit{
+    padding: 8px 5px;
+    width: 24%;
+    margin-left: 10px;
+    margin-right: 49px;
+    font-size: 14px;
+}
+.detail_six ul li:nth-child(7){
+    position: absolute;
+    width: 276px;
+    right: 0;
+	top: 245px;
+}
+.detail_six ul li:nth-child(7) .select_edit{
+	margin-left:0;
+}
+.detail_six ul li:nth-child(8){
+	margin-top:10px;
+}
+.detail_six ul li:last-child{
+	float:right;
+}
+.detail_six .text_number{
+    padding: 8px 5px;
+    margin-left: 10px;
+    margin-right: 49px;
+    font-size: 14px;
+}
+.detail_six  textarea{
+	padding: 1px 5px;
+    width: 77%;
+    margin-left: 5px;
+    margin-right: 49px;
+    font-size: 14px;
+    vertical-align: middle;
+    height: 100px;
+}
+.detail_six .button{
+	height: 34px;
+    line-height: 34px;
+    text-align: center;
+    width: 84px;
+    border:none;
+    background-color: #5A5D9D;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    display: inline-block;
+    position: absolute;
+    right: 60px;
+    bottom:30px;
+    font-size:14px;
+}
+.confirm{
+	
+}
+.detail_six li.danbao_type{
+	float:left;
+}
+input.margin_text{
+	margin-left: 5px !important;
+}
+.add_pro textarea{
+	width:62% !important;
+	height:32% !important;
+	margin-left: 10px;
+}
+
+/*入账点击在外加载*/
+.ontime{
+	display:none;
+	width: 539px;
+    height: 233px;
+    position: absolute;
+    z-index: 1;
+    border: 1px solid #ccc;
+    left: 110px;
+    top: 40px;
+    background: #f2f4f6;
+}
+.getcontinue_bill .oncontinue{
+	display: none;
+    width: 575px;
+    height: 195px;
+    position: absolute;
+    border: 1px solid #ccc;
+    left: 96px;
+    top: 133px;
+    background: #f2f4f6;
+    margin-top: 1px;
+}
+.data-container{
+    margin-left: 15px;
+    margin-right: 25px;
+    margin-top: 10px;
+    height:200px;
+    min-height: 175px;
+    overflow-y: scroll;
+}
+.data-container .view-all {
+}
+.clean-box .view-all {
+ overflow-y: auto !important;  
+}
+.data-container .data-list{
+    margin-left: 10px;
+}
+.data-container .data-list ul{
+}
+.data-container .data-list ul:nth-child(2){
+	border:none;
+}
+.data-container ul li {
+    float: left;
+	margin: 0 2px 0px;
+    overflow-x: hidden;
+    width: 96px;
+}
+.data-container ul li:nth-child(odd){
+	width:73px;
+}
+.data-container ul li:nth-child(even){
+	width:76px;
+}
+.data-container  .data-list-hot a {
+    line-height: 32px;
+    padding: 0 10px;
+    display: inline-block;
+    vertical-align: middle;
+    white-space: nowrap;
+    color: #666;
+    font-size: 0.85rem;
+    cursor:pointer;
+}
+/*新增提示信息双击详情页面*/
+.promptdetail ul li:last-child {
+    float: none;
+}
+.promptdetail textarea{
+	width:64% !important;
+	height:41% !important;
+}
+.data-title{
+    font-weight: bold;
+    font-size: 14px;
+    color: #14789d;
+}
+
+
+
+
+
+
+
+
+
+
+
+

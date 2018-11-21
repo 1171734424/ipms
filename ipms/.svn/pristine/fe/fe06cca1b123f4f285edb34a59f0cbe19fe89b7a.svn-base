@@ -1,0 +1,391 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ include file="../../common/taglib.jsp"%>
+<%@ include file="../../common/css.jsp"%>
+<%@ include file="../../common/script.jsp"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>My JSP 'addBranchPic.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<script src="<%=request.getContextPath()%>/script/crm/manage/jquery.min.js"></script>
+	<script type="text/javascript" src="<%=request.getContextPath()%>/script/common/keyPrevent.js"></script>
+	<script src="<%=request.getContextPath()%>/script/crm/manage/jquery-migrate-1.2.1.min.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+	<link href="<%=request.getContextPath()%>/css/reset.css" rel="stylesheet"  media="all" />
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="<%=request.getContextPath()%>/css/IMGUP.css" rel="stylesheet" type="text/css" media="all" />
+	
+	<style type="text/css">
+		td.tdone{
+			width:15%;
+			text-align:center;
+			vertical-align: middle;
+		    border: 0 none;
+		    padding: 2px;
+		    white-space: nowrap;
+	        text-align: right;	
+		}
+		td.tdtwo{
+			position:relative;
+			width:60%;
+			text-align:center; 
+		    padding-left: 15px;
+		}
+		#branchHeadPic,#branchId{
+			width: 447px;
+		    height: 36px;
+		    border: 1px solid #dddddd;	
+		}
+		input,select{
+			margin: 15px 0;
+		}
+		.basicInfo{
+			width:100%;
+			padding: 2%;
+		}
+		.tdthree{
+		 	width: 50px;
+		    text-align: left;
+		}
+		.tdfour{
+			width: 50px;
+		    margin: 0 14px;
+		}
+		
+		.file{ 
+		    cursor: pointer;
+		    z-index: 100;
+		    left: 0;
+		    top: 12px;
+		    width: 100px;
+		    height: 32px;
+		    opacity: 0;
+		    filter: alpha(opacity=0);
+		    margin: 0;
+		    position: absolute;
+		}
+		.a2{
+	        background: #5a5d9c;
+		    display: block;
+		    width: 87px;
+		    height: 32px;
+		    text-align: center;
+		    line-height: 32px;
+		    color: white;
+		    margin-top: -11px;
+		    font-size: 14px;
+		    font-weight: normal;
+		    border-radius: 4px;
+		}
+		.a{
+	        background: #f1a43a;
+		    display: block;
+		    width: 87px;
+		    height: 32px;
+		    text-align: center;
+		    line-height: 32px;
+		    color: white;
+		    margin-top: -11px;
+		    font-size: 14px;
+		    font-weight: normal;
+		    border-radius: 4px;
+		}
+		.em{    
+			margin-left: 206px;
+		    width: 56px;
+		    color: #999;
+		    font-size: 13px;
+		    margin-top: -25px;
+		}
+		.checkIn{	
+		    padding: 5px 10px;
+		    background-color: #5a5d9c;
+		    border: none;
+		    font-size: 12px;
+		    color: #fff;
+    		margin-right: -13px;
+		}
+		input.one{
+			margin-left:-19px;
+		}
+		.specpic{
+			margin-left:50px;
+		}
+		.table_basicInfo{
+			height: 324px;
+    		overflow-y: scroll;
+    		overflow-x: hidden;
+    		padding-right: 16px;
+		}
+		table{
+			width:100%;
+		}
+		input.dele{
+			background-color:#f1a43a;
+		}
+		.addnew{
+			margin-left:15px;
+		}
+	</style>
+  </head>
+  
+  <body>
+ 
+	<form id="basicInfo" name="basicInfo" class="basicInfo" method="POST" enctype="multipart/form-data">
+	  <div class="table_basicInfo">
+	  <div>
+	  
+	  	<c:if test="${operateType == 'citypic' }">
+			   		<p style="color:red;">注：图片限制最低像素宽高为400*300,同比例增长</p>
+			 
+			   	
+			   	</c:if>
+			   	<c:if test="${operateType == 'goodspic' }">
+			   		<p style="color:red;">注：商品图片限制最低像素宽高为400*300,同比例增长</p>
+			   	
+			   	</c:if>
+	  </div>
+		  <table class="" style="margin-left: -4%;margin-top: 44px;">
+		  <thead>
+			   	<tr>
+			   		<td class="tdone"></td>
+			     	<td class="tdtwo"><input type="button" onclick="addTd()" class="file" id="title" style="margin-top: -24px;"><a class="a2">新增</a></td>
+			     	<td class="tdthree"></td>
+
+			   		<td></td>
+			   	</tr>
+		</thead>	   	
+		 		<tbody id="tdInfo">
+		 			<c:forEach items="${pictures}" var="list" varStatus="status">
+		 				<tr class="basicInfo">
+					 		<td class="tdone"></td>
+					 		<td class="tdtwo"><input type="text" class="file" id="file${status.index + 1}"  disabled><span style ="display:none;">${pictures[status.index]}</span><a class="a">上传图片</a><p class="em" id="em${ status.index + 1}">已存在</p></td>
+					 		<td class="tdthree"><input type="button" onclick="queryPicture('${pictures[status.index]}')" class="checkIn" value="查看"/></input></td>
+					 		<td class="tdfour"><input type="button" onclick="delTd(this,${status.index + 1})" class="checkIn dele" value="删除"/><span style ="display:none;">${pictures[status.index]}</span></td>
+				 		</tr>
+		 			</c:forEach>
+		 		</tbody>
+		 		<input type="hidden" name="adminiCode" value="${adminiCode}" id="adminiCode"/>
+		 		<input type="hidden" name="pic_str" value="${pic_str}" id="pic_str"/>
+		 		<input type="hidden" name="operateType" value="${operateType}" id="operateType"/>
+		 		<input type="hidden" name="citytype" value="${citytype}" id="citytype"/>
+			</table>
+		</div>
+		<div class="contractbutton">
+			<div class="pdepartsubmit" onclick="submitCityPics()">提交</div>
+			<div class="pdepartcancle" onclick="window.parent.JDialog.close()">取消</div>
+		</div>
+	</form>
+  </body>
+  <script type="text/javascript">
+	var base_path = '<%=request.getContextPath()%>';
+	function showMsg(msg, fn) {
+		if (!fn) {
+			TipInfo.Msg.alert(msg);
+		} else {
+			TipInfo.Msg.confirm(msg, fn);
+		}
+	}
+  </script>
+  <script type="text/javascript">
+  	function addTd(){
+  		var index = document.getElementById("tdInfo").rows.length ;
+  		if($("#citytype").val() == 'city' && index >= 1){
+  			return false;
+  		}else{
+  			$("#tdInfo").append("<tr class='basicInfo'><td class='tdone'></td><td class='tdtwo'><input type='file' name='filename" + index + "' class='file' id='file" + index + "'  onchange='addPicture(this,this.value,this.files)'><a class='a'>上传图片</a><p class='em' id='em" + index + "'>未上传</p></td>"+
+  	  				"<td class='tdthree'></td>"+
+  	  				"<td class='tdfour'><input type='button' onclick='delTd(this,id)'  class='checkIn dele' value='删除'/></td></tr>");
+
+  		}
+  		  	}
+  	function delTd(e,id){
+  		var pic_str = $("#pic_str").val()+",";
+  		var pic_value = $(e).next().text();
+
+  		if(pic_value != ''){
+  			var pic_value1 = pic_value.lastIndexOf("/");
+  	   		var pic_value2 = pic_value.substring(pic_value1 + 1,pic_value.length);
+  			pic_str = pic_str.replace(pic_value2+",", "");
+  			var pic_str2 = pic_str.substring(0,pic_str.length -1);
+  			$("#pic_str").val(pic_str2);
+  			console.log($("#pic_str").val());
+  		}
+  	  	$(e).parent().parent().remove();
+
+  	}
+  	function queryPicture(src){
+  		
+  		if (src == '') {
+  			showMsg("未上传图片!");
+  		} else {
+  			JDialog.open("查看图片", base_path + "/showImageScale.do?src=" + src, 450, 300, true);
+  		}
+  	}
+  	function addPicture(file,name,files){
+  	//图片格式校验
+		    if(name.length>1 && name != ''){
+		        var lodt = name.lastIndexOf(".");
+		        var type = name.substring(lodt+1);
+		        if( type != "gif" &&
+		        		type != "jpeg" &&
+		        		type != "jpg" &&
+		        		type != "png" &&
+		        		type != "svg" ){
+		           showMsg("请上传图片文件!");
+		           file.value = "";
+		            return false;
+		        }else{
+		        	//校验图片像素尺寸
+		    /*     	var filePath = file.value;  
+		      	    if(filePath){  
+		      	        //读取图片数据  
+		      	        var filePic = file.files[0];  
+		      	        var reader = new FileReader();  
+		      	        reader.onload = function (e) {  
+		      	            var data = e.target.result;  
+		      	            //加载图片获取图片真实宽度和高度  
+		      	            var image = new Image();  
+		      	            image.onload=function(){  
+		      	                var width = image.width;  
+		      	                var height = image.height;  
+		      	               if($("#operateType").val() == 'goodspic'){
+		      	                	//商品图片的尺寸
+		      	                	 if (width == 400 && height == 300){  */
+				      	            		$(file).next().next().text('已选择');
+
+				      	/*                }else {  
+				      	                	showMsg("商品图片尺寸应为：400*300！");  
+				      	                    file.value = "";  
+				      	                    return false;  
+				      	                }  
+		      	                }else{
+		      	                //城市图片的尺寸
+		      	                	 if (width == 400 && height == 300){  
+				      	            		$(file).next().next().text('已选择');
+
+				      	                }else {  
+				      	                	showMsg("图片尺寸应为：400*300！");  
+				      	                    file.value = "";  
+				      	                    return false;  
+				      	                }  
+		      	                }
+		      	               
+		      	            };  
+		      	            image.src= data;  
+		      	        };  
+		      	        reader.readAsDataURL(filePic);  
+		      	    }else{  
+		      	        return false;  
+		      	    }  */
+		        }
+		    }
+  		
+  	}
+  </script>
+  <script type="text/javascript">
+	function submitCityPics(){
+		    
+		var thisTable = document.getElementById("tdInfo").rows;
+		if(thisTable.length > 0){
+			 var formData = new FormData($("#basicInfo")[0]); 
+			$.ajax({
+				url: base_path +"/addNewCityPicture.do",
+				 data : formData,
+				 type: "post",
+				 contentType: false,
+		         processData: false,
+				 dataType : "json",
+				 success: function(json) {
+					 showMsg("操作成功!");
+					 window.setTimeout("window.JDialog.close();",900);
+					 window.setTimeout("window.parent.location.reload(true)", 1000);
+				 },
+				 error: function(json) {
+					 showMsg("操作失败!");
+				 }
+			});
+			
+			
+			
+			
+		}else{
+			showMsg("请选择图片上传!");
+		}
+	  }
+	
+	
+	
+	
+  	function submitCityPics2(){
+  		var thisTable = document.getElementById("tdInfo").rows;
+  		debugger
+  		if(thisTable.length > 0){
+  			for(var i = 0; i < thisTable.length; i++){
+  	 			var id = thisTable[i].cells[1].getElementsByTagName("input")[0].id;
+  	 			var formData = document.getElementById(id).files[0];
+  	 			var textId = thisTable[i].cells[1].getElementsByTagName("p")[0].id;
+  	 			var text = $("#"+textId).text();
+  	 	  		if(formData == undefined && text == '已存在'){
+	  	 	  		if(i + 1 == thisTable.length){
+						showMsg("添加成功!");
+						window.setTimeout("window.JDialog.close();",900);
+						window.setTimeout("window.location.reload(true)", 1000);
+					}
+  					continue;
+  	 	  		} else if (formData == undefined && text == '') {
+	  	 	  		if(i + 1 == thisTable.length){
+						showMsg("添加成功!");
+						window.setTimeout("window.JDialog.close();",900);
+						window.setTimeout("window.location.reload(true)", 1000);
+					}
+  	 	  			continue;
+  	 	  		} else if (formData == undefined && text == '未上传') {
+	  	 	  		if(i + 1 == thisTable.length){
+						showMsg("添加成功!");
+						window.setTimeout("window.JDialog.close();",900);
+						window.setTimeout("window.location.reload(true)", 1000);
+					}
+  	 	  			continue;
+  	 	  		} else {
+  	 	  			var form = new FormData();
+  	 	  			form.append("file", formData);
+  	 	 	        form.append("adminiCode", $("#adminiCode").val());
+  	 	 	        form.append("index",i);
+  	 	 			$.ajax({
+  	 	 		        url: base_path + "/submitCityPictures.do",
+  	 	 		        data: form,
+  	 	 				contentType: false,
+  	 	 		        processData: false,
+  	 	 		        async : false,
+  	 	 				dataType : "json",
+  	 	 				type : "post",
+  	 	 				success: function(json) {
+  	 	 					if(i + 1 == thisTable.length){
+  	  							 showMsg("添加成功!");
+  	 	 	 				 	 window.setTimeout("window.JDialog.close();",900);
+  	 	 	 					 window.setTimeout("window.location.reload(true)", 1000);
+  	 	 					 }
+  	 	 				},
+  	 	 				error: function(json) {}
+  	 	 			});
+  	 	  		}
+  	        }
+  		} else {
+  			showMsg("保存成功!");
+  		}
+  	}
+  </script>
+</html>

@@ -1,0 +1,317 @@
+/*所有房态情况*/
+html,body{
+	height:100%;
+	font-size:16px;
+    background: #fff;
+}
+.main_wrapper{
+	height: 100%;
+    background: #fff;
+    padding-top: 12px;
+}
+.main_wrapper_apartment{
+	height: 91%;
+    background: #fff;
+    padding-top: 12px;
+}
+.main_content{
+	width:100%;
+	padding: 10px 15px;
+}
+.main_content ul{	
+	display:flex;
+	flex-direction:row;
+	display:-webkit-flex;
+	flex-wrap:wrap;
+	width:100%;
+}
+.main_content ul li{
+    width: 80px;
+    height: 75px;
+    margin: 4px 4px;
+    font-size: 13px;
+    border: 1px solid #fff;
+    box-shadow: 0 0 1px rgba(0,0,0,0.4);
+    border-radius: 4px;
+    background: #DDFFFD;
+}
+.house_roomstatus li:first-child,.hotel_roomstatus li:first-child{
+	background:#FC6E5E;
+}
+.main_content ul li.order{
+    background: #FFF68F;
+}
+.main_content ul li.live{
+    background: #A3DE83;
+}
+.main_content ul li.dirty{
+    background: #FFDCDC;
+}
+.main_content ul li.leave{
+    background: #FFC77F;
+}
+.main_content ul li.stopsell{
+    background: #EC9454;
+}
+.main_content ul li.maintance{
+    background: #78BBE6;
+}
+.main_content ul li.model{
+    background: #28CC9E;
+}
+.main_content ul li.employee{
+    background: #F5E1DA;
+}
+.main_content ul li.other{
+   background: #BDBDD7;
+}
+.main_content ul li span{
+    display: block;
+    margin-left: 4px;
+    font-family: arial;
+    cursor: pointer;
+    font-size: 14px;
+    width: 70px;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.main_content ul li span:first-child{
+	margin-top: 6px;
+}
+/*民宿图片*/
+.main_content ul li img{
+	position: sticky;
+    left: 88%;
+    bottom: 96.5%;
+}
+/*所有房态情况结束*/
+/*底部查询条件*/
+.footer_content{
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+    background: #D9DEE4;
+    position: fixed;
+	bottom: 88px;
+    padding-left: 20px;
+}
+.footer_content ul{
+	width:100%;
+} 
+.footer_content ul li{
+    float: left;
+    width: 50px;
+    height: 40px;
+    line-height: 40px;
+    margin: 9px 2px;
+    border-radius: 2px;
+    background: #fff;
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+    font-size: 15px;
+}
+
+/*空净房*/
+.footer_content ul .footer_li.active{
+	position: relative;
+    top: -2px;
+}
+.footer_content ul li:nth-child(4){
+    background: #DDFFFD;
+}
+/*脏房*/
+.footer_content ul li:nth-child(5){
+	background: #FFDCDC;
+}
+/*停售房*/
+.footer_content ul li:nth-child(6){
+    background-color: #EC9454;
+}	
+.footer_content ul li:nth-child(7){
+	 background:#ADD8E6;
+}
+.footer_content ul li:nth-child(10){
+    color: #333;
+}
+.footer_content ul li{
+	box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+.footer_content ul li:nth-child(12) {
+    width: 60px;
+}
+.footer_content ul li span{
+	cursor:pointer;
+}
+.countroom{
+	color: #333;
+}
+.number{
+	font-size: 1.4rem;
+    margin-left: 6px;	
+}
+.footer_content  .dropse_li{
+	width: 104px;
+}
+.dropse_li input{
+	display:inline-block;
+	border:none;
+	font-size: 14px;
+	padding: 10px 4px 0;
+	width:100%;
+}
+.footer_content .dropse{
+	width:104px;
+}
+#dropse_roomtype,#dropse_floor{
+	width: 104px;
+	padding: 8px;
+    border: none;
+}
+.totalcount{
+	font-size: 1.4rem;
+    margin-left: 6px;	
+}
+.livecount{
+	font-size: 1.4rem;
+    margin-left: 6px;	
+}
+.setmargin{
+	cursor: pointer;
+    background: linear-gradient(to bottom, #fff 0%, #e5e5e5 100px, #e5e5e5 100%);
+    border: 1px solid #bbb;
+    width: 123px;
+	pointer-events: auto;	
+    padding: 2px;
+	border-radius: 3px;
+    box-shadow: 1px 1px 4px rgba(0,0,0,.2);
+}
+.setmargin:before{
+	display: block;
+    content: " ";
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 0 10px 10px 10px;
+    border-left-color: #444;
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    z-index: 1;
+}
+.setmargin ul li{
+ 	color:#444;
+ 	font-size:14px;
+ 	white-space: nowrap;
+    padding: 6px 8px;
+    position:relative;
+}
+.setmargin .spans{
+	padding-left:20px;
+}
+.iconfont{
+	position:absolute;
+	top: 8px;
+}
+.setmargin ul li:hover{
+	background-color: #2E3940;
+    background: -webkit-linear-gradient(to bottom, #5D6D79, #2E3940);
+    background: linear-gradient(to bottom, #5D6D79, #2E3940);
+	color:#fff;
+	border-radius:2px;
+	
+}
+table.table_count{
+	border-collapse: separate;
+    border-spacing: 0px;
+    text-align: center;
+    border: none;
+    border-radius: 0;
+    background-color: #D9DEE4;
+    color: #333;
+    font-size: 14px;
+    font-weight: normal;
+}
+/*所有房型*/
+.footer_content .all_roomtype,.footer_content .all_storey #dropse_floor #dropse_roomtype{
+	border:none;
+	font-size:14px;
+}
+td div{
+	width: 97.3%;
+    height: 28px;
+}
+
+td #checkin{
+	background-color:#A3DE83;
+}
+td #reserve{
+	background-color:#FFF68F;
+}
+td #null{
+	background-color:#DDFFFD;
+}
+td #dirty{
+	background-color:#FFF1E5;
+}
+td #repair{
+	background-color:#78BBE6;
+}
+td #stopsale{
+	background-color:#EC9454;
+}
+td #demoRoom{
+	background-color:#28CC9E;
+}
+td #staffRoom{
+	background-color: #FF9D76;
+}
+td #other{
+	background-color: #808B97;
+}
+/*所有楼层*/
+
+/*底部查询条件结束*/
+.room_count{
+    position: relative;
+    bottom: 152px;	
+}
+table td{
+    line-height: 3;
+}
+table.table_count tbody tr:last-child{
+	color: #E70000;
+	font-weight: bold;
+}
+.hrStyle{
+	position: absolute;
+    width: 100%;
+    bottom: 35px;
+    height: 1px;
+    border: 0px;
+    background-color: #eff3f5;
+    color: #D5D5D5;
+}
+
+.footer_content ul li.emptyroom{
+	background: #DDFFFD;
+}
+.footer_content ul li.footer_li.dirhouse{
+	background: #FFDCDC;
+}
+.footer_content ul li.footer_li.stopsellhouse{
+	background-color: #EC9454;
+}
+
+
+
+
+
+
+
+
+
+

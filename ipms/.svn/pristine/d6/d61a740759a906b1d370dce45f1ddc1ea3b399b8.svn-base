@@ -1,0 +1,61 @@
+package com.ideassoft.pms.task;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+
+import com.ideassoft.bean.Campaign;
+import com.ideassoft.bean.RoomStatus;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.SystemConstants.ProjectName;
+import com.ideassoft.core.factory.ServiceFactory;
+import com.ideassoft.core.task.ScheduledTask;
+import com.ideassoft.pms.service.DailyService;
+
+public class CampaignTask extends ScheduledTask implements ProjectName {
+
+	private final Logger logger = Logger.getLogger(CampaignTask.class);
+
+	private static DailyService dailyService = null;
+
+	public CampaignTask(String name) {
+		super(name);
+	}
+
+	public void initScheduledData() {
+		dailyService = (DailyService) ServiceFactory.getService("dailyService");
+		logger.debug("schedule task [test1111] init...............");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void run() {
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+			Calendar dayTime = Calendar.getInstance();
+			dayTime.add(Calendar.DAY_OF_MONTH, -1);
+			String time = sdf.format(dayTime.getTime());
+			List<Campaign> campaigns = dailyService.findByProperties(Campaign.class, "status", "1");
+			List<Campaign> list = new ArrayList<Campaign>();
+			for(Campaign campaign : campaigns){
+				//限时活动结束，将酒店roomstatus表的campaigns置0
+				if(sdf.format(campaign.getEndTime()).equals(time)){
+					campaign.setStatus("2");
+					list.add(campaign);
+					if(campaign.getBusinessId().equals(CommonConstants.CampaignsType.CampaignSix)){
+						RoomStatus currRoomStatus = (RoomStatus)dailyService.findOneByProperties(RoomStatus.class, "branchId", campaign.getBranchId(), "roomType",campaign.getRoomType());
+						currRoomStatus.setCampaigns(0);
+						dailyService.update(currRoomStatus);
+					}	
+				}
+			}
+			if(list.size() > 0){
+				dailyService.saveOrUpdateAll(list);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}

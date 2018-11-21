@@ -1,0 +1,150 @@
+/*高级查询*/
+.house_info{
+	padding: 10px 0;
+}
+.house_info h2{
+    padding-left: 10px;
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    background: #4A5064;
+    color: #fff;
+    font-size: 18px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+/*高级查询条件*/
+.house_info ul li{
+	float:left;
+	line-height: 38px;
+	margin:4px;
+	position:relative;
+}
+.house_info .margintop{
+	margin-top:10px;
+}
+.house_info .label_name {
+    float: left;
+    text-align: right;
+    font-weight: normal;
+    font-size: 0.85rem;
+}
+input {
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    color: #323232;
+    background-color: #fff;
+    border: 1px solid #DDDDDD;
+    line-height: 1.2;
+    font-size: 0.85rem;
+    -webkit-box-shadow: none!important;
+    box-shadow: none!important;
+    -webkit-transition-duration: .1s;
+    transition-duration: .1s;
+}
+.house_info .adroom {
+    margin-left: 10px;
+    width: 184px;
+    font-size: 14px;
+}
+.createworkbill .text_add{
+	padding: 8px 5px;
+    width: 184px;
+    margin-left: 11px;
+    font-size: 14px
+}
+
+.button_comfirm,.button_complete,.button_cancel,.button_update{
+	background-color:#5A5D9D;
+    color: #fff;
+	border:none;
+    border-radius: 4px;
+}
+
+.button_complete{
+	left: 47.7%;
+}
+.button_cancel{
+	left: 63.4%;
+}
+.button_update{
+	left: 79.2%;
+}
+/*关闭按鈕*/
+.house_info .house_imooc{
+    position: absolute;
+    top: -4px;
+    left: 95%;
+}
+.house_info .house_imooc:hover{
+	transform: rotate(90dge);
+    -ms-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+}
+/*选择器禁用*/
+input[type="text"]:disabled,textarea:disabled,input[type="submit"]:disabled{
+	background:#F0F0F0;
+}
+/*增加停售房*/
+.fa-calendar-check-o{
+	position: absolute;
+    z-index: 1;
+    right: 6px;
+    top: 12px;
+    color: #333;
+}
+.workaccount_info ul .last_li_one{
+	float: right;
+    margin: 11% 3.5%;
+}
+.workaccount_info ul .last_li_one .button_comfirm{
+	background-color:#5A5D9D;
+	border: none;
+	width: 85px;
+}
+.workaccount_info ul{
+	margin: 10px 0 10px 14px;
+}
+.workaccount_info ul li label{
+	line-height:34px;
+}
+.workaccount_info ul li select{
+	height: 35px;
+    margin-top: 1px;
+}
+.workaccount_info ul li textarea{
+	margin-left: 4px;
+    width: 717px;
+}
+/*操作停售房信息*/
+.house_info .last_li_edit{
+	 position: absolute;
+    bottom: 27px;
+    right: 67px;
+    border: none;
+}
+
+/*创建工作 帐*/
+.house_info  ul li.last_li{
+   float: right;
+   margin: 37px 77px;
+}
+.house_info .button_confirm{
+	background-color:#5A5D9D;
+	color:#fff;
+	border:none;
+}
+/*编辑停售房*/
+.workaccount_edit ul li label{
+	width:134px;
+}
+
+.workaccount_edit ul li textarea.text_area{
+	margin-left:4px;
+}
+
+
+
+
+

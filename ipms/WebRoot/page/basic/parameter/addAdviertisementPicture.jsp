@@ -1,0 +1,333 @@
+<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
+<%@ include file="../../common/taglib.jsp"%>
+<%@ include file="../../common/css.jsp"%>
+<%@ include file="../../common/script.jsp"%>
+<%
+String path = request.getContextPath();
+String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <base href="<%=basePath%>">
+    
+    <title>My JSP 'addBranchPic.jsp' starting page</title>
+    
+	<meta http-equiv="pragma" content="no-cache">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">    
+	<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+	<meta http-equiv="description" content="This is my page">
+	<script src="<%=request.getContextPath()%>/script/crm/manage/jquery.min.js"></script>
+	<script src="<%=request.getContextPath()%>/script/crm/manage/jquery-migrate-1.2.1.min.js"></script>
+	<script src="<%=request.getContextPath()%>/script/common/tipInfo.js"></script>
+	<link href="<%=request.getContextPath()%>/css/reset.css" rel="stylesheet" media="all" />
+	<link href="<%=request.getContextPath()%>/css/common/tipInfo.css" rel="stylesheet" type="text/css" media="all" />
+	<link href="<%=request.getContextPath()%>/css/IMGUP.css" rel="stylesheet" type="text/css" media="all" />
+	
+	<style type="text/css">
+		td.tdone{
+			width:15%;
+			text-align:center;
+			vertical-align: middle;
+		    border: 0 none;
+		    padding: 2px;
+		    white-space: nowrap;
+	        text-align: right;	
+	        display: none;
+		}
+		td.tdtwo{
+	        padding-left:27px;
+		    width: 17%;
+		    line-height: 38px;
+		    text-align: center;
+		    vertical-align: middle;
+		}
+		#branchHeadPic,#branchId{
+			width: 447px;
+		    height: 36px;
+		    border: 1px solid #dddddd;	
+		}
+		.basicInfo input,.basicInfo  select,.basicInfo  flie{
+			border-radius:2px;	
+		}
+		.basicInfo{
+		    width: 100%;
+		    padding: 2%;
+		    height: 38px;
+		    line-height: 38px;
+		}
+		.tdthree{
+		 	width: 50px;
+		    text-align: left;	
+		}
+		.tdfour{
+			width: 50px;
+		    text-align: left;
+		}
+		.file{ 
+			cursor:pointer;
+			z-index:100;
+			left:0;
+			top:0;
+			width: 200px;
+			height: 32px;
+			opacity:0;
+			filter:alpha(opacity=0);
+			margin: 0;
+		}
+		.a{
+	        background: #f1a43a;
+		    display: block;
+		    width: 87px;
+		    height: 32px;
+		    text-align: center;
+		    line-height: 32px;
+		    color: white;
+		    font-size: 14px;
+		    font-weight: normal;
+		    margin-top: -23px;
+		    border-radius: 4px;
+		}
+		.em{
+		    width: 180px;
+		    color: #999;
+		    font-size: 13px;
+		    margin: 0;
+		    float: right;
+		    margin-top: -34px;
+		    margin-left: 10px;
+		}
+		.checkIn{	
+		    padding: 6px 16px;
+		    background-color: #ccc;
+		    border: none;
+		    font-size: 12px;
+		}
+		input.one{
+			margin-left:-19px;
+		}
+		.specpic{
+			margin-left:50px;
+		}
+		.table_basicInfo{
+			height:715px;
+    		overflow-y: scroll;
+			overflow-x:hidden;
+		}
+		.table_basicInfo table{
+			display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    justify-items: center;
+		    flex: 1;
+		    width: 100%;
+		    overflow-x:hidden;
+		}
+		.table_basicInfo table tr td{
+			border:1px solid #ddd;
+		    text-align: center;
+		}
+		.table_basicInfo table select{
+			margin: 15px 0;
+		    border: 1px solid #ddd;
+		    border-radius: 2px;
+		    padding: 4px;
+		}
+		.button_margin {
+			height: 34px;
+			line-height: 34px;
+			text-align: center;
+			width: 85px;
+			border: none;
+			color: #fff;
+			cursor: pointer;
+			border-radius: 4px;
+			font-size: 14px;
+			background: #ff9800;
+			margin-top:4px;
+		}
+		.button_check{
+			height: 24px;
+			line-height: 24px;
+			text-align: center;
+			width: 45px;
+			border: none;
+			color: #fff;
+			cursor: pointer;
+			border-radius: 4px;
+			font-size: 14px;
+			background: #ff9800;
+			margin-top:4px;
+		}
+		input.dele{
+			background:#5A5D9C;
+		}
+		
+		#jd_dialog_m_t{
+			width:100% !important;
+			margin:0 auto;
+			display:inline-block;
+			vertical-align:middle;
+			
+		}
+		#btns{
+				display:inline-block;
+				vertical-align:middle;
+		}
+	</style>
+  </head>
+  
+  <body>
+  	<form id="basicInfo" name="basicInfo" class="basicInfo"  method="POST" enctype="multipart/form-data">
+  	<div class="table_basicInfo">
+  		<div style="margin-bottom:10px;">
+  		<input type="button" class="button_margin" onclick="addTd()" value="新增"/>
+  		<span style="color:red;">注：上传服务广告图片的像素为360*200(同比例为9:5)，营销广告图片的像素为180*140(同比例为9:7)。</span>
+  		</div>
+		<table class="">
+	 		<tbody id="tdInfo">
+	 			<c:forEach items="${adpictureList}" var="list" varStatus="status">
+	 			
+	 			  <c:forEach items="${jo}" var="stylelist">
+	 			   <c:if test="${stylelist.picid  eq list.pictureId}">
+	 				<tr class="basicInfo">
+				 		<td class="tdone"></td>
+				 		<td class="tdtwo"><input type="file" class="file" id="file${ status.index + 1}" onchange="addPicture(this,this.value)" disabled><a class="a">上传图片</a><p class="em" id="em${ status.index + 1}">已存在</p></td>
+				 	    <td class="tdfive">
+				 	   
+				 		<select id="pictype" name="pictype" disabled>
+							<option value="dp" <c:if test="${stylelist.style eq 'dp'}">selected = "selected"</c:if>>服务广告</option>
+							<option value="cp" <c:if test="${stylelist.style eq 'cp'}">selected = "selected"</c:if>>营销广告</option>
+	    			    </select>
+	    			   
+	    			    </td>
+	    			    <td>
+	    			    <textarea id="remark" name="remark" class="" rows="4" style="height: 55px;" readonly><c:if test="${stylelist.remark == null}"></c:if><c:if test="${stylelist.remark != null}">${stylelist.remark}</c:if></textarea>
+	    			    
+	    			    </td>
+				 		<td class="tdthree"><input type="button" onclick="queryPicture('${list.pictureUrl}')" class="button_check" value="查看"/></input></td>
+				 		<td class="tdfour"><input type="button" onclick="delTd(this,'${list.pictureId}')" class="button_check dele" value="删除"/></td>
+				 		
+			 		</tr>
+			 		 </c:if>
+			 		</c:forEach>
+	 			</c:forEach>
+	 		</tbody>
+			<input type="hidden" name="roomType" value="${roomType}" id="roomType"/>
+			<input type="hidden" name="branchIdTwo" value="${branchIdTwo}" id="branchIdTwo"/>
+		</table>
+		<div class="contractbutton" style="margin-top:7px;">
+		 	<div class="pdepartsubmit" onclick="submitRoomPics()">提交</div>
+		 	<!--<div class="pdepartcancle" onclick="window.parent.JDialog.close()">取消</div>
+	 	--></div>
+	 	</div>
+	</form>
+  </body>
+  <script type="text/javascript">
+	var base_path = '<%=request.getContextPath()%>';
+  </script>
+  <script type="text/javascript">
+  	function addTd(){
+  		var index = document.getElementById("tdInfo").rows.length ;
+  		index++;
+  		if(index < 11){
+  			$("#tdInfo").append("<tr class='basicInfo'><td class='tdone'></td><td class='tdtwo'><input type='file' class='file' id='file" + index + "' size='1' onchange='addPicture(this,this.value)'><a class='a'>上传图片</a><p class='em' id='em" + index + "'>未上传</p></td>"+
+  					"<td class='tdfive'><select id='pictype' name='pictype' >"+
+ 					"<option value='dp' >服务广告</option>"+
+ 					//"<option value='cp' >营销广告</option>"+
+ 			        "</select></td>"+
+ 			        "<td><textarea id='remark' name='remark' class='' maxlength='100' rows='4' style='height: 55px;'></textarea></td>"+
+  					"<td class='tdthree'></td>"+
+  	  				"<td class='tdfour'><input type='button' onclick='delTd(this)' class='button_check dele' value='删除'/></td></tr>");
+
+  		}
+  		  	}
+  	function delTd(e, pictureId){
+  		$(e).parent().parent().remove();
+  		$.ajax({
+	         url: base_path + "/delAdPics.do",
+	         data: {
+	        	 pictureId : pictureId,
+	        
+	         },
+			 dataType : "json",
+			 type : "post",
+			 success: function(json) {
+				    showMsg("删除成功!");
+					//window.setTimeout("window.JDialog.close();",900);
+					//window.setTimeout("window.location.reload(true)", 1000);
+			 },
+			 error: function(json) {}
+		});
+  	}
+  	function queryPicture(src){
+  		JDialog.open("查看图片", base_path + "/showImageScale.do?src=" + src, 450, 350, true);
+  	}
+  	function addPicture(e,name){
+  		$(e).next().next().text('已选择');
+  	}
+  </script>
+  <script type="text/javascript">
+
+  	function submitRoomPics(){
+  		var thisTable = document.getElementById("tdInfo").rows;
+ 		for(var i = 0; i < thisTable.length; i++){
+ 			var id = thisTable[i].cells[1].getElementsByTagName("input")[0].id;
+ 			var pictype = thisTable[i].cells[2].getElementsByTagName("select")[0].value;
+ 			var formData = document.getElementById(id).files[0];
+ 			var textId = thisTable[i].cells[1].getElementsByTagName("p")[0].id;
+ 			var remark = thisTable[i].cells[3].getElementsByTagName("textarea")[0].value;
+ 			var text = $("#"+textId).text();
+   	 		if(formData == undefined && text == '已存在' ){
+	   	 		if(i + 1 == thisTable.length){
+					showMsg("添加成功!");
+					window.setTimeout("window.JDialog.close();",900);
+					window.setTimeout("window.location.reload(true)", 1000);
+					
+				}
+   				continue;
+   	  		}  else if (formData == undefined && text == '未上传') {
+ 	  			if(i + 1 == thisTable.length){
+					showMsg("添加成功!");
+					window.setTimeout("window.JDialog.close();",900);
+					window.setTimeout("window.location.reload(true)", 1000);
+					
+				}
+ 	  			continue;
+ 	  		} else {
+   	  			var form = new FormData();
+   	  			form.append("file", formData);
+ 				form.append("remark",remark);
+ 				form.append("pictype",pictype);
+   	  			$.ajax({
+   	 		         url: base_path + "/submitAdvertisePics.do",
+   	 		         data: form,
+   	 				 contentType: false,
+   	 		         processData: false,
+   	 		     	 async : false,
+   	 				 dataType : "json",
+   	 				 type : "post",
+   	 				 success: function(json) {
+  	 					 if(i + 1 == thisTable.length){
+   							 showMsg("添加成功!");
+  	 	 				 	 window.setTimeout("window.JDialog.close();",900);
+  	 	 					 window.setTimeout("window.location.reload(true)", 1000);
+  	 					 }
+   	 				 },
+   	 				 error: function(json) {}
+   	 			});
+   	  		}
+        }
+  	}
+  	
+	function showMsg(msg, fn) {
+		if (!fn) {
+			TipInfo.Msg.alert(msg);
+		} else {
+			TipInfo.Msg.confirm(msg, fn);
+		}
+	}
+  </script>
+</html>

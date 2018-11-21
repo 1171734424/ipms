@@ -1,0 +1,181 @@
+package com.ideassoft.basic.controller;
+
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
+
+import net.sf.json.JSONArray;
+
+import org.apache.log4j.Logger;
+import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.google.gson.JsonObject;
+
+
+
+
+
+
+import org.springframework.web.servlet.ModelAndView;
+
+import com.ideassoft.bean.Equipment;
+import com.ideassoft.core.ajax.AjaxResult;
+import com.ideassoft.core.bean.LoginUser;
+import com.ideassoft.core.constants.CommonConstants;
+import com.ideassoft.core.constants.SystemConstants;
+import com.ideassoft.crm.service.CommonService;
+import com.ideassoft.util.CardUtil;
+import com.ideassoft.util.DateUtil;
+import com.ideassoft.util.HttpUtil;
+import com.ideassoft.util.JSONUtil;
+import com.ideassoft.util.RequestUtil;
+import com.ideassoft.util.SpringUtil;
+
+@Transactional
+@Controller
+public class DoorController {
+	// 日志管理
+	private static Logger log = Logger.getLogger(DoorController.class);
+
+	@Autowired
+	CommonService commonService;
+	
+
+	/**
+	 * 用于门锁设备数据同步
+	 * 
+	 */
+	@RequestMapping("/doorDataAbutment.do")
+	public void doorSyscData(HttpServletRequest request,HttpServletResponse response) {
+		try {
+			JsonObject jsonObject = new JsonObject();
+			jsonObject.addProperty("sign", 16);
+			jsonObject.addProperty("ownerId", CommonConstants.doorInterfaceParam.OWNERID);
+			jsonObject.addProperty("operatorId", CommonConstants.doorInterfaceParam.OPERATORID);
+			String re = HttpUtil.postData(jsonObject.toString(), CommonConstants.ZyDoorIp.IP);
+			LoginUser loginuser = (LoginUser) request.getSession(true).getAttribute(RequestUtil.LOGIN_USER_SESSION_KEY);
+			
+			Map<String,String> map = new HashMap<String,String>();
+			JSONUtil.buildParamFromJSON(map,re);
+
+			if(map.get("result").toString().equals(CommonConstants.doorInterfaceResult.SUCESS)){
+				JSONArray jsonArray = JSONArray.fromObject(map.get("devices")); 
+				for(int i = 0; i < jsonArray.size(); i++){
+					String  gatewayName = jsonArray.getJSONObject(i).getString("gatewayName").toString(); 
+					String  gatewayComment = jsonArray.getJSONObject(i).getString("gatewayComment").toString();
+					String  gatewayLocation = jsonArray.getJSONObject(i).getString("gatewayLocation").toString();
+					String  gatewayStatus =  Integer.toString(jsonArray.getJSONObject(i).getInt("gatewayStatus"));
+					String  gatewayCode = jsonArray.getJSONObject(i).getString("gatewayCode").toString();
+					String  lockLists = jsonArray.getJSONObject(i).getString("lockLists").toString();
+					JSONArray jsonArraynew = JSONArray.fromObject(lockLists); 
+					for(int j = 0; j < jsonArraynew.size(); j++){
+						String  lockLocation = jsonArraynew.getJSONObject(j).getString("lockLocation").toString(); 
+						String  lockPower = Integer.toString(jsonArraynew.getJSONObject(j).getInt("lockPower"));
+						String  lockComment = jsonArraynew.getJSONObject(j).getString("lockComment").toString();
+						String  lockCode = jsonArraynew.getJSONObject(j).getString("lockCode").toString();
+						String  lockName = jsonArraynew.getJSONObject(j).getString("lockName").toString();
+						String  lockStatus = Integer.toString(jsonArraynew.getJSONObject(j).getInt("lockStatus"));
+						Equipment equipmenta = (Equipment)commonService.findOneByProperties(Equipment.class, "serialNo", lockCode);
+						
+						if(equipmenta == null){
+							Equipment equipment = new Equipment();
+							equipment.setDataId(loginuser.getStaff().getBranchId() + commonService.getSequence("SEQ_EQUIPMENT_ID"));
+							//后期要修改branchID
+							equipment.setBranchId("H10024");
+							equipment.setSuperKind(CommonConstants.serviceKind.DOOR);
+							equipment.setSerialNo(lockCode);
+							equipment.setRecordUser(SystemConstants.User.ADMIN_ID);
+							equipment.setRecordTime(new Date());
+							equipment.setGateWayName(gatewayName);
+							equipment.setGateWayCode(gatewayCode);
+							equipment.setGatewayLocation(gatewayLocation);
+							equipment.setGateWayComment(gatewayComment);
+							equipment.setGateWayStatus(gatewayStatus);
+							equipment.setLockName(lockName);
+							equipment.setLockComment(lockComment);
+							equipment.setLockLocation(lockLocation);
+							equipment.setLockPower(lockPower);
+							equipment.setStatus(lockStatus);
+							commonService.save(equipment);
+						} else {
+							//后期要修改branchID
+							equipmenta.setBranchId("H10024");
+							equipmenta.setRecordTime(new Date());
+							equipmenta.setGateWayName(gatewayName);
+							equipmenta.setGateWayCode(gatewayCode);
+							equipmenta.setGatewayLocation(gatewayLocation);
+							equipmenta.setGateWayComment(gatewayComment);
+							equipmenta.setGateWayStatus(gatewayStatus);
+							equipmenta.setLockName(lockName);
+							equipmenta.setLockComment(lockComment);
+							equipmenta.setLockLocation(lockLocation);
+							equipmenta.setLockPower(lockPower);
+							equipmenta.setStatus(lockStatus);
+							commonService.update(equipmenta);
+						}
+					}
+				}
+				JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(CommonConstants.doorReturnToJs.SUCESS),"数据同步成功！"));	
+			} else {
+				JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(CommonConstants.doorReturnToJs.FAILED),"数据同步失败！"));	
+			}
+			
+		} catch (Exception e) {
+			log.error("transfer data occurs error! " + e.getMessage());
+			JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(CommonConstants.doorReturnToJs.FAILED),"数据同步失败！"));
+		}
+	}
+
+	/*@RequestMapping("/AddCardDataInDoor.do")
+	public void AddCardDataInDoor(HttpServletRequest request,HttpServletResponse response) {
+		try {
+			Integer result = CardUtil.doorAddCardData(request, response , gatewayCode, lockCode, name, cardNumb, startTime, endTime);
+			if(result != CommonConstants.PortalResultCode.FAILED && !result.toString().equals(CommonConstants.doorInterfaceResult.FAILED)){
+				JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(CommonConstants.doorReturnToJs.SUCESS),"数据添加成功！"));	
+			} else {
+				JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(CommonConstants.doorReturnToJs.FAILED),"数据添加失败！"));
+			}	 
+		} catch (Exception e) {
+			log.error("transfer data occurs error! " + e.getMessage());
+			JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(CommonConstants.doorReturnToJs.FAILED),"数据添加失败！"));
+		}
+	}
+
+	@RequestMapping("/DeleteCardDataInDoor.do")
+	public void DeleteCardDataInDoor(HttpServletRequest request,HttpServletResponse response) {
+		try {
+			Integer result = CardUtil.doorDelCardData(request, response, lockCode, cardNumb);
+			if(result != CommonConstants.PortalResultCode.FAILED && !result.toString().equals(CommonConstants.doorInterfaceResult.FAILED)){
+				JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(CommonConstants.doorReturnToJs.SUCESS),"数据删除成功！"));	
+			} else {
+				JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(CommonConstants.doorReturnToJs.FAILED),"数据删除失败！"));
+			}	 
+		} catch (Exception e) {
+			log.error("transfer data occurs error! " + e.getMessage());
+			JSONUtil.responseJSON(response, new AjaxResult(Integer.parseInt(CommonConstants.doorReturnToJs.FAILED),"数据删除失败！"));
+		}
+	}
+	*/
+	@RequestMapping("/test.do")
+	public ModelAndView test(HttpServletRequest request) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("/page/basic/user/test");
+		return mv;
+	}
+
+
+
+}
